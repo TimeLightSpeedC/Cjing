@@ -1,6 +1,7 @@
 # platform_sdl/ —— SDL3 实现（渲染 / 输入 / 资源 / 存档 / 生命周期）
 add_library(ttt_platform_sdl STATIC
-    app.cpp)
+    app.cpp
+    sdl_view.cpp)
 
 target_include_directories(ttt_platform_sdl PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}")

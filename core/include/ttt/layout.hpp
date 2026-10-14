@@ -18,8 +18,10 @@ struct Recti {
 class Layout {
 public:
     // logical: 逻辑分辨率边长（如 900）；insets: 安全区在各边占用的逻辑单位
+    // reserveTop: 顶部额外预留（如状态文字区），棋盘在这个范围内居中
     static Layout compute(int logical, int insetTop, int insetRight,
-                          int insetBottom, int insetLeft) noexcept;
+                          int insetBottom, int insetLeft,
+                          int reserveTop = 0) noexcept;
 
     // 棋盘整体区域（正方形、居中、已扣安全区）
     [[nodiscard]] const Recti& boardRect() const noexcept { return board_; }

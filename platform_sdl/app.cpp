@@ -4,14 +4,24 @@
 
 namespace ttt::sdl {
 
+void App::refreshScale() {
+    // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方，供视图用）
+    int outW = 0, outH = 0;
+    SDL_GetRenderOutputSize(renderer_, &outW, &outH);
+    scale_ = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize) : 1.0F;
+    if (view_) view_.reset();          // 缩放变化后重建视图
+    view_ = std::make_unique<SDLView>(renderer_, scale_);
+}
+
 SDL_AppResult App::init() {
-    // SDL3: SDL_Init 返回 bool（true = 成功），不再是 0（路线图已验证 API）
+    // SDL3: SDL_Init 返回 bool（true = 成功），不再是 0
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::fprintf(stderr, "[Cjing] SDL_Init 失败: %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
-    window_ = SDL_CreateWindow("Tic-Tac-Toe", 800, 800, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    window_ = SDL_CreateWindow("Tic-Tac-Toe", 800, 900,
+                               SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (window_ == nullptr) {
         std::fprintf(stderr, "[Cjing] 创建窗口失败: %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -27,32 +37,56 @@ SDL_AppResult App::init() {
     SDL_SetRenderLogicalPresentation(renderer_, kLogicalSize, kLogicalSize,
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
+    // P2-T9 触摸/鼠标去重：选定【方案 A】—— 只处理鼠标事件。
+    // SDL_HINT_TOUCH_MOUSE_EVENTS 默认为 "1"（触摸会合成鼠标事件），
+    // 因此移动端触摸与桌面鼠标走完全相同的代码路径；
+    // 同时【显式忽略】 SDL_EVENT_FINGER_*，避免一次触摸落两子。
+    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+
+    refreshScale();
     rebuildLayout();
 
-    SDL_Log("Cjing %s | SDL %d.%d.%d", "0.1.0",
+    SDL_Log("Cjing %s | SDL %d.%d.%d | 逻辑分辨率 %d",
+            "0.2.0",
             SDL_VERSIONNUM_MAJOR(SDL_GetVersion()),
             SDL_VERSIONNUM_MINOR(SDL_GetVersion()),
-            SDL_VERSIONNUM_MICRO(SDL_GetVersion()));
+            SDL_VERSIONNUM_MICRO(SDL_GetVersion()),
+            kLogicalSize);
     return SDL_APP_CONTINUE;
 }
 
 void App::rebuildLayout() {
-    // F6/P2-T11：安全区注入 Layout（Android 15+ / 刘海屏必做）
+    // F6/P2-T11：安全区注入 Layout（Android 15+ / 刘海屏必做，PC 端为窗口装饰留白）
     SDL_Rect safe{0, 0, 0, 0};
     SDL_GetWindowSafeArea(window_, &safe);
 
-    // 安全区以窗口像素给出；换算为逻辑单位（按渲染输出宽度等比）
     int outW = 0, outH = 0;
     SDL_GetRenderOutputSize(renderer_, &outW, &outH);
-    const float scale = (outW > 0) ? static_cast<float>(kLogicalSize) / static_cast<float>(outW) : 1.0f;
+    const float s = (outW > 0) ? static_cast<float>(kLogicalSize) / static_cast<float>(outW) : 1.0F;
 
-    const int insetTop    = static_cast<int>(static_cast<float>(safe.y) * scale);
-    const int insetLeft   = static_cast<int>(static_cast<float>(safe.x) * scale);
-    const int insetBottom = static_cast<int>(static_cast<float>(outH - safe.y - safe.h) * scale);
-    const int insetRight  = static_cast<int>(static_cast<float>(outW - safe.x - safe.w) * scale);
+    const int insetTop    = static_cast<int>(static_cast<float>(safe.y) * s);
+    const int insetLeft   = static_cast<int>(static_cast<float>(safe.x) * s);
+    const int insetBottom = static_cast<int>(static_cast<float>(outH - safe.y - safe.h) * s);
+    const int insetRight  = static_cast<int>(static_cast<float>(outW - safe.x - safe.w) * s);
 
-    layout_ = Layout::compute(kLogicalSize, insetTop, insetRight, insetBottom, insetLeft);
+    layout_ = Layout::compute(kLogicalSize, insetTop, insetRight, insetBottom, insetLeft,
+                              kReserveTop);
     dirty_  = true;
+}
+
+void App::handlePointer(int renderX, int renderY) {
+    const int cell = layout_.cellAt(renderX, renderY);
+    if (cell < 0) return;
+
+    // P2-T9 去重：同一次指针交互只允许产生一次落子意图。
+    // 触摸会同时产生 finger 与合成鼠标事件（F5），此外还可能重复投递；
+    // 这里以"同一格子未抬起前不重复落子"作为守卫。
+    if (cell == lastCell_) return;
+    lastCell_ = cell;
+
+    const MoveResult r = game_.applyMove(cell);
+    if (r != MoveResult::Rejected) dirty_ = true;
 }
 
 SDL_AppResult App::event(SDL_Event* e) {
@@ -60,15 +94,23 @@ SDL_AppResult App::event(SDL_Event* e) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
 
-        // P2-T5：窗口尺寸/DPI 变化时重算布局
+        // P2-T5：窗口尺寸/DPI 变化时重算布局与缩放
         case SDL_EVENT_WINDOW_RESIZED:
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
         case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+            refreshScale();
             rebuildLayout();
             return SDL_APP_CONTINUE;
 
-        // F3：这些是应用生命周期事件（切后台/恢复），移动端必需；
-        //     SDL_EVENT_WINDOW_MINIMIZED 是桌面窗口事件，不能用于此目的
+        // F5/P2-T9：显式忽略触摸事件（方案 A：触摸已由 SDL 合成鼠标事件）
+        case SDL_EVENT_FINGER_DOWN:
+        case SDL_EVENT_FINGER_UP:
+        case SDL_EVENT_FINGER_MOTION:
+        case SDL_EVENT_FINGER_CANCELED:
+            return SDL_APP_CONTINUE;
+
+        // F3：应用生命周期事件（移动端切后台必需）。
+        //     SDL_EVENT_WINDOW_MINIMIZED 是桌面窗口事件，不能用于此目的。
         case SDL_EVENT_WILL_ENTER_BACKGROUND:
             SDL_Log("[Cjing] WILL_ENTER_BACKGROUND → 此处落盘存档并停止渲染（P3-T7）");
             return SDL_APP_CONTINUE;
@@ -77,26 +119,31 @@ SDL_AppResult App::event(SDL_Event* e) {
         case SDL_EVENT_DID_ENTER_FOREGROUND:
         case SDL_EVENT_TERMINATING:
         case SDL_EVENT_LOW_MEMORY:
-            return SDL_APP_CONTINUE;
         case SDL_EVENT_RENDER_DEVICE_RESET:
             return SDL_APP_CONTINUE;
 
         // P2-T7/P2-T8：指针输入 —— 先换算到渲染坐标，再交给 Layout
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
             if (e->button.button != SDL_BUTTON_LEFT) return SDL_APP_CONTINUE;
-            // F4：唯一换算点。触摸事件同样经此路径（F5：触摸会合成鼠标事件）
+            // F4：唯一换算点（含 letterbox 换算）。触摸经此路径同样处理。
             SDL_ConvertEventToRenderCoordinates(renderer_, e);
-            const int cell = layout_.cellAt(static_cast<int>(e->button.x),
-                                           static_cast<int>(e->button.y));
-            if (cell >= 0) {
-                const MoveResult r = game_.applyMove(cell);
-                if (r != MoveResult::Rejected) dirty_ = true;
-            }
+            handlePointer(static_cast<int>(e->button.x), static_cast<int>(e->button.y));
             return SDL_APP_CONTINUE;
         }
 
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            lastCell_ = -1;   // 抬起后允许在同一格再次落子（新的一次交互）
+            return SDL_APP_CONTINUE;
+
+        // P2-T19：键盘
         case SDL_EVENT_KEY_DOWN:
-            if (e->key.key == SDLK_R) { game_.reset(); dirty_ = true; }
+            if (e->key.key == SDLK_R) {
+                game_.reset();
+                lastCell_ = -1;
+                dirty_    = true;
+            } else if (e->key.key == SDLK_ESCAPE) {
+                return SDL_APP_SUCCESS;
+            }
             return SDL_APP_CONTINUE;
 
         default:
@@ -105,18 +152,22 @@ SDL_AppResult App::event(SDL_Event* e) {
 }
 
 SDL_AppResult App::iterate() {
-    // 空帧循环：P0 只验证渲染器可用（后续 P2 绘制棋盘）
-    SDL_SetRenderDrawColor(renderer_, 24, 24, 28, 255);
-    SDL_RenderClear(renderer_);
-
-    if (dirty_) {
-        SDL_RenderPresent(renderer_);   // P2-T20：仅状态变化时呈现
-        dirty_ = false;
+    if (view_) {
+        view_->beginFrame();
+        view_->drawBoard(layout_);
+        view_->drawPieces(game_.state(), layout_);
+        view_->drawWinningLine(game_.state(), layout_);
+        view_->drawText(TextId::TurnX, layout_);
+        if (dirty_) {
+            view_->present();          // P2-T20：仅状态变化时呈现
+            dirty_ = false;
+        }
     }
     return SDL_APP_CONTINUE;
 }
 
 void App::quit() {
+    view_.reset();
     if (renderer_ != nullptr) SDL_DestroyRenderer(renderer_);
     if (window_ != nullptr)   SDL_DestroyWindow(window_);
     SDL_Quit();

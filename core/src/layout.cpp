@@ -10,13 +10,14 @@ constexpr int kBoardRatioDen = 100;
 }  // namespace
 
 Layout Layout::compute(int logical, int insetTop, int insetRight,
-                       int insetBottom, int insetLeft) noexcept {
+                       int insetBottom, int insetLeft, int reserveTop) noexcept {
     Layout out;
     if (logical <= 0) return out;
 
-    // 可用区域 = 逻辑尺寸扣掉安全区
+    // 可用区域 = 逻辑尺寸扣掉安全区与顶部预留
+    const int top = std::max(0, insetTop) + std::max(0, reserveTop);
     const int availW = logical - std::max(0, insetLeft) - std::max(0, insetRight);
-    const int availH = logical - std::max(0, insetTop) - std::max(0, insetBottom);
+    const int availH = logical - top - std::max(0, insetBottom);
     if (availW <= 0 || availH <= 0) return out;
 
     // 棋盘保持正方形：取可用区域较短边
@@ -30,7 +31,7 @@ Layout Layout::compute(int logical, int insetTop, int insetRight,
 
     // 居中于可用区域
     const int originX = std::max(0, insetLeft);
-    const int originY = std::max(0, insetTop);
+    const int originY = top;
     out.board_.x = originX + (availW - out.board_.w) / 2;
     out.board_.y = originY + (availH - out.board_.h) / 2;
     return out;
