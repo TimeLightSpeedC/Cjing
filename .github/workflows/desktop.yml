@@ -38,6 +38,13 @@ jobs:
 
       # SDL3 由 FetchContent 从源码编译，需要系统图形/输入开发库。
       # 其余平台（macOS/Windows）的系统框架开箱可用，无需额外安装。
+      #
+      # ⚠️ SDL3 在 Linux 上对以下 X11 扩展做 FATAL 检查（cmake/sdlchecks.cmake），
+      #    缺任何一个都会导致 configure 直接失败，必须逐个装齐：
+      #      XCURSOR(libxcursor-dev) XDBE/XSYNC/XSHAPE(libxext-dev)
+      #      XINPUT(libxi-dev) XFIXES(libxfixes-dev) XRANDR(libxrandr-dev)
+      #      XSCRNSAVER(libxss-dev) XTEST(libxtst-dev)
+      #    首次 CI 即因漏装 libxtst-dev 而失败（报 "Couldn't find dependency package for XTEST"）。
       - name: 安装 Linux 构建依赖
         if: runner.os == 'Linux'
         run: |
@@ -45,7 +52,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential ninja-build \
             libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
-            libxfixes-dev libxss-dev libwayland-dev libdecor-0-dev \
+            libxfixes-dev libxss-dev libxtst-dev libwayland-dev libdecor-0-dev \
+            libfribidi-dev \
             libasound2-dev libpulse-dev libdbus-1-dev libibus-1.0-dev \
             libudev-dev libunwind-dev
 
