@@ -1,0 +1,97 @@
+name: desktop
+
+# 桌面三平台：编译 + 单元测试（路线图 P0-T7 / P5-T6）
+# 本工作流不需要任何密钥。公开仓库可免费无限运行（含 macOS runner）。
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu / debug + ASan+UBSan
+            os: ubuntu-latest
+            build_type: Debug
+            sanitize: "ON"
+          - name: ubuntu / release
+            os: ubuntu-latest
+            build_type: Release
+            sanitize: "OFF"
+          - name: macos / release
+            os: macos-latest
+            build_type: Release
+            sanitize: "OFF"
+          - name: windows / release
+            os: windows-latest
+            build_type: Release
+            sanitize: "OFF"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # SDL3 由 FetchContent 从源码编译，需要系统图形/输入开发库。
+      # 其余平台（macOS/Windows）的系统框架开箱可用，无需额外安装。
+      - name: 安装 Linux 构建依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential ninja-build \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxfixes-dev libxss-dev libwayland-dev libdecor-0-dev \
+            libasound2-dev libpulse-dev libdbus-1-dev libibus-1.0-dev \
+            libudev-dev libunwind-dev
+
+      - name: 配置（Configure）
+        shell: bash
+        env:
+          SANITIZE: ${{ matrix.sanitize }}
+        run: |
+          FLAGS=""
+          if [ "$SANITIZE" = "ON" ]; then
+            FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          fi
+
+          # SDL3 的依赖检查按 C 语言进行，故同时设置 CFLAGS / CXXFLAGS / LDFLAGS
+          if [ -n "$FLAGS" ]; then
+            export CFLAGS="$FLAGS"
+            export CXXFLAGS="$FLAGS"
+            export LDFLAGS="-fsanitize=address,undefined"
+          fi
+
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCJING_BUILD_DESKTOP_APP=ON
+
+      - name: 编译（Build）
+        shell: bash
+        env:
+          SANITIZE: ${{ matrix.sanitize }}
+        run: |
+          if [ "$SANITIZE" = "ON" ]; then
+            export CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+            export CXXFLAGS="$CFLAGS"
+            export LDFLAGS="-fsanitize=address,undefined"
+          fi
+          cmake --build build --config ${{ matrix.build_type }} --parallel 4
+
+      - name: 单元测试（Test）
+        shell: bash
+        env:
+          SANITIZE: ${{ matrix.sanitize }}
+        run: |
+          if [ "$SANITIZE" = "ON" ]; then
+            export ASAN_OPTIONS=detect_leaks=1
+            export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1
+          fi
+          ctest --test-dir build --build-config ${{ matrix.build_type }} --output-on-failure
+
+      - name: core/ 纯净性检查（架构原则 1）
+        run: cmake --build build --target core_purity_check

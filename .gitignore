@@ -1,0 +1,59 @@
+# ---- 构建产物 ----
+build/
+build-*/
+cmake-build-*/          # CLion 默认构建目录
+out/
+install/
+
+# ---- CMake ----
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+cmake_install.cmake
+Makefile
+*.cmake.stamp
+
+# ---- 本地工具链与探针（CLion 自带 CMake 的探针、临时验证工程）----
+.tools/
+.cache/
+
+# ---- 包管理器缓存（沙箱禁止写工作区外，故重定向到此处）----
+vcpkg_installed/
+.cache/vcpkg/
+
+# ---- macOS / Xcode ----
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+.DS_Store
+
+# ---- 编译中间产物 ----
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.swp
+*~
+
+# ---- 平台打包产物 ----
+*.apk
+*.aab
+*.hap
+*.ipa
+*.app/
+*.dmg
+*.AppImage
+
+# ---- 编译产物（本次新增目标）----
+
+# ---- 内部计划与过程记录（不公开；仅保留在本地工作区）----
+plans/
