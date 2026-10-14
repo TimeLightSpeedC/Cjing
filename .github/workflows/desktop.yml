@@ -50,6 +50,7 @@ jobs:
             libudev-dev libunwind-dev
 
       - name: 配置（Configure）
+        id: configure
         shell: bash
         env:
           SANITIZE: ${{ matrix.sanitize }}
@@ -95,3 +96,30 @@ jobs:
 
       - name: core/ 纯净性检查（架构原则 1）
         run: cmake --build build --target core_purity_check
+
+      # 失败时上传日志，便于定位（无需仓库 admin 权限即可通过 API 下载 artifact）
+      - name: 收集失败日志
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-logs
+          echo "===== CMakeCache 关键项 =====" > ci-logs/summary.txt
+          { cmake --version; echo; uname -a; echo; echo "generator: $(grep -m1 CMAKE_GENERATOR: build/CMakeCache.txt 2>/dev/null || echo n/a)"; } >> ci-logs/summary.txt 2>&1 || true
+          if [ -f build/CMakeFiles/CMakeConfigureLog.yaml ]; then
+            cp build/CMakeFiles/CMakeConfigureLog.yaml ci-logs/ || true
+          fi
+          if [ -f build/CMakeFiles/CMakeError.log ]; then
+            cp build/CMakeFiles/CMakeError.log ci-logs/ || true
+          fi
+          if [ -f build/CMakeFiles/CMakeOutput.log ]; then
+            cp build/CMakeFiles/CMakeOutput.log ci-logs/ || true
+          fi
+
+      - name: 上传失败日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-${{ strategy.job-index }}
+          path: ci-logs/
+          if-no-files-found: warn
+          retention-days: 7
