@@ -354,29 +354,35 @@ Cjing/                          # 仓库根目录
 
 > **里程碑 M2**：桌面三平台可完整对弈，文字、音效、resize、安全区全部正常
 
-- [ ] P2-T1 实现 `SDLRenderer`（实现 `IView`）：持有 `SDL_Renderer*`，封装绘制调用
-- [ ] P2-T2 设定逻辑分辨率：`SDL_SetRenderLogicalPresentation(renderer, 900, 900, SDL_LOGICAL_PRESENTATION_LETTERBOX)`（DPI 缩放、窗口缩放、letterbox 全部交给 SDL）
-- [ ] P2-T3 实现 `Layout`：只接受逻辑尺寸，内部按逻辑单位算格子，保持棋盘正方形居中；**不得**读取窗口像素尺寸算位置
-- [ ] P2-T4 绘制棋盘网格（`SDL_RenderLine`，4 条线）与 X/O（矢量绘制，`SDL_RenderLine` / `SDL_RenderFillRect`；注意 `SDL_RenderFillRect` 参数为 `const SDL_FRect*`）
-- [ ] P2-T5 处理窗口尺寸变化事件（`SDL_EVENT_WINDOW_RESIZED` 等），尺寸变化时重算布局；**不允许出现写死坐标**
-- [ ] P2-T6 处理 `SDL_EVENT_QUIT`，实现正常退出（资源释放顺序：纹理 → 渲染器 → 窗口 → `SDL_Quit`）
-- [ ] P2-T7 **输入统一换算（关键，唯一实现点）**：在 `SDL_AppEvent` 入口调用一次 `SDL_ConvertEventToRenderCoordinates(renderer, event)`，把鼠标/触摸统一为渲染坐标后再交给 `IInput`；`Layout` 只消费渲染坐标
-- [ ] P2-T8 实现鼠标点击 → 棋盘格映射（消费换算后的渲染坐标，按逻辑单位除以 3 得行列）；**禁止**在事件循环里另写命中判断
-- [ ] P2-T9 **触摸/鼠标去重（关键）**：选定并写死方案 —— **方案 A（推荐）**保持 `SDL_HINT_TOUCH_MOUSE_EVENTS` 默认 `"1"`，只处理鼠标事件、**显式忽略** `SDL_EVENT_FINGER_*`，桌面与移动完全同构；或方案 B 设 hint 为 `"0"` 只处理 finger。无论哪种，**输入层必须保证一次落子意图只产生一次落子**
-- [ ] P2-T10 处理 `SDL_EVENT_LOW_MEMORY` 与 `SDL_EVENT_RENDER_DEVICE_RESET`（释放/重建可重建资源）
-- [ ] P2-T11 **安全区注入**：调用 `SDL_GetWindowSafeArea(window, &rect)`，把安全矩形注入 `Layout` 作为可交互边距；**不要**用 `SDL_SetRenderViewport`
-- [ ] P2-T12 引入 `SDL3_ttf`（**必需，提前到此阶段**，勿拖到 P5）：FetchContent 锁 SHA + `GIT_SUBMODULES_RECURSE TRUE`（见 0.1）；按 P0-T16 的策略配置 vendored 依赖
+- [x] P2-T1 实现 `SDLRenderer`（实现 `IView`）：持有 `SDL_Renderer*`，封装绘制调用
+- [x] P2-T2 设定逻辑分辨率：`SDL_SetRenderLogicalPresentation(renderer, 900, 900, SDL_LOGICAL_PRESENTATION_LETTERBOX)`（DPI 缩放、窗口缩放、letterbox 全部交给 SDL）
+- [x] P2-T3 实现 `Layout`：只接受逻辑尺寸，内部按逻辑单位算格子，保持棋盘正方形居中；**不得**读取窗口像素尺寸算位置
+- [x] P2-T4 绘制棋盘网格（`SDL_RenderLine`，4 条线）与 X/O（矢量绘制，`SDL_RenderLine` / `SDL_RenderFillRect`；注意 `SDL_RenderFillRect` 参数为 `const SDL_FRect*`）
+- [x] P2-T5 处理窗口尺寸变化事件（`SDL_EVENT_WINDOW_RESIZED` 等），尺寸变化时重算布局；**不允许出现写死坐标**
+- [x] P2-T6 处理 `SDL_EVENT_QUIT`，实现正常退出（资源释放顺序：纹理 → 渲染器 → 窗口 → `SDL_Quit`）
+- [x] P2-T7 **输入统一换算（关键，唯一实现点）**：在 `SDL_AppEvent` 入口调用一次 `SDL_ConvertEventToRenderCoordinates(renderer, event)`，把鼠标/触摸统一为渲染坐标后再交给 `IInput`；`Layout` 只消费渲染坐标
+- [x] P2-T8 实现鼠标点击 → 棋盘格映射（消费换算后的渲染坐标，按逻辑单位除以 3 得行列）；**禁止**在事件循环里另写命中判断
+- [x] P2-T9 **触摸/鼠标去重（关键）**：选定并写死方案 —— **方案 A（推荐）**保持 `SDL_HINT_TOUCH_MOUSE_EVENTS` 默认 `"1"`，只处理鼠标事件、**显式忽略** `SDL_EVENT_FINGER_*`，桌面与移动完全同构；或方案 B 设 hint 为 `"0"` 只处理 finger。无论哪种，**输入层必须保证一次落子意图只产生一次落子**
+- [x] P2-T10 处理 `SDL_EVENT_LOW_MEMORY` 与 `SDL_EVENT_RENDER_DEVICE_RESET`（释放/重建可重建资源）
+- [x] P2-T11 **安全区注入**：调用 `SDL_GetWindowSafeArea(window, &rect)`，把安全矩形注入 `Layout` 作为可交互边距；**不要**用 `SDL_SetRenderViewport`
+- [x] P2-T12 引入 `SDL3_ttf`（**必需，提前到此阶段**，勿拖到 P5）：FetchContent 锁 SHA + `GIT_SUBMODULES_RECURSE TRUE`（见 0.1）；按 P0-T16 的策略配置 vendored 依赖
 - [ ] P2-T13 实现文本渲染（当前回合、胜负结果、平局），文案经 `TextId → 文案表` 查询；验证中文字形不缺字（缺字会显示方块）
-- [ ] P2-T14 确认字体授权允许再分发，并在 `assets/` 中保留授权文件
+- [x] P2-T14 确认字体授权允许再分发，并在 `assets/` 中保留授权文件
 - [ ] P2-T15 实现 `AssetIO` 的桌面实现（文件路径），字体加载路径不得写死绝对路径
 - [ ] P2-T16 实现 `SaveIO` 的桌面实现（`SDL_GetPrefPath`），支持退出时保存、启动时恢复
-- [ ] P2-T17 音频接入：用 **SDL3 核心音频 API**（`SDL_audio.h`）播放落子音效（WAV，无额外依赖）；**不引入** `SDL3_mixer`
-- [ ] P2-T18 实现 `winLine` 高亮（线索来自 P1-T7）
-- [ ] P2-T19 键盘：`R` 重开、`ESC` 退出
-- [ ] P2-T20 渲染优化：仅在状态变化时调用 `SDL_RenderPresent`
+- [x] P2-T17 音频接入：用 **SDL3 核心音频 API**（`SDL_audio.h`）播放落子音效（WAV，无额外依赖）；**不引入** `SDL3_mixer`
+- [x] P2-T18 实现 `winLine` 高亮（线索来自 P1-T7）
+- [x] P2-T19 键盘：`R` 重开、`ESC` 退出
+- [x] P2-T20 渲染优化：仅在状态变化时调用 `SDL_RenderPresent`
 - [ ] P2-T21 处理 SDL3 运行时依赖：Windows 随包 DLL、macOS `Contents/Frameworks`、Linux 打包或依赖系统库；记录第三方库清单
 - [ ] P2-T22 三平台手动测试：对弈、胜负/平局、文字、音效、resize、安全区、重开
 - [ ] P2-T23 **鸿蒙 Go/No-Go 预检（不占额外工期）**：用 P0 锁定的 SHA 构建一个**鸿蒙空窗口 + 触摸回调 + 一行中文文字**的最小应用。**Go 判据 = 空窗口可显示 且 字体渲染成功**；音频为可降级项，不作为判据
+> **TTF 实测记录（2026-10-15）**：SDL3_ttf 3.3.0 以 **`SDLTTF_VENDORED=ON`** 构建成功。
+> 未启用 vendored 时会去找系统 FreeType/HarfBuzz，macOS/Windows 默认没有、鸿蒙/Android 更不会有 → configure 直接失败。
+> 运行日志确认字体加载：`[Cjing] 字体已加载: assets/fonts/NotoSansSC-Regular.ttf @ 39pt`
+> （39pt = 44 逻辑单位 × 0.884 输出缩放，证明逻辑单位→像素换算正确）。
+> CI 在四矩阵（含 Windows）全部通过，TTF 构建三平台可用。
+
 - [ ] P2-T24 里程碑 `v0.2.0`：桌面可玩可打包 + 鸿蒙预检结论已产出
 
 ### P3 移动端 Android / iOS（约 2 周）
