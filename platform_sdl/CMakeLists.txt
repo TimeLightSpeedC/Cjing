@@ -8,9 +8,12 @@ option(CJING_WITH_TTF "Build text rendering (SDL3_ttf)" ON)
 
 if(CJING_WITH_TTF)
     include(FetchContent)
-    set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
-    set(SDLTTF_TESTS OFF CACHE BOOL "" FORCE)
-    set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
+    # 必须启用 vendored：使用 SDL_ttf 自带的 freetype/harfbuzz 子模块。
+    # 否则它会去找系统库，而 macOS/Windows 默认没有，鸿蒙/Android 更不会有。
+    set(SDLTTF_VENDORED ON  CACHE BOOL "" FORCE)
+    set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)   # 省掉彩色 emoji 依赖（本项目不需要）
+    set(SDLTTF_TESTS    OFF CACHE BOOL "" FORCE)
+    set(SDLTTF_SAMPLES  OFF CACHE BOOL "" FORCE)
 
     FetchContent_Declare(SDL3_ttf
         GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git

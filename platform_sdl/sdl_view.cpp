@@ -54,24 +54,33 @@ void SDLView::destroyTextCache() {
 
 bool SDLView::loadFont(std::string_view assetName, int logicalPointSize) {
 #ifdef CJING_HAVE_TTF
+    // 同一字体只加载一次（缩放变化会重建 view，但字体重载是浪费）
+    if (font_ != nullptr) return true;
+
     if (!TTF_Init()) {
         std::fprintf(stderr, "[Cjing] TTF_Init 失败: %s\n", SDL_GetError());
         return false;
     }
 
-    // 资源路径：优先 assets/<name>，并回退到多级父目录，
+    // 资源定位：assets/<name>，并回退到多级父目录，
     // 以适配 CMake 构建目录（build/bin/）与打包后的目录结构差异。
-    static const char* kPrefixes[] = {"", "../", "../../", "../../../", "../../../../"};
-    std::string found;
-    for (const char* p : kPrefixes) {
-        std::string cand = assetBase_ + "/" + p + "assets/" + std::string(assetName);
-        if (SDL_IOFromFile(cand.c_str(), "rb") != nullptr) { found = cand; break; }
+    // 首次解析结果缓存在 fontPath_，后续复用。
+    if (fontPath_.empty()) {
+        // assetBase_ 以 '/' 结尾（见 App::init），prefix 负责向父目录回退：
+        //   ""      -> <base>assets/...            打包后布局
+        //   "../.." -> <repo>/assets/...          build/bin 构建目录布局
+        static const char* kPrefixes[] = {"", "../..", "../../..", "../../../.."};
+        for (const char* p : kPrefixes) {
+            std::string cand = assetBase_ + p + "/assets/" + std::string(assetName);
+            if (SDL_IOFromFile(cand.c_str(), "rb") != nullptr) { fontPath_ = cand; break; }
+        }
     }
-    if (found.empty()) {
+    if (fontPath_.empty()) {
         std::fprintf(stderr, "[Cjing] 找不到字体资源: assets/%s（已尝试多级回退）\n",
                      std::string(assetName).c_str());
         return false;
     }
+    const std::string& found = fontPath_;
 
     // 字体栅格化尺寸随输出缩放，保证高分屏清晰
     const float ptsize = static_cast<float>(logicalPointSize) * scale_;

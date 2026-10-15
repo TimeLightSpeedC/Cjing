@@ -14,11 +14,13 @@ void App::refreshScale() {
     int outW = 0, outH = 0;
     SDL_GetRenderOutputSize(renderer_, &outW, &outH);
     scale_ = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize) : 1.0F;
+    // 缩放变化需重建视图：字体按新缩放重新栅格化，保证高分屏清晰
     const bool hadFont = (view_ != nullptr && view_->hasFont());
-    view_.reset();                     // 缩放变化后重建视图（字体随缩放重新栅格化）
+    view_.reset();
     view_ = std::make_unique<SDLView>(renderer_, scale_, assetBase_);
-    if (hadFont && !assetBase_.empty()) {
-        view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+    if (!assetBase_.empty()) {
+        (void)view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+        if (hadFont) SDL_Log("[Cjing] 缩放变化，字体已按新比例重新栅格化");
     }
 }
 
@@ -55,16 +57,16 @@ SDL_AppResult App::init() {
 
     // 资源根目录：桌面为可执行文件所在目录；移动端由 SDL 给出 assets:// 语义
     const char* base = SDL_GetBasePath();
-    assetBase_ = (base != nullptr) ? base : ".";
+    // SDL_GetBasePath 返回带尾斜杠的目录（如 ".../bin/"），保留它作为路径基准
+    assetBase_ = (base != nullptr) ? base : "";
 
     refreshScale();
     rebuildLayout();
 
-    // P2-T12/T13：加载字体（SDL3_ttf）。失败不致命——胜负仍由连线高亮表达。
-    if (view_) {
-        if (!view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
-            SDL_Log("[Cjing] 字体不可用，将以几何方式表达状态");
-        }
+    // P2-T12/T13：字体已由 refreshScale() 创建视图时加载。
+    // 失败不致命——胜负仍由连线高亮表达。
+    if (view_ && !view_->hasFont()) {
+        SDL_Log("[Cjing] 字体不可用，将以几何方式表达状态");
     }
 
     SDL_Log("Cjing %s | SDL %d.%d.%d | 逻辑分辨率 %d",

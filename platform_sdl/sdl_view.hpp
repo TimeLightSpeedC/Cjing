@@ -58,6 +58,7 @@ private:
     SDL_Renderer* renderer_ = nullptr;
     float         scale_    = 1.0F;
     std::string   assetBase_;
+    std::string   fontPath_;      // 已解析的字体路径（避免重复扫描与重复加载）
     bool          present_  = false;
 
 #ifdef CJING_HAVE_TTF
