@@ -6,6 +6,7 @@
 #include <SDL3/SDL.h>
 
 #include <memory>
+#include <string>
 
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
@@ -32,6 +33,10 @@ private:
     void rebuildLayout();
     void refreshScale();
     void handlePointer(int renderX, int renderY);
+    // 状态行文案（UTF-8）。文案属应用逻辑，不放在渲染层。
+    [[nodiscard]] std::string statusLine() const;
+    [[nodiscard]] std::string hintLine() const;
+    void drawHud();
 
     SDL_Window*   window_   = nullptr;
     SDL_Renderer* renderer_ = nullptr;
@@ -39,6 +44,7 @@ private:
     Layout        layout_{};
     Game          game_{};
     float         scale_    = 1.0F;   // 逻辑单位 -> 输出像素
+    std::string   assetBase_;         // 资源根目录（SDL_GetBasePath）
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
     bool          dirty_    = true;   // 仅在状态变化时 present（P2-T20）
 };

@@ -1,0 +1,10 @@
+本目录字体为 Noto Sans SC，采用 SIL Open Font License 1.1 授权。
+
+Copyright 2014-2024 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+Copyright 2015-2024 Google LLC.
+Noto is a trademark of Google Inc.
+
+SIL Open Font License 1.1 允许自由使用、研究、修改与再分发（包括随软件打包分发），
+条件为：保留版权与授权声明；不得单独售卖字体本身；修改版本不得使用保留字体名。
+
+完整授权文本见：https://scripts.sil.org/OFL

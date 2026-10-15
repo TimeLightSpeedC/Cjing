@@ -3,14 +3,23 @@
 #include <cstdio>
 
 namespace ttt::sdl {
+namespace {
+// HUD 配色（与 sdl_view.cpp 的 kText* 保持一致的视觉基调）
+constexpr Uint8 kHudR = 236, kHudG = 238, kHudB = 244;
+constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
+}  // namespace
 
 void App::refreshScale() {
     // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方，供视图用）
     int outW = 0, outH = 0;
     SDL_GetRenderOutputSize(renderer_, &outW, &outH);
     scale_ = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize) : 1.0F;
-    if (view_) view_.reset();          // 缩放变化后重建视图
-    view_ = std::make_unique<SDLView>(renderer_, scale_);
+    const bool hadFont = (view_ != nullptr && view_->hasFont());
+    view_.reset();                     // 缩放变化后重建视图（字体随缩放重新栅格化）
+    view_ = std::make_unique<SDLView>(renderer_, scale_, assetBase_);
+    if (hadFont && !assetBase_.empty()) {
+        view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+    }
 }
 
 SDL_AppResult App::init() {
@@ -44,8 +53,19 @@ SDL_AppResult App::init() {
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
+    // 资源根目录：桌面为可执行文件所在目录；移动端由 SDL 给出 assets:// 语义
+    const char* base = SDL_GetBasePath();
+    assetBase_ = (base != nullptr) ? base : ".";
+
     refreshScale();
     rebuildLayout();
+
+    // P2-T12/T13：加载字体（SDL3_ttf）。失败不致命——胜负仍由连线高亮表达。
+    if (view_) {
+        if (!view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
+            SDL_Log("[Cjing] 字体不可用，将以几何方式表达状态");
+        }
+    }
 
     SDL_Log("Cjing %s | SDL %d.%d.%d | 逻辑分辨率 %d",
             "0.2.0",
@@ -151,13 +171,39 @@ SDL_AppResult App::event(SDL_Event* e) {
     }
 }
 
+std::string App::statusLine() const {
+    const GameState& st = game_.state();
+    switch (st.status) {
+        case Status::XWins: return "X 获胜！";
+        case Status::OWins: return "O 获胜！";
+        case Status::Draw:  return "平局";
+        case Status::Playing:
+        default:
+            return (st.current == Player::X) ? "轮到 X" : "轮到 O";
+    }
+}
+
+std::string App::hintLine() const {
+    return game_.state().isOver() ? "按 R 再来一局 · ESC 退出"
+                                  : "点击棋盘落子 · R 重开 · ESC 退出";
+}
+
+void App::drawHud() {
+    if (!view_) return;
+    const Recti& b = layout_.boardRect();
+    if (b.w <= 0) return;
+    // 状态区位于棋盘上方预留空间内
+    view_->drawTextAt(statusLine(), b.x, b.y / 3, kHudR, kHudG, kHudB);
+    view_->drawTextAt(hintLine(), b.x, b.y / 3 + b.y / 3, kHintR, kHintG, kHintB);
+}
+
 SDL_AppResult App::iterate() {
     if (view_) {
         view_->beginFrame();
         view_->drawBoard(layout_);
         view_->drawPieces(game_.state(), layout_);
         view_->drawWinningLine(game_.state(), layout_);
-        view_->drawText(TextId::TurnX, layout_);
+        drawHud();
         if (dirty_) {
             view_->present();          // P2-T20：仅状态变化时呈现
             dirty_ = false;
