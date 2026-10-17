@@ -162,12 +162,12 @@ int main() {
                 // 可选：把离屏渲染结果存盘，便于人工/工具核对画面
                 // 额外导出一张"获胜局面"（含 O 与获胜连线），便于核对 O 圆与高亮
                 if (const char* shotPath0 = SDL_getenv("CJING_SHOT")) {
-                    ttt::Game win;
-                    for (int c : {0, 3, 1, 4, 2}) win.applyMove(c);   // X 第一行获胜，含 2 个 O
+                    ttt::Game winGame;   // 注意：不要命名为 win，避免遮蔽外层 SDL_Window*
+                    for (int c : {0, 3, 1, 4, 2}) winGame.applyMove(c);   // X 第一行获胜，含 2 个 O
                     view.beginFrame();
                     view.drawBoard(layout);
-                    view.drawPieces(win.state(), layout);
-                    view.drawWinningLine(win.state(), layout);
+                    view.drawPieces(winGame.state(), layout);
+                    view.drawWinningLine(winGame.state(), layout);
                     if (SDL_Surface* s2 = SDL_RenderReadPixels(ren, nullptr)) {
                         SDL_Surface* c2 = SDL_ConvertSurface(s2, SDL_PIXELFORMAT_XRGB8888);
                         std::string winPath = std::string(shotPath0);

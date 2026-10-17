@@ -38,7 +38,6 @@ TEST_CASE("安全区把棋盘压小且不越界", "[layout]") {
 TEST_CASE("四角与中心映射到正确格子", "[layout]") {
     const Layout L = Layout::compute(900, 0, 0, 0, 0);
     const Recti& r = L.boardRect();
-    const int c = L.cellSize();
 
     // 每格中心必须映射回自身索引
     for (int i = 0; i < kCellCount; ++i) {

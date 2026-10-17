@@ -1,78 +1,184 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Cjing
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Cross-platform Tic-Tac-Toe (SDL3) — Windows/macOS/Linux/Android/iOS/HarmonyOS"
     LANGUAGES C CXX)
 
-# ---------------------------------------------------------------- 全局设置
+# ===========================================================================
+#  全局设置
+# ===========================================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   # 供 clangd / clang-tidy 使用
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "构建类型" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
-# 统一输出目录，避免各子目录散落产物
+# 统一输出目录，避免产物散落在各子目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-# ------------------------------------------------- SDL3 依赖（路线图 F7 / P0-T3）
-# 版本策略：全平台共用同一份 SDL3 源码。
-#   - 必须用 FetchContent + 浅克隆：全历史克隆在本环境会因连接被 reset 而失败（路线图陷阱 E2）
-#   - 不使用包管理器 / 系统包：它们提供的版本不含 HarmonyOS 后端
-#   - 不锁 tag：当前没有任何已发布 tag 包含 src/video/openharmony/
-#   - GIT_TAG 用分支名（浅克隆 + 分支名已验证稳定）；实际解析出的 SHA 记录在 README 与
-#     《技术验证结论》中，六端共用
-option(CJING_FETCH_SDL3 "Fetch SDL3 via FetchContent (else find_package)" ON)
+# ===========================================================================
+#  构建选项（集中在此，便于 CMake GUI / CLion 中统一查看）
+# ===========================================================================
+option(CJING_FETCH_SDL3       "通过 FetchContent 获取 SDL3（关闭则用 find_package）" ON)
+option(CJING_WITH_TTF         "启用 SDL3_ttf 文字渲染"                            ON)
+option(CJING_BUILD_TESTS      "构建单元测试（Catch2）"                            ON)
+option(CJING_BUILD_DESKTOP_APP "构建桌面可执行文件 CjingApp"                      ON)
+option(CJING_BUILD_SELFTEST   "构建无界面自测 CjingSelfTest"                      ON)
+option(CJING_SANITIZE         "为本项目目标启用 ASan/UBSan（第三方依赖不受影响）"  OFF)
+option(CJING_WERROR           "把告警当作错误（仅本项目代码）"                    OFF)
+option(CJING_OFFLINE          "禁止联网：依赖必须来自本地缓存，否则直接报错"      OFF)
 
-set(CJING_SDL3_GIT_TAG "main" CACHE STRING "SDL3 git ref (branch name; record resolved SHA)")
+set(CJING_SDL3_GIT_TAG "main" CACHE STRING
+    "SDL3 的 git ref。用分支名（如 main）便于跟随开发主线（鸿蒙后端尚未进入任何发布版本）；
+     如需完全可复现，可改为具体的 commit SHA，并记录到 docs/技术验证结论.md")
 
-set(CJING_SDL3_SOURCE_DIR "" CACHE PATH
-    "已有 SDL3 源码目录（跳过下载；用于离线开发与复用克隆）")
+# ===========================================================================
+#  依赖解析：本地缓存优先，网络兜底
+# ===========================================================================
+# 默认缓存位置为项目内 .tools/（不纳入版本控制）。
+# 若依赖放在别处，用 -DCJING_CACHE_DIR=<path> 指定。
+set(CJING_CACHE_DIR "${CMAKE_SOURCE_DIR}/.tools" CACHE PATH "第三方依赖本地缓存根目录")
 
+include("${CMAKE_SOURCE_DIR}/cmake/CjingDeps.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/CjingCompiler.cmake")
+
+# 约定布局（优先）与历史布局（兼容）
+cjing_detect_dep(SDL3 CJING_SDL3_SOURCE_DIR
+    "${CJING_CACHE_DIR}/sdl3-src"
+    "${CJING_CACHE_DIR}/sdl3probe/build/_deps/sdl3-src")
+
+if(CJING_WITH_TTF)
+    cjing_detect_dep(SDL3_ttf CJING_SDL3_TTF_SOURCE_DIR
+        "${CJING_CACHE_DIR}/sdltff-src"
+        "${CJING_CACHE_DIR}/ttf-fetch/build/_deps/sdl3_ttf-src")
+endif()
+
+if(CJING_BUILD_TESTS)
+    cjing_detect_dep(Catch2 CJING_CATCH2_SOURCE_DIR
+        "${CJING_CACHE_DIR}/catch2-src"
+        "${CMAKE_SOURCE_DIR}/build/_deps/catch2-src")
+endif()
+
+if(CJING_OFFLINE)
+    cjing_require_offline(
+        CJING_SDL3_SOURCE_DIR
+        CJING_SDL3_TTF_SOURCE_DIR
+        CJING_CATCH2_SOURCE_DIR)
+endif()
+
+# ===========================================================================
+#  依赖获取
+# ===========================================================================
+include(FetchContent)
+
+# ---------------------------------------------------------------- SDL3
 if(CJING_FETCH_SDL3)
-    include(FetchContent)
+    cjing_prepare_dep(SDL3 CJING_SDL3_SOURCE_DIR)
     FetchContent_Declare(SDL3
         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
         GIT_TAG        ${CJING_SDL3_GIT_TAG}
         GIT_SHALLOW    TRUE)
-    if(CJING_SDL3_SOURCE_DIR)
-        # 复用本地克隆：避免重复下载（本环境大文件传输不稳定，见路线图陷阱 E2）
-        # 必须用 FETCHCONTENT_SOURCE_DIR_<name>（大写），它是 FetchContent 官方的跳过下载机制
-        set(FETCHCONTENT_SOURCE_DIR_SDL3 "${CJING_SDL3_SOURCE_DIR}" CACHE PATH "" FORCE)
-        message(STATUS "SDL3: 复用本地源码目录 ${CJING_SDL3_SOURCE_DIR}")
-    endif()
     FetchContent_MakeAvailable(SDL3)
 else()
     find_package(SDL3 CONFIG REQUIRED)
 endif()
 
-# --------------------------------------------------------------- 测试入口
-# 注意：enable_testing() 必须出现在顶层，否则 ctest 在构建根目录看不到测试
+# ------------------------------------------------------------ SDL3_ttf
+if(CJING_WITH_TTF)
+    # 必须启用 vendored：使用 SDL_ttf 自带的 freetype/harfbuzz 子模块。
+    # 否则它会去找系统库，而 macOS/Windows 默认没有，鸿蒙/Android 更不会有。
+    set(SDLTTF_VENDORED  ON  CACHE BOOL "" FORCE)
+    set(SDLTTF_PLUTOSVG  OFF CACHE BOOL "" FORCE)   # 彩色 emoji 依赖，本项目不需要
+    set(SDLTTF_TESTS     OFF CACHE BOOL "" FORCE)
+    set(SDLTTF_SAMPLES   OFF CACHE BOOL "" FORCE)
+
+    cjing_prepare_dep(SDL3_ttf CJING_SDL3_TTF_SOURCE_DIR)
+    FetchContent_Declare(SDL3_ttf
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+        GIT_TAG        main
+        GIT_SHALLOW    TRUE
+        GIT_SUBMODULES_RECURSE TRUE)   # 依赖是 git submodule，必须递归
+    FetchContent_MakeAvailable(SDL3_ttf)
+endif()
+
+# --------------------------------------------------------------- Catch2
+if(CJING_BUILD_TESTS)
+    cjing_prepare_dep(Catch2 CJING_CATCH2_SOURCE_DIR)
+    FetchContent_Declare(Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG        v3.7.1
+        GIT_SHALLOW    TRUE)
+    FetchContent_MakeAvailable(Catch2)
+endif()
+
+# ===========================================================================
+#  子目录
+# ===========================================================================
+# 注意：enable_testing() 必须在顶层，否则 ctest 在构建根目录看不到测试
 enable_testing()
 
-# ------------------------------------------------------------------- 子目录
 add_subdirectory(core)
 add_subdirectory(platform_sdl)
 
-# ------------------------------------------------------------------- 摘要
-if(CJING_FETCH_SDL3)
-    if(CJING_SDL3_SOURCE_DIR)
-        set(_sdl3_origin "FetchContent(${CJING_SDL3_GIT_TAG}) [复用本地: ${CJING_SDL3_SOURCE_DIR}]")
+# ===========================================================================
+#  配置摘要
+# ===========================================================================
+function(cjing_dep_origin dep_name dir_var)
+    if("${${dir_var}}" STREQUAL "")
+        set(_where "网络获取")
     else()
-        set(_sdl3_origin "FetchContent(${CJING_SDL3_GIT_TAG})")
+        set(_where "本地缓存")
     endif()
+    set(${dep_name}_ORIGIN "${_where}: ${${dir_var}}" PARENT_SCOPE)
+endfunction()
+
+if(CJING_FETCH_SDL3)
+    cjing_dep_origin(_sdl3 CJING_SDL3_SOURCE_DIR)
+    set(_sdl3_line "${_sdl3_ORIGIN}  (tag: ${CJING_SDL3_GIT_TAG})")
 else()
-    set(_sdl3_origin "find_package(SDL3)")
+    set(_sdl3_line "find_package(SDL3)")
+endif()
+
+if(CJING_WITH_TTF)
+    cjing_dep_origin(_ttf CJING_SDL3_TTF_SOURCE_DIR)
+    set(_ttf_line "${_ttf_ORIGIN}")
+else()
+    set(_ttf_line "已禁用（CJING_WITH_TTF=OFF）")
+endif()
+
+if(CJING_BUILD_TESTS)
+    cjing_dep_origin(_catch CJING_CATCH2_SOURCE_DIR)
+    set(_catch_line "${_catch_ORIGIN}")
+else()
+    set(_catch_line "已禁用（CJING_BUILD_TESTS=OFF）")
 endif()
 
 message(STATUS "")
-message(STATUS "Cjing ${PROJECT_VERSION}  (${CMAKE_BUILD_TYPE})")
+message(STATUS "========== Cjing ${PROJECT_VERSION} ==========")
+message(STATUS "  构建类型      : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C++ 标准      : ${CMAKE_CXX_STANDARD}")
-message(STATUS "  SDL3 来源     : ${_sdl3_origin}")
+message(STATUS "  编译器        : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  SDL3          : ${_sdl3_line}")
+message(STATUS "  SDL3_ttf      : ${_ttf_line}")
+message(STATUS "  Catch2        : ${_catch_line}")
+message(STATUS "  依赖缓存目录  : ${CJING_CACHE_DIR}")
 message(STATUS "  构建目录      : ${CMAKE_BINARY_DIR}")
+message(STATUS "  可选开关      : SANITIZE=${CJING_SANITIZE}  WERROR=${CJING_WERROR}  OFFLINE=${CJING_OFFLINE}")
+message(STATUS "============================================")
 message(STATUS "")
+
+# 提示：若依赖走网络且本机网络受限，给出可执行建议
+if(NOT CJING_OFFLINE)
+    if(CJING_FETCH_SDL3 AND "${CJING_SDL3_SOURCE_DIR}" STREQUAL "")
+        message(STATUS "提示：未找到 SDL3 本地缓存，本次将联网下载。")
+        message(STATUS "      若网络受限，可把源码放到 ${CJING_CACHE_DIR}/sdl3-src，")
+        message(STATUS "      或配置 -DCJING_SDL3_SOURCE_DIR=<目录>。")
+    endif()
+endif()

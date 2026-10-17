@@ -36,15 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # SDL3 由 FetchContent 从源码编译，需要系统图形/输入开发库。
-      # 其余平台（macOS/Windows）的系统框架开箱可用，无需额外安装。
-      #
-      # ⚠️ SDL3 在 Linux 上对以下 X11 扩展做 FATAL 检查（cmake/sdlchecks.cmake），
-      #    缺任何一个都会导致 configure 直接失败，必须逐个装齐：
-      #      XCURSOR(libxcursor-dev) XDBE/XSYNC/XSHAPE(libxext-dev)
-      #      XINPUT(libxi-dev) XFIXES(libxfixes-dev) XRANDR(libxrandr-dev)
-      #      XSCRNSAVER(libxss-dev) XTEST(libxtst-dev)
-      #    首次 CI 即因漏装 libxtst-dev 而失败（报 "Couldn't find dependency package for XTEST"）。
+      # SDL3 / SDL3_ttf 由 FetchContent 从源码编译，需要系统图形/输入开发库。
+      # SDL3 在 Linux 上对 9 项 X11 扩展做 FATAL 检查（cmake/sdlchecks.cmake），
+      # 缺任何一个都会使 configure 直接失败，必须逐个装齐：
+      #   XCURSOR(libxcursor-dev) XDBE/XSYNC/XSHAPE(libxext-dev)
+      #   XINPUT(libxi-dev) XFIXES(libxfixes-dev) XRANDR(libxrandr-dev)
+      #   XSCRNSAVER(libxss-dev) XTEST(libxtst-dev)
       - name: 安装 Linux 构建依赖
         if: runner.os == 'Linux'
         run: |
@@ -60,43 +57,21 @@ jobs:
       - name: 配置（Configure）
         id: configure
         shell: bash
-        env:
-          SANITIZE: ${{ matrix.sanitize }}
         run: |
-          FLAGS=""
-          if [ "$SANITIZE" = "ON" ]; then
-            FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
-          fi
-
-          # SDL3 的依赖检查按 C 语言进行，故同时设置 CFLAGS / CXXFLAGS / LDFLAGS
-          if [ -n "$FLAGS" ]; then
-            export CFLAGS="$FLAGS"
-            export CXXFLAGS="$FLAGS"
-            export LDFLAGS="-fsanitize=address,undefined"
-          fi
-
+          # CI 无本地依赖缓存（.tools 不入库），因此走网络获取：
+          # GitHub runner 访问 GitHub 是内网速度，不受开发者本地网络影响。
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCJING_BUILD_DESKTOP_APP=ON
+            -DCJING_SANITIZE=${{ matrix.sanitize }}
 
       - name: 编译（Build）
-        shell: bash
-        env:
-          SANITIZE: ${{ matrix.sanitize }}
-        run: |
-          if [ "$SANITIZE" = "ON" ]; then
-            export CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
-            export CXXFLAGS="$CFLAGS"
-            export LDFLAGS="-fsanitize=address,undefined"
-          fi
-          cmake --build build --config ${{ matrix.build_type }} --parallel 4
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel 4
 
       - name: 单元测试（Test）
         shell: bash
-        env:
-          SANITIZE: ${{ matrix.sanitize }}
         run: |
-          if [ "$SANITIZE" = "ON" ]; then
+          # 注意：LeakSanitizer 仅 Linux 支持；macOS 上开启 detect_leaks 会报 unsupported
+          if [ "${{ matrix.sanitize }}" = "ON" ]; then
             export ASAN_OPTIONS=detect_leaks=1
             export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1
           fi
@@ -105,23 +80,18 @@ jobs:
       - name: core/ 纯净性检查（架构原则 1）
         run: cmake --build build --target core_purity_check
 
-      # 失败时上传日志，便于定位（无需仓库 admin 权限即可通过 API 下载 artifact）
+      # 失败时上传日志，便于定位（公开仓库可通过 artifact 下载，无需仓库 admin 权限）
       - name: 收集失败日志
         if: failure()
         shell: bash
         run: |
           mkdir -p ci-logs
-          echo "===== CMakeCache 关键项 =====" > ci-logs/summary.txt
-          { cmake --version; echo; uname -a; echo; echo "generator: $(grep -m1 CMAKE_GENERATOR: build/CMakeCache.txt 2>/dev/null || echo n/a)"; } >> ci-logs/summary.txt 2>&1 || true
-          if [ -f build/CMakeFiles/CMakeConfigureLog.yaml ]; then
-            cp build/CMakeFiles/CMakeConfigureLog.yaml ci-logs/ || true
-          fi
-          if [ -f build/CMakeFiles/CMakeError.log ]; then
-            cp build/CMakeFiles/CMakeError.log ci-logs/ || true
-          fi
-          if [ -f build/CMakeFiles/CMakeOutput.log ]; then
-            cp build/CMakeFiles/CMakeOutput.log ci-logs/ || true
-          fi
+          echo "===== 环境摘要 =====" > ci-logs/summary.txt
+          { cmake --version; echo; uname -a || true; echo; } >> ci-logs/summary.txt 2>&1 || true
+          for f in CMakeCache.txt CMakeFiles/CMakeConfigureLog.yaml \
+                   CMakeFiles/CMakeError.log CMakeFiles/CMakeOutput.log; do
+            if [ -f "build/$f" ]; then cp "build/$f" ci-logs/ || true; fi
+          done
 
       - name: 上传失败日志
         if: failure()
