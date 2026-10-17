@@ -124,6 +124,115 @@ int main() {
         check(true, "获胜局面渲染一帧未卡死");
     }
 
+    // ---- 像素级验证：离屏渲染并读回，确认画面真的画出了内容 ----
+    // 这是"黑屏/只闪一下"类问题的回归测试：仅验证"没崩溃"是不够的。
+    {
+        SDL_Texture* target = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888,
+                                                SDL_TEXTUREACCESS_TARGET, 900, 900);
+        if (target == nullptr) {
+            std::printf("  · 渲染目标不可用（%s），跳过像素验证\n", SDL_GetError());
+        } else if (!SDL_SetRenderTarget(ren, target)) {
+            std::printf("  · 无法切换到离屏渲染目标（%s），跳过像素验证\n", SDL_GetError());
+            SDL_DestroyTexture(target);
+        } else {
+            ttt::sdl::SDLView view(ren, 1.0F, ".");
+            ttt::Game game;
+            game.applyMove(0);          // 放一个 X，确保有前景内容
+            view.beginFrame();
+            view.drawBoard(layout);
+            view.drawPieces(game.state(), layout);
+            view.drawWinningLine(game.state(), layout);
+
+            SDL_Surface* shot = SDL_RenderReadPixels(ren, nullptr);
+            if (shot == nullptr) {
+                std::printf("  · 读回像素失败（%s），跳过像素验证\n", SDL_GetError());
+            } else {
+                // 统计与背景色 (24,24,28) 不同的像素数量
+                int nonBg = 0;
+                SDL_Surface* conv = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA8888);
+                SDL_Surface* use  = (conv != nullptr) ? conv : shot;
+                for (int y = 0; y < use->h; y += 3) {
+                    for (int x = 0; x < use->w; x += 3) {
+                        Uint8 r = 0, g = 0, b = 0, a = 0;
+                        if (!SDL_ReadSurfacePixel(use, x, y, &r, &g, &b, &a)) continue;
+                        if (r != 24 || g != 24 || b != 28) ++nonBg;
+                    }
+                }
+                std::printf("  · 前景像素采样数: %d\n", nonBg);
+                // 可选：把离屏渲染结果存盘，便于人工/工具核对画面
+                // 额外导出一张"获胜局面"（含 O 与获胜连线），便于核对 O 圆与高亮
+                if (const char* shotPath0 = SDL_getenv("CJING_SHOT")) {
+                    ttt::Game win;
+                    for (int c : {0, 3, 1, 4, 2}) win.applyMove(c);   // X 第一行获胜，含 2 个 O
+                    view.beginFrame();
+                    view.drawBoard(layout);
+                    view.drawPieces(win.state(), layout);
+                    view.drawWinningLine(win.state(), layout);
+                    if (SDL_Surface* s2 = SDL_RenderReadPixels(ren, nullptr)) {
+                        SDL_Surface* c2 = SDL_ConvertSurface(s2, SDL_PIXELFORMAT_XRGB8888);
+                        std::string winPath = std::string(shotPath0);
+                        auto dot = winPath.find_last_of('.');
+                        if (dot != std::string::npos) winPath.insert(dot, "-win");
+                        else winPath += "-win";
+                        if (SDL_SaveBMP(c2 != nullptr ? c2 : s2, winPath.c_str())) {
+                            std::printf("  · 获胜局面已保存: %s\n", winPath.c_str());
+                        }
+                        if (c2 != nullptr) SDL_DestroySurface(c2);
+                        SDL_DestroySurface(s2);
+                    }
+                }
+                // 截图模式下额外验证：加载字体并绘制中文 HUD
+                ttt::sdl::SDLView hud(ren, 1.0F, ".");
+                if (const char* shotPath = SDL_getenv("CJING_SHOT")) {
+                    if (hud.loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
+                        ttt::Game g2;
+                        view.beginFrame();
+                        view.drawBoard(layout);
+                        view.drawPieces(g2.state(), layout);
+                        hud.drawTextAt("轮到 X", layout.boardRect().x, layout.boardRect().y / 3,
+                                       236, 238, 244);
+                        hud.drawTextAt("点击棋盘落子 · R 重开 · ESC 退出",
+                                       layout.boardRect().x,
+                                       layout.boardRect().y / 3 + layout.boardRect().y / 3,
+                                       140, 144, 156);
+                        if (SDL_Surface* s3 = SDL_RenderReadPixels(ren, nullptr)) {
+                            SDL_Surface* c3 = SDL_ConvertSurface(s3, SDL_PIXELFORMAT_XRGB8888);
+                            std::string hp = std::string(shotPath);
+                            auto d2 = hp.find_last_of('.');
+                            if (d2 != std::string::npos) hp.insert(d2, "-hud");
+                            else hp += "-hud";
+                            if (SDL_SaveBMP(c3 != nullptr ? c3 : s3, hp.c_str())) {
+                                std::printf("  · HUD 画面已保存: %s\n", hp.c_str());
+                            }
+                            if (c3 != nullptr) SDL_DestroySurface(c3);
+                            SDL_DestroySurface(s3);
+                        }
+                    } else {
+                        std::printf("  · 字体加载失败，跳过 HUD 截图\n");
+                    }
+                }
+                {
+                    (void)hud;
+                }
+                if (const char* shotPath = SDL_getenv("CJING_SHOT")) {
+                    SDL_Surface* conv2 = SDL_ConvertSurface(use, SDL_PIXELFORMAT_XRGB8888);
+                    SDL_Surface* out = (conv2 != nullptr) ? conv2 : use;
+                    if (SDL_SaveBMP(out, shotPath)) {
+                        std::printf("  · 画面已保存: %s\n", shotPath);
+                    } else {
+                        std::printf("  · 保存画面失败: %s\n", SDL_GetError());
+                    }
+                    if (conv2 != nullptr) SDL_DestroySurface(conv2);
+                }
+                check(nonBg > 100, "离屏渲染确有前景内容（非黑屏）");
+                if (conv != nullptr) SDL_DestroySurface(conv);
+                SDL_DestroySurface(shot);
+            }
+            SDL_SetRenderTarget(ren, nullptr);
+            SDL_DestroyTexture(target);
+        }
+    }
+
     // ---- 坐标换算链路（复现输入路径）----
     {
         bool allOk = true;

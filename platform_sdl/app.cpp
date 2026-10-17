@@ -194,26 +194,36 @@ void App::drawHud() {
     if (!view_) return;
     const Recti& b = layout_.boardRect();
     if (b.w <= 0) return;
-    // 状态区位于棋盘上方预留空间内
-    view_->drawTextAt(statusLine(), b.x, b.y / 3, kHudR, kHudG, kHudB);
-    view_->drawTextAt(hintLine(), b.x, b.y / 3 + b.y / 3, kHintR, kHintG, kHintB);
+    // 状态区位于棋盘上方预留空间内：状态行靠上，提示行其下，与棋盘留出间距
+    const int statusY = (b.y * 12) / 100;
+    const int lineH   = (b.y * 38) / 100;
+    view_->drawTextAt(statusLine(), b.x, statusY, kHudR, kHudG, kHudB);
+    view_->drawTextAt(hintLine(), b.x, statusY + lineH, kHintR, kHintG, kHintB);
 }
 
 SDL_AppResult App::iterate() {
     if (!view_) return SDL_APP_CONTINUE;
 
-    // 只在状态变化时重绘内容（省 CPU）；但【必须每帧 present】——
-    // SDL 的 vsync 节流发生在 SDL_RenderPresent 内部，不调用它主循环会满速空转，
-    // 导致 CPU 占满、事件饿死，macOS 上表现为彩虹圈（无响应）。
-    if (dirty_) {
-        view_->beginFrame();
-        view_->drawBoard(layout_);
-        view_->drawPieces(game_.state(), layout_);
-        view_->drawWinningLine(game_.state(), layout_);
-        drawHud();
-        dirty_ = false;
-    }
-    view_->present();      // 每帧无条件 present（vsync 在这里节流）
+    // 【每帧全量重绘 + 每帧 present】
+    //
+    // 为什么不能"只在状态变化时重绘"（两次踩坑，均已实测）：
+    //  1. 跳过 present → SDL 的 vsync 节流失效，主循环满速空转（实测 20 万 fps），
+    //     CPU 占满、事件饿死，macOS 表现为彩虹圈（应用无响应）。
+    //  2. 跳过重绘但仍 present → 渲染器是双缓冲的，每帧交换到另一块后备缓冲；
+    //     跳过清屏与绘制就会 present 一块空白/陈旧缓冲，窗口在"有内容/黑屏"之间交替，
+    //     表现为黑屏、偶发闪烁残影。
+    //
+    // 对井字棋这种绘制量（几十条线 + 少量文字），全量重绘的代价可以忽略。
+    // 若将来需要"按需重绘"，必须改为渲染到持久化的离屏纹理，再整帧贴出；
+    // 直接跳过绘制是不可行的。
+    view_->beginFrame();
+    view_->drawBoard(layout_);
+    view_->drawPieces(game_.state(), layout_);
+    view_->drawWinningLine(game_.state(), layout_);
+    drawHud();
+    view_->present();
+
+    dirty_ = false;
     return SDL_APP_CONTINUE;
 }
 

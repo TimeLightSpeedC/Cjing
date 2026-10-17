@@ -132,28 +132,49 @@ void SDLView::drawBoard(const Layout& layout) {
 
 void SDLView::drawX(int cx, int cy, int half) {
     setColor(renderer_, kXR, kXG, kXB);
-    const float t = 3.0F;   // 线宽（逻辑单位）
-    const float x = static_cast<float>(cx), y = static_cast<float>(cy);
+    const float x = static_cast<float>(cx);
+    const float y = static_cast<float>(cy);
     const float h = static_cast<float>(half);
-    for (float d = -t / 2.0F; d <= t / 2.0F; d += 1.0F) {
-        SDL_RenderLine(renderer_, x - h + d, y - h + d, x + h + d, y + h + d);
-        SDL_RenderLine(renderer_, x - h + d, y + h + d, x + h + d, y - h + d);
+
+    // 加粗方式：沿笔画的【法线】方向平移多条平行线。
+    // 若沿对角线方向平移（x+d, y+d），得到的是"平行斜线偏移"，会让两条笔画粗细不均、
+    // 交叉点错位 —— 之前就是这样画错了。
+    const float thickness = 5.0F;   // 总线宽（逻辑单位）
+    const float k         = 0.70710678F;  // 1/√2
+
+    // 笔画 A：左上 → 右下，法线 (k, -k)
+    // 笔画 B：右上 → 左下，法线 (k,  k)
+    const int layers = static_cast<int>(thickness);
+    for (int i = 0; i < layers; ++i) {
+        const float d = (static_cast<float>(i) - (static_cast<float>(layers) - 1.0F) / 2.0F);
+        const float ax = k * d, ay = -k * d;   // A 的法线偏移
+        const float bx = k * d, by =  k * d;   // B 的法线偏移
+
+        SDL_RenderLine(renderer_, x - h + ax, y - h + ay, x + h + ax, y + h + ay);
+        SDL_RenderLine(renderer_, x - h + bx, y + h + by, x + h + bx, y - h + by);
     }
 }
 
 void SDLView::drawO(int cx, int cy, int radius) {
     setColor(renderer_, kOR, kOG, kOB);
-    constexpr int kSegments = 64;
-    constexpr float kTwoPi  = 6.2831853F;
-    constexpr int kRings     = 3;
-    for (int ring = 0; ring < kRings; ++ring) {
-        const float rr = static_cast<float>(radius) - static_cast<float>(ring) * 1.5F;
-        float px = 0.0F, py = 0.0F;
-        for (int i = 0; i <= kSegments; ++i) {
+    constexpr int   kSegments = 96;        // 折线段数（越大越圆）
+    constexpr float kTwoPi     = 6.2831853F;
+    constexpr float kThickness = 5.0F;     // 与 X 的线宽保持一致
+
+    // 用多条同心折线模拟圆环笔宽；每个半径都画满一整圈（含首尾闭合）
+    const int rings = static_cast<int>(kThickness);
+    for (int ring = 0; ring < rings; ++ring) {
+        const float d  = (static_cast<float>(ring) - (static_cast<float>(rings) - 1.0F) / 2.0F);
+        const float rr = static_cast<float>(radius) + d;
+        if (rr <= 0.5F) continue;
+
+        float px = static_cast<float>(cx) + rr;
+        float py = static_cast<float>(cy);
+        for (int i = 1; i <= kSegments; ++i) {
             const float a = (static_cast<float>(i) / static_cast<float>(kSegments)) * kTwoPi;
             const float x = static_cast<float>(cx) + rr * std::cos(a);
             const float y = static_cast<float>(cy) + rr * std::sin(a);
-            if (i > 0) SDL_RenderLine(renderer_, px, py, x, y);
+            SDL_RenderLine(renderer_, px, py, x, y);
             px = x; py = y;
         }
     }
