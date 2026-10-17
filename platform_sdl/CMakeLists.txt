@@ -59,3 +59,11 @@ if(CJING_BUILD_DESKTOP_APP)
     add_executable(CjingApp main_callbacks.cpp)
     target_link_libraries(CjingApp PRIVATE ttt_platform_sdl)
 endif()
+
+# 无界面自测（可纳入 CI，覆盖事件→输入→渲染全链路）
+option(CJING_BUILD_SELFTEST "Build headless self-test" ON)
+if(CJING_BUILD_SELFTEST)
+    add_executable(CjingSelfTest selftest.cpp)
+    target_link_libraries(CjingSelfTest PRIVATE ttt_platform_sdl)
+    add_test(NAME cjing_selftest COMMAND CjingSelfTest)
+endif()

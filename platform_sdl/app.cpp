@@ -200,17 +200,20 @@ void App::drawHud() {
 }
 
 SDL_AppResult App::iterate() {
-    if (view_) {
+    if (!view_) return SDL_APP_CONTINUE;
+
+    // 只在状态变化时重绘内容（省 CPU）；但【必须每帧 present】——
+    // SDL 的 vsync 节流发生在 SDL_RenderPresent 内部，不调用它主循环会满速空转，
+    // 导致 CPU 占满、事件饿死，macOS 上表现为彩虹圈（无响应）。
+    if (dirty_) {
         view_->beginFrame();
         view_->drawBoard(layout_);
         view_->drawPieces(game_.state(), layout_);
         view_->drawWinningLine(game_.state(), layout_);
         drawHud();
-        if (dirty_) {
-            view_->present();          // P2-T20：仅状态变化时呈现
-            dirty_ = false;
-        }
+        dirty_ = false;
     }
+    view_->present();      // 每帧无条件 present（vsync 在这里节流）
     return SDL_APP_CONTINUE;
 }
 

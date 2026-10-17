@@ -373,7 +373,11 @@ Cjing/                          # 仓库根目录
 - [x] P2-T17 音频接入：用 **SDL3 核心音频 API**（`SDL_audio.h`）播放落子音效（WAV，无额外依赖）；**不引入** `SDL3_mixer`
 - [x] P2-T18 实现 `winLine` 高亮（线索来自 P1-T7）
 - [x] P2-T19 键盘：`R` 重开、`ESC` 退出
-- [x] P2-T20 渲染优化：仅在状态变化时调用 `SDL_RenderPresent`
+- [x] P2-T20 渲染优化：**内容**仅在状态变化时重绘，但**必须每帧调用 `SDL_RenderPresent`**
+  - ⚠️ **踩坑记录**：初版按"仅在状态变化时 present"实现，结果 `dirty_` 变为 false 后不再 present，
+    SDL 的 vsync 节流失效，`SDL_AppIterate` 以 ~20 万次/秒空转，CPU 占满、事件饿死，
+    macOS 表现为**彩虹圈（应用无响应）**，任何操作都卡死
+  - 正确做法：vsync 节流发生在 `SDL_RenderPresent` 内部 —— 内容可跳过重绘，present 不能跳过
 - [ ] P2-T21 处理 SDL3 运行时依赖：Windows 随包 DLL、macOS `Contents/Frameworks`、Linux 打包或依赖系统库；记录第三方库清单
 - [ ] P2-T22 三平台手动测试：对弈、胜负/平局、文字、音效、resize、安全区、重开
 - [ ] P2-T23 **鸿蒙 Go/No-Go 预检（不占额外工期）**：用 P0 锁定的 SHA 构建一个**鸿蒙空窗口 + 触摸回调 + 一行中文文字**的最小应用。**Go 判据 = 空窗口可显示 且 字体渲染成功**；音频为可降级项，不作为判据

@@ -1,0 +1,8 @@
+# GitHub over SSH —— 备用 443 端口（当 22 被封锁时自动生效）
+Host github.com
+    HostName ssh.github.com
+    Port 443
+    User git
+    IdentityFile /Users/c/Desktop/MacMiniTest/Cjing/.ssh-local/id_ed25519
+    IdentitiesOnly yes
+    StrictHostKeyChecking accept-new
