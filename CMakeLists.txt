@@ -65,6 +65,7 @@ option(CJING_WITH_TTF          "启用 SDL3_ttf 文字渲染"                   
 option(CJING_BUILD_TESTS       "构建单元测试（Catch2）"                            ON)
 option(CJING_BUILD_DESKTOP_APP "构建桌面可执行文件 CjingApp"                       ON)
 option(CJING_BUILD_SELFTEST    "构建无界面自测 CjingSelfTest"                      ON)
+option(CJING_BUILD_EXAMPLES    "构建学习用示例（examples/）"                      ON)
 option(CJING_SANITIZE          "为本项目目标启用 ASan/UBSan（第三方依赖不受影响）"  OFF)
 option(CJING_WERROR            "把告警当作错误（仅本项目代码）"                     OFF)
 option(CJING_OFFLINE           "禁止联网：依赖必须来自本地缓存，否则直接报错"        OFF)
@@ -216,6 +217,11 @@ enable_testing()
 add_subdirectory(core)          # 纯逻辑：ttt_core + 单元测试 + 纯净性检查
 add_subdirectory(platform_sdl)  # SDL3 实现：渲染、应用外壳、自测
 
+# 学习用示例：纯 C、直接调 SDL3，刻意不依赖本项目的抽象层
+if(CJING_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
 # =============================================================================
 #  六、配置摘要
 #
@@ -262,7 +268,7 @@ message(STATUS "  SDL3_ttf      : ${_ttf_line}")
 message(STATUS "  Catch2        : ${_catch_line}")
 message(STATUS "  依赖缓存目录  : ${CJING_CACHE_DIR}")
 message(STATUS "  构建目录      : ${CMAKE_BINARY_DIR}")
-message(STATUS "  可选开关      : SANITIZE=${CJING_SANITIZE}  WERROR=${CJING_WERROR}  OFFLINE=${CJING_OFFLINE}")
+message(STATUS "  可选开关      : SANITIZE=${CJING_SANITIZE}  WERROR=${CJING_WERROR}  OFFLINE=${CJING_OFFLINE}  EXAMPLES=${CJING_BUILD_EXAMPLES}")
 message(STATUS "============================================")
 message(STATUS "")
 
