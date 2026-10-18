@@ -46,7 +46,6 @@ private:
     float         scale_    = 1.0F;   // 逻辑单位 -> 输出像素
     std::string   assetBase_;         // 资源根目录（SDL_GetBasePath）
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
-    bool          dirty_    = true;   // 仅在状态变化时 present（P2-T20）
 };
 
 }  // namespace ttt::sdl
