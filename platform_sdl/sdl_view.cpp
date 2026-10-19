@@ -21,10 +21,10 @@ inline void setColor(SDL_Renderer* r, Uint8 cr, Uint8 cg, Uint8 cb) {
 
 }  // namespace
 
-SDLView::SDLView(SDL_Renderer* renderer, float scale, std::string assetBase)
+SDLView::SDLView(SDL_Renderer* renderer, float scale, const AssetIO& assets)
     : renderer_(renderer),
       scale_(scale > 0.0F ? scale : 1.0F),
-      assetBase_(std::move(assetBase)) {}
+      assets_(&assets) {}
 
 SDLView::~SDLView() {
 #ifdef CJING_HAVE_TTF
@@ -54,42 +54,43 @@ void SDLView::destroyTextCache() {
 
 bool SDLView::loadFont(std::string_view assetName, int logicalPointSize) {
 #ifdef CJING_HAVE_TTF
-    // 同一字体只加载一次（缩放变化会重建 view，但字体重载是浪费）
-    if (font_ != nullptr) return true;
+    if (font_ != nullptr) return true;      // 同一字体只加载一次
 
     if (!TTF_Init()) {
         std::fprintf(stderr, "[Cjing] TTF_Init 失败: %s\n", SDL_GetError());
         return false;
     }
-
-    // 资源定位：assets/<name>，并回退到多级父目录，
-    // 以适配 CMake 构建目录（build/bin/）与打包后的目录结构差异。
-    // 首次解析结果缓存在 fontPath_，后续复用。
-    if (fontPath_.empty()) {
-        // assetBase_ 以 '/' 结尾（见 App::init），prefix 负责向父目录回退：
-        //   ""      -> <base>assets/...            打包后布局
-        //   "../.." -> <repo>/assets/...          build/bin 构建目录布局
-        static const char* kPrefixes[] = {"", "../..", "../../..", "../../../.."};
-        for (const char* p : kPrefixes) {
-            std::string cand = assetBase_ + p + "/assets/" + std::string(assetName);
-            if (SDL_IOFromFile(cand.c_str(), "rb") != nullptr) { fontPath_ = cand; break; }
-        }
-    }
-    if (fontPath_.empty()) {
-        std::fprintf(stderr, "[Cjing] 找不到字体资源: assets/%s（已尝试多级回退）\n",
-                     std::string(assetName).c_str());
+    if (assets_ == nullptr) {
+        std::fprintf(stderr, "[Cjing] 未绑定 AssetIO，无法加载字体\n");
         return false;
     }
-    const std::string& found = fontPath_;
 
-    // 字体栅格化尺寸随输出缩放，保证高分屏清晰
+    // ① 通过抽象层拿字节 —— 不拼路径、不假设文件系统结构。
+    auto bytes = assets_->read(assetName);
+    if (!bytes.has_value() || bytes->empty()) {
+        std::fprintf(stderr, "[Cjing] 找不到字体资源: %s\n", std::string(assetName).c_str());
+        return false;
+    }
+    fontData_ = std::move(*bytes);         // 必须由本对象持有（见头文件注释）
+
+    // ② 把内存包装成 IOStream；closeio=true 表示流随字体一起关闭。
+    //    注意：closeio 只管"流对象"，不管"内存"—— 内存归 fontData_ 管。
+    SDL_IOStream* io = SDL_IOFromConstMem(fontData_.data(), fontData_.size());
+    if (io == nullptr) {
+        std::fprintf(stderr, "[Cjing] 创建内存流失败: %s\n", SDL_GetError());
+        return false;
+    }
+
+    // ③ 字号随输出缩放，保证高分屏清晰
     const float ptsize = static_cast<float>(logicalPointSize) * scale_;
-    font_ = TTF_OpenFont(found.c_str(), ptsize);
+    font_ = TTF_OpenFontIO(io, /*closeio=*/true, ptsize);
     if (font_ == nullptr) {
-        std::fprintf(stderr, "[Cjing] 打开字体失败 (%s): %s\n", found.c_str(), SDL_GetError());
+        std::fprintf(stderr, "[Cjing] 打开字体失败: %s\n", SDL_GetError());
         return false;
     }
-    SDL_Log("[Cjing] 字体已加载: %s @ %.0fpt", found.c_str(), static_cast<double>(ptsize));
+
+    SDL_Log("[Cjing] 字体已加载: %s（%zu 字节 @ %.0fpt）",
+            std::string(assetName).c_str(), fontData_.size(), static_cast<double>(ptsize));
     return true;
 #else
     (void)assetName;

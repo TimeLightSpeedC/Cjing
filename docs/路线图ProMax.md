@@ -368,8 +368,8 @@ Cjing/                          # 仓库根目录
 - [x] P2-T12 引入 `SDL3_ttf`（**必需，提前到此阶段**，勿拖到 P5）：FetchContent 锁 SHA + `GIT_SUBMODULES_RECURSE TRUE`（见 0.1）；按 P0-T16 的策略配置 vendored 依赖
 - [ ] P2-T13 实现文本渲染（当前回合、胜负结果、平局），文案经 `TextId → 文案表` 查询；验证中文字形不缺字（缺字会显示方块）
 - [x] P2-T14 确认字体授权允许再分发，并在 `assets/` 中保留授权文件
-- [ ] P2-T15 实现 `AssetIO` 的桌面实现（文件路径），字体加载路径不得写死绝对路径
-- [ ] P2-T16 实现 `SaveIO` 的桌面实现（`SDL_GetPrefPath`），支持退出时保存、启动时恢复
+- [x] P2-T15 实现 `AssetIO` 的桌面实现（文件路径），字体加载路径不得写死绝对路径
+- [x] P2-T16 实现 `SaveIO` 的桌面实现（`SDL_GetPrefPath`），支持退出时保存、启动时恢复
 - [x] P2-T17 音频接入：用 **SDL3 核心音频 API**（`SDL_audio.h`）播放落子音效（WAV，无额外依赖）；**不引入** `SDL3_mixer`
 - [x] P2-T18 实现 `winLine` 高亮（线索来自 P1-T7）
 - [x] P2-T19 键盘：`R` 重开、`ESC` 退出
@@ -386,6 +386,13 @@ Cjing/                          # 仓库根目录
 > 运行日志确认字体加载：`[Cjing] 字体已加载: assets/fonts/NotoSansSC-Regular.ttf @ 39pt`
 > （39pt = 44 逻辑单位 × 0.884 输出缩放，证明逻辑单位→像素换算正确）。
 > CI 在四矩阵（含 Windows）全部通过，TTF 构建三平台可用。
+
+> **存档实测记录（2026-10-19）**：`SaveIO` 与 `AssetIO` 已落地，并用端到端流程验证：
+> 启动 → 预置存档 `TTT1,X...O....,X,2` → 日志 `已恢复对局: 手数=2` →
+> 退出时写回 `TTT1,X...O....,X,2`（与预置完全一致）。
+> 另支持 `CJING_SAVE_DIR=<目录>` 覆盖存档位置（便携模式 / 自动化测试）。
+> 注：`WILL_ENTER_BACKGROUND` / `TERMINATING` 的存档钩子已在桌面验证
+> （SIGTERM 触发正常退出并落盘）；移动端真实切后台仍待 P3 真机验证。
 
 - [ ] P2-T24 里程碑 `v0.2.0`：桌面可玩可打包 + 鸿蒙预检结论已产出
 

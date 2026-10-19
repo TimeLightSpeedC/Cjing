@@ -17,9 +17,9 @@ void App::refreshScale() {
     // 缩放变化需重建视图：字体按新缩放重新栅格化，保证高分屏清晰
     const bool hadFont = (view_ != nullptr && view_->hasFont());
     view_.reset();
-    view_ = std::make_unique<SDLView>(renderer_, scale_, assetBase_);
-    if (!assetBase_.empty()) {
-        (void)view_->loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+    view_ = std::make_unique<SDLView>(renderer_, scale_, *assetIO_);
+    if (assetIO_) {
+        (void)view_->loadFont(kFontAsset, 44);
         if (hadFont) SDL_Log("[Cjing] 缩放变化，字体已按新比例重新栅格化");
     }
 }
@@ -63,13 +63,27 @@ SDL_AppResult App::init() {
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
-    // 资源根目录：桌面为可执行文件所在目录；移动端由 SDL 给出 assets:// 语义
+    // ---- 资源访问：根目录由 SDL 给出（桌面是可执行文件目录，移动端为 assets://）----
     const char* base = SDL_GetBasePath();
-    // SDL_GetBasePath 返回带尾斜杠的目录（如 ".../bin/"），保留它作为路径基准
-    assetBase_ = (base != nullptr) ? base : "";
+    assetIO_ = std::make_unique<SDLAssetIO>((base != nullptr) ? base : "");
+
+    // ---- 存档访问：默认用平台推荐的"用户偏好目录"（无需额外权限）----
+    //
+    // 若设置了环境变量 CJING_SAVE_DIR，则优先使用它。用途：
+    //   · 便携模式（存档放在程序旁边）
+    //   · 自动化测试（避免污染用户目录、也便于在受限环境验证）
+    if (const char* overrideDir = SDL_getenv("CJING_SAVE_DIR")) {
+        SDL_Log("[Cjing] 使用 CJING_SAVE_DIR 覆盖存档目录: %s", overrideDir);
+        saveIO_ = std::make_unique<SDLSaveIO>(overrideDir);
+    } else {
+        saveIO_ = SDLSaveIO::create("TimeLightSpeedC", "Cjing");
+    }
 
     refreshScale();
     rebuildLayout();
+
+    // 启动时尝试恢复上一局。没有存档 / 存档损坏都只是"从新局开始"，不是错误。
+    loadSaved();
 
     // P2-T12/T13：字体已由 refreshScale() 创建视图时加载。
     // 失败不致命——胜负仍由连线高亮表达。
@@ -139,13 +153,22 @@ SDL_AppResult App::event(SDL_Event* e) {
 
         // F3：应用生命周期事件（移动端切后台必需）。
         //     SDL_EVENT_WINDOW_MINIMIZED 是桌面窗口事件，不能用于此目的。
+        // 进入后台：必须在这里落盘 —— Android 之后可能不再给应用运行时间，
+        // 甚至直接回收进程。这是移动端"局面丢失"的根因所在。
         case SDL_EVENT_WILL_ENTER_BACKGROUND:
-            SDL_Log("[Cjing] WILL_ENTER_BACKGROUND → 此处落盘存档并停止渲染（P3-T7）");
+            SDL_Log("[Cjing] WILL_ENTER_BACKGROUND → 保存对局");
+            saveNow();
             return SDL_APP_CONTINUE;
+
+        // 即将被系统终止：最后一次保存机会
+        case SDL_EVENT_TERMINATING:
+            SDL_Log("[Cjing] TERMINATING → 保存对局");
+            saveNow();
+            return SDL_APP_CONTINUE;
+
         case SDL_EVENT_DID_ENTER_BACKGROUND:
         case SDL_EVENT_WILL_ENTER_FOREGROUND:
         case SDL_EVENT_DID_ENTER_FOREGROUND:
-        case SDL_EVENT_TERMINATING:
         case SDL_EVENT_LOW_MEMORY:
         case SDL_EVENT_RENDER_DEVICE_RESET:
             return SDL_APP_CONTINUE;
@@ -230,7 +253,54 @@ SDL_AppResult App::iterate() {
     return SDL_APP_CONTINUE;
 }
 
+// -----------------------------------------------------------------------------
+//  saveNow —— 把当前对局写入存档
+//
+//  存档内容只有棋盘 + 当前玩家 + 手数（见 core/src/io.cpp）：
+//  胜负状态不存，恢复时由棋盘推导，避免"两份真相"不一致。
+// -----------------------------------------------------------------------------
+void App::saveNow() const {
+    if (!saveIO_) return;
+
+    const std::string data = serialize(game_.state());
+    if (!saveIO_->write(kSaveFile, data)) {
+        SDL_Log("[Cjing] 存档失败（不影响继续游戏）");
+        return;
+    }
+    SDL_Log("[Cjing] 已保存: %s（%s）",
+            std::string(kSaveFile).c_str(), data.c_str());
+}
+
+// -----------------------------------------------------------------------------
+//  loadSaved —— 启动时恢复对局
+//
+//  三种情况都视为正常：
+//    ① 没有存档文件（首次运行）
+//    ② 存档损坏（被截断/被改过）
+//    ③ 恢复成功
+//  只有 ③ 才改变局面；其余静默从新局开始 —— 不该因为一个坏文件让游戏起不来。
+// -----------------------------------------------------------------------------
+void App::loadSaved() {
+    if (!saveIO_) return;
+
+    const auto raw = saveIO_->read(kSaveFile);
+    if (!raw.has_value()) return;              // ① 无存档
+
+    const auto restored = deserialize(*raw);
+    if (!restored.has_value()) {               // ② 存档损坏
+        SDL_Log("[Cjing] 存档无法解析，忽略并开始新局: %s", raw->c_str());
+        return;
+    }
+
+    game_.restore(*restored);                  // ③ 恢复
+    SDL_Log("[Cjing] 已恢复对局: 手数=%d，状态=%d", game_.moveCount(),
+            static_cast<int>(game_.status()));
+}
+
 void App::quit() {
+    // 正常退出也保存一次（ESC / 关窗口走这里）
+    saveNow();
+
     view_.reset();
     if (renderer_ != nullptr) SDL_DestroyRenderer(renderer_);
     if (window_ != nullptr)   SDL_DestroyWindow(window_);

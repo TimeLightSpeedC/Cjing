@@ -15,6 +15,7 @@
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
 
+#include "sdl_io.hpp"
 #include "sdl_view.hpp"
 
 namespace {
@@ -97,13 +98,17 @@ int main() {
 
     SDL_SetRenderLogicalPresentation(ren, 900, 900, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
+    // 资源访问抽象。基目录给当前工作目录即可 —— SDLAssetIO 内部会向上回退几级，
+    // 因此无论从项目根还是 build/bin 运行都能找到 assets/。
+    const ttt::sdl::SDLAssetIO assets(".");
+
     // ---- 布局 ----
     const ttt::Layout layout = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
     check(layout.cellSize() > 0, "布局计算：格子尺寸 > 0");
 
     // ---- 渲染一帧（含全部绘制路径）----
     {
-        ttt::sdl::SDLView view(ren, 1.0F, ".");
+        ttt::sdl::SDLView view(ren, 1.0F, assets);
         ttt::Game game;
         view.beginFrame();
         view.drawBoard(layout);
@@ -135,7 +140,7 @@ int main() {
             std::printf("  · 无法切换到离屏渲染目标（%s），跳过像素验证\n", SDL_GetError());
             SDL_DestroyTexture(target);
         } else {
-            ttt::sdl::SDLView view(ren, 1.0F, ".");
+            ttt::sdl::SDLView view(ren, 1.0F, assets);
             ttt::Game game;
             game.applyMove(0);          // 放一个 X，确保有前景内容
             view.beginFrame();
@@ -182,7 +187,7 @@ int main() {
                     }
                 }
                 // 截图模式下额外验证：加载字体并绘制中文 HUD
-                ttt::sdl::SDLView hud(ren, 1.0F, ".");
+                ttt::sdl::SDLView hud(ren, 1.0F, assets);
                 if (const char* shotPath = SDL_getenv("CJING_SHOT")) {
                     if (hud.loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
                         ttt::Game g2;
@@ -231,6 +236,38 @@ int main() {
             SDL_SetRenderTarget(ren, nullptr);
             SDL_DestroyTexture(target);
         }
+    }
+
+    // ---- 存档往返：SaveIO 写入 → 读回 → 反序列化 → 棋盘一致 ----
+    // 用【项目内临时目录】而不是用户目录：
+    //   · CI 与沙箱环境可能不允许写 ~/Library
+    //   · 测试结束后可以干净删除，不在用户机器上留垃圾
+    {
+        const std::string tmpDir = "selftest-tmp";
+        SDL_CreateDirectory(tmpDir.c_str());     // 已存在时返回 false，无妨
+
+        ttt::sdl::SDLSaveIO save(tmpDir);
+        ttt::Game g;
+        g.applyMove(0);      // X 落左上
+        g.applyMove(4);      // O 落中心
+        const std::string data = ttt::serialize(g.state());
+        const std::string name = "save.txt";
+
+        const bool wrote = save.write(name, data);
+        const auto back = save.read(name);
+        check(wrote && back.has_value() && *back == data,
+              "SaveIO 写入/读回内容完全一致");
+
+        if (back.has_value()) {
+            const auto parsed = ttt::deserialize(*back);
+            check(parsed.has_value() && parsed->board == g.state().board &&
+                      parsed->current == g.state().current,
+                  "读回内容可解析且棋盘/当前玩家一致");
+        }
+
+        // 清理：先删文件再删目录
+        std::remove((save.writableDir() + name).c_str());
+        SDL_RemovePath(tmpDir.c_str());
     }
 
     // ---- 坐标换算链路（复现输入路径）----

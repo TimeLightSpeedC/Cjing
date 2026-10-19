@@ -7,10 +7,12 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
 
+#include "sdl_io.hpp"
 #include "sdl_view.hpp"
 
 namespace ttt::sdl {
@@ -19,6 +21,10 @@ namespace ttt::sdl {
 inline constexpr int kLogicalSize = 900;
 // 顶部为状态文字预留的逻辑单位（P2-T13 接入文字后使用）
 inline constexpr int kReserveTop  = 120;
+
+// 资源与存档的文件名（集中定义，避免各处硬编码字符串）
+inline constexpr std::string_view kFontAsset = "fonts/NotoSansSC-Regular.ttf";
+inline constexpr std::string_view kSaveFile  = "save.txt";
 
 class App {
 public:
@@ -33,6 +39,10 @@ private:
     void rebuildLayout();
     void refreshScale();
     void handlePointer(int renderX, int renderY);
+
+    // 存档：把当前对局写入 SaveIO；启动时读回并恢复
+    void saveNow() const;
+    void loadSaved();
     // 状态行文案（UTF-8）。文案属应用逻辑，不放在渲染层。
     [[nodiscard]] std::string statusLine() const;
     [[nodiscard]] std::string hintLine() const;
@@ -44,7 +54,10 @@ private:
     Layout        layout_{};
     Game          game_{};
     float         scale_    = 1.0F;   // 逻辑单位 -> 输出像素
-    std::string   assetBase_;         // 资源根目录（SDL_GetBasePath）
+
+    // 平台资源与存档（core 只定义接口，实现留在这里）
+    std::unique_ptr<SDLAssetIO> assetIO_;
+    std::unique_ptr<SDLSaveIO>  saveIO_;
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
 };
 
