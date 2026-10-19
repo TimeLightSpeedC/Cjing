@@ -275,6 +275,20 @@ int main() {
     // 自测只验证"能初始化、能加载、能调用播放而不崩溃"，
     // 无法验证实际听感 —— 那必须在真机上由人耳确认。
     {
+        // 自测统一使用 dummy 音频驱动。
+        //
+        // 理由与视频驱动相同：CI runner 没有音频后端，
+        // 若走真实后端（pulse/alsa），不同环境行为不一，甚至会被
+        // LeakSanitizer 报出 SDL 内部的泄漏，导致测试结果不稳定。
+        // dummy 驱动不需要任何硬件，能稳定地覆盖"打开设备 / 加载 WAV /
+        // 绑定流 / 播放"这条我们自己的代码路径。
+#if !defined(_WIN32)
+        setenv("SDL_AUDIODRIVER", "dummy", 1);
+#else
+        _putenv_s("SDL_AUDIODRIVER", "dummy");
+#endif
+        SDL_SetHintWithPriority(SDL_HINT_AUDIO_DRIVER, "dummy", SDL_HINT_OVERRIDE);
+
         const auto audio = ttt::sdl::SDLAudio::create(assets);
         if (!audio) {
             std::printf("  · 无可用音频设备，跳过音效测试（CI/静音环境属正常）\n");

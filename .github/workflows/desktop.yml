@@ -71,6 +71,10 @@ jobs:
         shell: bash
         run: |
           # 注意：LeakSanitizer 仅 Linux 支持；macOS 上开启 detect_leaks 会报 unsupported
+          # runner 没有音频硬件：强制 dummy 音频驱动，
+          # 避免真实后端（pulse/alsa）在 LeakSanitizer 下报出 SDL 内部泄漏，
+          # 也避免音频设备探测拖慢测试。
+          export SDL_AUDIODRIVER=dummy
           if [ "${{ matrix.sanitize }}" = "ON" ]; then
             export ASAN_OPTIONS=detect_leaks=1
             export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1
