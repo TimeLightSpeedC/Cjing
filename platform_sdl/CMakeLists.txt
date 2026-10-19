@@ -14,7 +14,8 @@
 add_library(ttt_platform_sdl STATIC
     app.cpp        # 应用外壳：窗口/渲染器/事件分发/生命周期
     sdl_view.cpp   # IView 实现：棋盘、X/O、获胜连线、文字
-    sdl_io.cpp)    # AssetIO/SaveIO 实现：资源读取与存档读写
+    sdl_io.cpp     # AssetIO/SaveIO 实现：资源读取与存档读写
+    sdl_audio.cpp) # IAudio 实现：SDL 核心音频播放 WAV
 
 target_include_directories(ttt_platform_sdl PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}")

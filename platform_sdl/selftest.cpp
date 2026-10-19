@@ -15,6 +15,7 @@
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
 
+#include "sdl_audio.hpp"
 #include "sdl_io.hpp"
 #include "sdl_view.hpp"
 
@@ -268,6 +269,32 @@ int main() {
         // 清理：先删文件再删目录
         std::remove((save.writableDir() + name).c_str());
         SDL_RemovePath(tmpDir.c_str());
+    }
+
+    // ---- 音频（可选能力）----
+    // 自测只验证"能初始化、能加载、能调用播放而不崩溃"，
+    // 无法验证实际听感 —— 那必须在真机上由人耳确认。
+    {
+        const auto audio = ttt::sdl::SDLAudio::create(assets);
+        if (!audio) {
+            std::printf("  · 无可用音频设备，跳过音效测试（CI/静音环境属正常）\n");
+        } else {
+            check(audio->available(), "音频设备可用");
+            const bool l1 = audio->load(ttt::SoundId::Place, "sounds/place.wav");
+            const bool l2 = audio->load(ttt::SoundId::Win,   "sounds/win.wav");
+            const bool l3 = audio->load(ttt::SoundId::Draw,  "sounds/draw.wav");
+            check(l1 && l2 && l3, "三个音效资源均加载成功");
+            check(!audio->load(ttt::SoundId::Place, "sounds/does-not-exist.wav"),
+                  "缺失的音效资源被正确拒绝");
+
+            // 连播三次，确认重复触发不会崩溃
+            for (int i = 0; i < 3; ++i) {
+                audio->play(ttt::SoundId::Place);
+                audio->play(ttt::SoundId::Win);
+                audio->play(ttt::SoundId::Draw);
+            }
+            check(true, "连续播放未崩溃");
+        }
     }
 
     // ---- 坐标换算链路（复现输入路径）----

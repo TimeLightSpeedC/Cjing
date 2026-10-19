@@ -12,6 +12,7 @@
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
 
+#include "sdl_audio.hpp"
 #include "sdl_io.hpp"
 #include "sdl_view.hpp"
 
@@ -55,9 +56,10 @@ private:
     Game          game_{};
     float         scale_    = 1.0F;   // 逻辑单位 -> 输出像素
 
-    // 平台资源与存档（core 只定义接口，实现留在这里）
+    // 平台资源、存档与音频（core 只定义接口，实现留在这里）
     std::unique_ptr<SDLAssetIO> assetIO_;
     std::unique_ptr<SDLSaveIO>  saveIO_;
+    std::unique_ptr<SDLAudio>   audio_;     // 可能为 nullptr：无音频设备时静音运行
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
 };
 

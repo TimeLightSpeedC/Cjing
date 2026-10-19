@@ -82,6 +82,18 @@ SDL_AppResult App::init() {
     refreshScale();
     rebuildLayout();
 
+    // ---- 音频（可选能力）----
+    // create() 失败返回 nullptr（无设备/子系统初始化失败），此时 play() 不会被调用，
+    // 游戏照常运行 —— 音频不该成为启动的硬依赖。
+    audio_ = SDLAudio::create(*assetIO_);
+    if (audio_) {
+        audio_->load(SoundId::Place, "sounds/place.wav");
+        audio_->load(SoundId::Win,   "sounds/win.wav");
+        audio_->load(SoundId::Draw,  "sounds/draw.wav");
+    } else {
+        SDL_Log("[Cjing] 音频不可用，将安静运行");
+    }
+
     // 启动时尝试恢复上一局。没有存档 / 存档损坏都只是"从新局开始"，不是错误。
     loadSaved();
 
@@ -128,7 +140,19 @@ void App::handlePointer(int renderX, int renderY) {
     if (cell == lastCell_) return;
     lastCell_ = cell;
 
-    (void)game_.applyMove(cell);          // 非法落子不改变状态，无需特判
+    const MoveResult r = game_.applyMove(cell);
+    if (r == MoveResult::Rejected) return;      // 非法落子：无声、无状态变化
+
+    // 音效映射集中在这里（应用层知道"什么时候该响什么"）。
+    // core 不参与：它只返回 MoveResult，不关心声音。
+    if (audio_) {
+        audio_->play(SoundId::Place);
+        if (r == MoveResult::XWon || r == MoveResult::OWon) {
+            audio_->play(SoundId::Win);
+        } else if (r == MoveResult::Drawn) {
+            audio_->play(SoundId::Draw);
+        }
+    }
 }
 
 SDL_AppResult App::event(SDL_Event* e) {
@@ -300,6 +324,9 @@ void App::loadSaved() {
 void App::quit() {
     // 正常退出也保存一次（ESC / 关窗口走这里）
     saveNow();
+
+    // 音频要先于 SDL_Quit 释放：析构里会关闭设备并退出音频子系统
+    audio_.reset();
 
     view_.reset();
     if (renderer_ != nullptr) SDL_DestroyRenderer(renderer_);
