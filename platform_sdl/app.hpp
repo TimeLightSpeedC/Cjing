@@ -45,8 +45,9 @@ private:
     void saveNow() const;
     void loadSaved();
     // 状态行文案（UTF-8）。文案属应用逻辑，不放在渲染层。
-    [[nodiscard]] std::string statusLine() const;
-    [[nodiscard]] std::string hintLine() const;
+    // 只返回文案 ID，不返回字符串：具体文案由 core 的文案表提供
+    [[nodiscard]] TextId statusText() const;
+    [[nodiscard]] TextId hintText() const;
     void drawHud();
 
     SDL_Window*   window_   = nullptr;

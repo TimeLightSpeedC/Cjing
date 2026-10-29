@@ -22,6 +22,8 @@ enum class TextId : std::uint8_t {
     DifficultyEasy,
     DifficultyNormal,
     DifficultyHard,
+    HintPlaying,      // 对局中的提示行（落子 / 重开 / 退出）
+    HintOver,         // 终局后的提示行（重开 / 退出）
     _Count  // 计数哨兵，勿作 UI 使用
 };
 

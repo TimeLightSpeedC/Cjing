@@ -267,21 +267,21 @@ SDL_AppResult App::event(SDL_Event* e) {
     }
 }
 
-std::string App::statusLine() const {
+TextId App::statusText() const {
+    // 状态机 -> 文案 ID 的映射。视图负责把 ID 变成字符串，
+    // 应用层不再出现任何用户可见的中文字面量。
     const GameState& st = game_.state();
     switch (st.status) {
-        case Status::XWins: return "X 获胜！";
-        case Status::OWins: return "O 获胜！";
-        case Status::Draw:  return "平局";
+        case Status::XWins: return TextId::XWins;
+        case Status::OWins: return TextId::OWins;
+        case Status::Draw:  return TextId::Draw;
         case Status::Playing:
-        default:
-            return (st.current == Player::X) ? "轮到 X" : "轮到 O";
+        default:            return (st.current == Player::X) ? TextId::TurnX : TextId::TurnO;
     }
 }
 
-std::string App::hintLine() const {
-    return game_.state().isOver() ? "按 R 再来一局 · ESC 退出"
-                                  : "点击棋盘落子 · R 重开 · ESC 退出";
+TextId App::hintText() const {
+    return game_.state().isOver() ? TextId::HintOver : TextId::HintPlaying;
 }
 
 void App::drawHud() {
@@ -291,8 +291,8 @@ void App::drawHud() {
     // 状态区位于棋盘上方预留空间内：状态行靠上，提示行其下，与棋盘留出间距
     const int statusY = (b.y * 12) / 100;
     const int lineH   = (b.y * 38) / 100;
-    view_->drawTextAt(statusLine(), b.x, statusY, kHudR, kHudG, kHudB);
-    view_->drawTextAt(hintLine(), b.x, statusY + lineH, kHintR, kHintG, kHintB);
+    view_->drawText(statusText(), b.x, statusY, kHudR, kHudG, kHudB);
+    view_->drawText(hintText(), b.x, statusY + lineH, kHintR, kHintG, kHintB);
 }
 
 SDL_AppResult App::iterate() {

@@ -44,7 +44,8 @@ public:
     void drawBoard(const Layout& layout) override;
     void drawPieces(const GameState& state, const Layout& layout) override;
     void drawWinningLine(const GameState& state, const Layout& layout) override;
-    void drawText(TextId id, const Layout& layout) override;
+    void drawText(TextId id, int x, int y,
+                  std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 
     // ---- 可重建资源的生命周期 ----
     //
@@ -82,6 +83,9 @@ public:
 
 #ifdef CJING_HAVE_TTF
     [[nodiscard]] bool hasFont() const noexcept { return font_ != nullptr; }
+    // 仅供自测使用：字形覆盖检查需要直接问 TTF 字体是否有某个码位的字形。
+    // 生产代码不应通过它直接绘制（绘制请走 drawText/drawTextAt）。
+    [[nodiscard]] TTF_Font* rawFontForTest() const noexcept { return font_; }
 #else
     [[nodiscard]] bool hasFont() const noexcept { return false; }
 #endif

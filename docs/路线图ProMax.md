@@ -372,7 +372,12 @@ Cjing/                          # 仓库根目录
 > 设计取舍：这两个方法是平台概念，只加在 `SDLView` 上，**不改 core 的 `IView` 接口**。
 - [x] P2-T11 **安全区注入**：调用 `SDL_GetWindowSafeArea(window, &rect)`，把安全矩形注入 `Layout` 作为可交互边距；**不要**用 `SDL_SetRenderViewport`
 - [x] P2-T12 引入 `SDL3_ttf`（**必需，提前到此阶段**，勿拖到 P5）：FetchContent 锁 SHA + `GIT_SUBMODULES_RECURSE TRUE`（见 0.1）；按 P0-T16 的策略配置 vendored 依赖
-- [ ] P2-T13 实现文本渲染（当前回合、胜负结果、平局），文案经 `TextId → 文案表` 查询；验证中文字形不缺字（缺字会显示方块）
+- [x] P2-T13 实现文本渲染（当前回合、胜负结果、平局），文案经 `TextId → 文案表` 查询；验证中文字形不缺字（缺字会显示方块）
+> **P2-T13 实测记录（2026-10-29）**：文案表已从渲染层移入 `core/src/text.cpp`（`TextId → 文案`），
+> `IView::drawText` 改为 `(TextId, x, y, rgb)`，应用层不再出现任何用户可见的中文字面量。
+> 新增 `core/tests/test_text.cpp`：每个条目非空、无重复、越界 id 返回空串。
+> 缺字检测**自动化**：自测用 `TTF_FontHasGlyph` 遍历全部文案的每个码位，任一字符无字形即失败
+> （对应验收条件「缺字会显示方块」）。当前 229 断言 / 32 用例全过，字形覆盖 0 缺字。
 - [x] P2-T14 确认字体授权允许再分发，并在 `assets/` 中保留授权文件
 - [x] P2-T15 实现 `AssetIO` 的桌面实现（文件路径），字体加载路径不得写死绝对路径
 - [x] P2-T16 实现 `SaveIO` 的桌面实现（`SDL_GetPrefPath`），支持退出时保存、启动时恢复

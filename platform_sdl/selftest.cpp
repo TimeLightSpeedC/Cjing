@@ -14,6 +14,7 @@
 
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
+#include <ttt/text.hpp>
 
 #include "sdl_audio.hpp"
 #include "sdl_io.hpp"
@@ -269,6 +270,48 @@ int main() {
         // 清理：先删文件再删目录
         std::remove((save.writableDir() + name).c_str());
         SDL_RemovePath(tmpDir.c_str());
+    }
+
+    // ---- 文案表字形覆盖：自动检测"缺字显示方块" ----
+    //
+    // 人工看截图只能发现"明显缺字"，而漏一个字往往很隐蔽。
+    // 这里用 TTF_FontHasGlyph 逐码位检查：任何一个文案里出现字体不支持的字符，
+    // 都会被判定为失败 —— 这正好对应路线图 T13 的验收条件。
+    {
+        ttt::sdl::SDLView tv(ren, 1.0F, assets);
+        const bool ok = tv.loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+        check(ok, "字体加载成功（字形覆盖检查前置）");
+#ifdef CJING_HAVE_TTF
+        if (ok) {
+            TTF_Font* f = tv.rawFontForTest();
+            int missing = 0;
+            for (std::size_t i = 0; i < ttt::kTextCount; ++i) {
+                const auto id = static_cast<ttt::TextId>(i);
+                const std::string_view t = ttt::textOf(id);
+                // 极简 UTF-8 解码：只需取出码位，不需要严格校验
+                for (std::size_t k = 0; k < t.size();) {
+                    const auto c0 = static_cast<unsigned char>(t[k]);
+                    std::uint32_t cp = 0;
+                    int len = 1;
+                    if (c0 < 0x80)               { cp = c0;        len = 1; }
+                    else if ((c0 >> 5) == 0x06)  { cp = c0 & 0x1F; len = 2; }
+                    else if ((c0 >> 4) == 0x0E)  { cp = c0 & 0x0F; len = 3; }
+                    else if ((c0 >> 3) == 0x1E)  { cp = c0 & 0x07; len = 4; }
+                    for (int b = 1; b < len && k + static_cast<std::size_t>(b) < t.size(); ++b) {
+                        cp = (cp << 6) |
+                             (static_cast<unsigned char>(t[k + static_cast<std::size_t>(b)]) & 0x3F);
+                    }
+                    if (!TTF_FontHasGlyph(f, cp)) {
+                        std::printf("  ! 缺字形: U+%04X（文案下标 %zu）\n",
+                                    static_cast<unsigned>(cp), i);
+                        ++missing;
+                    }
+                    k += static_cast<std::size_t>(len);
+                }
+            }
+            check(missing == 0, "所有文案的字符都能被字体正确渲染（无缺字）");
+        }
+#endif
     }
 
     // ---- 缩放增量更新（修复 resize 时反复重读字体）----

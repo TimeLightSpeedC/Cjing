@@ -28,7 +28,8 @@ endif()
 add_executable(ttt_tests
     test_game.cpp     # 8 条获胜线、平局、非法落子、回合切换
     test_layout.cpp   # 正方形/居中/安全区/格子往返映射/退化输入
-    test_io.cpp)      # 存档序列化往返、损坏存档拒绝、状态由棋盘推导
+    test_io.cpp
+    test_text.cpp)    # 文案表完整性：无空条目、无重复、越界安全      # 存档序列化往返、损坏存档拒绝、状态由棋盘推导
 # 注意：上面三行的闭合括号必须在注释之外，否则会被当成注释内容，报
 #       "Parse error. Function missing ending ')'"。这是 CMake 注释的常见陷阱：
 #       行内 # 之后直到行尾，全部被视为注释。

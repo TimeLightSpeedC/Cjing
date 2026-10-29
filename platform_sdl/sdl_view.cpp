@@ -1,4 +1,5 @@
 #include "sdl_view.hpp"
+#include <ttt/text.hpp>
 
 #include <cmath>
 #include <cstdio>
@@ -13,7 +14,6 @@ constexpr Uint8 kGridR = 96, kGridG = 100, kGridB = 112;
 constexpr Uint8 kXR = 236, kXG = 108, kXB = 108;
 constexpr Uint8 kOR = 118, kOG = 190, kOB = 250;
 constexpr Uint8 kWinR = 250, kWinG = 214, kWinB = 96;
-constexpr Uint8 kTextR = 226, kTextG = 228, kTextB = 236;
 
 inline void setColor(SDL_Renderer* r, Uint8 cr, Uint8 cg, Uint8 cb) {
     SDL_SetRenderDrawColor(r, cr, cg, cb, 255);
@@ -290,21 +290,12 @@ void SDLView::drawTextAt(std::string_view utf8, int x, int y, Uint8 r, Uint8 g, 
 #endif
 }
 
-void SDLView::drawText(TextId id, const Layout& layout) {
-    // 状态文字：位于棋盘上方预留区（kReserveTop）
-    const Recti& b = layout.boardRect();
-    if (b.w <= 0) return;
-
-    const int lineH = b.y / 2;          // 预留区中线
-    const int x     = b.x;
-
-    switch (id) {
-        case TextId::AppTitle:
-            drawTextAt("井字棋 Tic-Tac-Toe", x, lineH - 40, kTextR, kTextG, kTextB);
-            break;
-        default:
-            break;
-    }
+void SDLView::drawText(TextId id, int x, int y,
+                       std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+    // 视图不再持有文案表：统一向 core 的文案表查询。
+    // 这样"改一句文案"只需改一处，所有平台同时生效。
+    drawTextAt(textOf(id), x, y, r, g, b);
 }
+
 
 }  // namespace ttt::sdl
