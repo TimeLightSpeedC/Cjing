@@ -364,6 +364,12 @@ Cjing/                          # 仓库根目录
 - [x] P2-T8 实现鼠标点击 → 棋盘格映射（消费换算后的渲染坐标，按逻辑单位除以 3 得行列）；**禁止**在事件循环里另写命中判断
 - [x] P2-T9 **触摸/鼠标去重（关键）**：选定并写死方案 —— **方案 A（推荐）**保持 `SDL_HINT_TOUCH_MOUSE_EVENTS` 默认 `"1"`，只处理鼠标事件、**显式忽略** `SDL_EVENT_FINGER_*`，桌面与移动完全同构；或方案 B 设 hint 为 `"0"` 只处理 finger。无论哪种，**输入层必须保证一次落子意图只产生一次落子**
 - [x] P2-T10 处理 `SDL_EVENT_LOW_MEMORY` 与 `SDL_EVENT_RENDER_DEVICE_RESET`（释放/重建可重建资源）
+> **P2-T10 实测记录（2026-10-29）**：该任务此前被提前勾选但代码为空（仅与其它事件一起 `return CONTINUE`），本次真正实现。
+> 实现：`SDLView::releaseCachedResources()` / `onRenderDeviceReset()` 释放文字纹理缓存（字体保留），
+> `LOW_MEMORY` 额外落盘对局，`RENDER_DEVICE_RESET` 丢弃失效纹理并在下次绘制时自动重建。
+> 桌面验证手段：Debug 构建下按 **F9** 合成 `LOW_MEMORY`、**F10** 合成 `RENDER_DEVICE_RESET`
+> （macOS 不会自然产生这两个事件；用 `SDL_PushEvent` 走真实事件循环）。
+> 设计取舍：这两个方法是平台概念，只加在 `SDLView` 上，**不改 core 的 `IView` 接口**。
 - [x] P2-T11 **安全区注入**：调用 `SDL_GetWindowSafeArea(window, &rect)`，把安全矩形注入 `Layout` 作为可交互边距；**不要**用 `SDL_SetRenderViewport`
 - [x] P2-T12 引入 `SDL3_ttf`（**必需，提前到此阶段**，勿拖到 P5）：FetchContent 锁 SHA + `GIT_SUBMODULES_RECURSE TRUE`（见 0.1）；按 P0-T16 的策略配置 vendored 依赖
 - [ ] P2-T13 实现文本渲染（当前回合、胜负结果、平局），文案经 `TextId → 文案表` 查询；验证中文字形不缺字（缺字会显示方块）
@@ -397,8 +403,9 @@ Cjing/                          # 仓库根目录
 > 启动 → 预置存档 `TTT1,X...O....,X,2` → 日志 `已恢复对局: 手数=2` →
 > 退出时写回 `TTT1,X...O....,X,2`（与预置完全一致）。
 > 另支持 `CJING_SAVE_DIR=<目录>` 覆盖存档位置（便携模式 / 自动化测试）。
-> 注：`WILL_ENTER_BACKGROUND` / `TERMINATING` 的存档钩子已在桌面验证
-> （SIGTERM 触发正常退出并落盘）；移动端真实切后台仍待 P3 真机验证。
+> 注：桌面验证的只是「正常退出 → 落盘」这条路径（SIGTERM / 关窗口 → `SDL_EVENT_QUIT` → `saveNow()`）。
+> **`WILL_ENTER_BACKGROUND` 在 macOS 后端根本不会发出**（仅 Android/iOS 实现发送，见 `src/video/cocoa/` 与 `src/video/android/`），
+> 因此移动端切后台存档**尚未在真机验证**，留待 P3。
 
 - [ ] P2-T24 里程碑 `v0.2.0`：桌面可玩可打包 + 鸿蒙预检结论已产出
 

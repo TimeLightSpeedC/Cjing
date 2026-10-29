@@ -271,6 +271,23 @@ int main() {
         SDL_RemovePath(tmpDir.c_str());
     }
 
+    // ---- 缩放增量更新（修复 resize 时反复重读字体）----
+    // 关键行为：只有缩放【真的变了】才重建字号；重复设置同一值必须是空操作，
+    // 否则密集的 resize 事件会退化成"每次重读 10MB 字体"。
+    {
+        ttt::sdl::SDLView v(ren, 1.0F, assets);
+        const bool loaded = v.loadFont("fonts/NotoSansSC-Regular.ttf", 44);
+        check(loaded, "字体加载成功（缩放测试前置）");
+        if (loaded) {
+            check(!v.setScale(1.0F), "相同缩放被判定为无变化");
+            check(v.setScale(2.0F),  "缩放变化被正确识别");
+            check(!v.setScale(2.0F), "重复设置同一缩放仍为无变化");
+            check(v.setScale(1.0F),  "缩放可回退");
+            check(v.hasFont(),       "缩放变化后字体仍可用（未重新解析）");
+            check(v.cachedTextureCount() == 0, "缩放变化后文字纹理缓存被清空");
+        }
+    }
+
     // ---- 音频（可选能力）----
     // 自测只验证"能初始化、能加载、能调用播放而不崩溃"，
     // 无法验证实际听感 —— 那必须在真机上由人耳确认。

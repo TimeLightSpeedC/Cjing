@@ -50,6 +50,27 @@ void SDLView::destroyTextCache() {
     }
     textCache_.clear();
 }
+
+void SDLView::releaseCachedResources() {
+    const std::size_t before = cachedTextureCount();
+    destroyTextCache();
+    SDL_Log("[Cjing] 已释放文字纹理缓存: %zu 项", before);
+}
+
+void SDLView::onRenderDeviceReset() {
+    const std::size_t before = cachedTextureCount();
+    destroyTextCache();          // 旧纹理指针已失效，直接丢弃
+    SDL_Log("[Cjing] 渲染设备重置，丢弃失效纹理 %zu 项（下次绘制时重建）", before);
+}
+
+std::size_t SDLView::cachedTextureCount() const noexcept {
+#ifdef CJING_HAVE_TTF
+    return textCache_.size();
+#else
+    return 0;
+#endif
+}
+
 #endif
 
 bool SDLView::loadFont(std::string_view assetName, int logicalPointSize) {
@@ -84,6 +105,7 @@ bool SDLView::loadFont(std::string_view assetName, int logicalPointSize) {
     // ③ 字号随输出缩放，保证高分屏清晰
     const float ptsize = static_cast<float>(logicalPointSize) * scale_;
     font_ = TTF_OpenFontIO(io, /*closeio=*/true, ptsize);
+    fontLogicalPt_ = logicalPointSize;         // 记录逻辑字号，供 setScale 重算
     if (font_ == nullptr) {
         std::fprintf(stderr, "[Cjing] 打开字体失败: %s\n", SDL_GetError());
         return false;
@@ -97,6 +119,31 @@ bool SDLView::loadFont(std::string_view assetName, int logicalPointSize) {
     (void)logicalPointSize;
     return false;
 #endif
+}
+
+bool SDLView::setScale(float scale) {
+    const float next = (scale > 0.0F) ? scale : 1.0F;
+
+    // 用相对容差判断"是否真的变了"：
+    // 窗口 resize 事件非常密集，哪怕像素级抖动也不该触发重建。
+    // 0.01 的阈值足以区分 Retina(2.0) 与 1x(1.0)，也不会被浮点噪声扰动。
+    if (std::fabs(next - scale_) < 0.01F) return false;
+
+    scale_ = next;
+
+#ifdef CJING_HAVE_TTF
+    if (font_ != nullptr && fontLogicalPt_ > 0) {
+        // 只改字号：FreeType 内部只调整字符尺寸并重算度量，
+        // 不需要重新读取或解析字体文件（那才是 resize 卡顿的根源）。
+        const float ptsize = static_cast<float>(fontLogicalPt_) * scale_;
+        if (!TTF_SetFontSize(font_, ptsize)) {
+            SDL_Log("[Cjing] TTF_SetFontSize 失败: %s", SDL_GetError());
+        }
+        // 旧尺寸下栅格化的纹理不能复用
+        destroyTextCache();
+    }
+#endif
+    return true;
 }
 
 void SDLView::beginFrame() {

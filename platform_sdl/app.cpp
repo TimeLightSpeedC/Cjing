@@ -10,17 +10,29 @@ constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
 }  // namespace
 
 void App::refreshScale() {
-    // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方，供视图用）
+    // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方）
     int outW = 0, outH = 0;
     SDL_GetRenderOutputSize(renderer_, &outW, &outH);
-    scale_ = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize) : 1.0F;
-    // 缩放变化需重建视图：字体按新缩放重新栅格化，保证高分屏清晰
-    const bool hadFont = (view_ != nullptr && view_->hasFont());
-    view_.reset();
-    view_ = std::make_unique<SDLView>(renderer_, scale_, *assetIO_);
-    if (assetIO_) {
-        (void)view_->loadFont(kFontAsset, 44);
-        if (hadFont) SDL_Log("[Cjing] 缩放变化，字体已按新比例重新栅格化");
+    const float next = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize)
+                                  : 1.0F;
+
+    // 首次调用：创建视图并加载字体（只发生一次）
+    if (view_ == nullptr) {
+        scale_ = next;
+        view_ = std::make_unique<SDLView>(renderer_, scale_, *assetIO_);
+        if (assetIO_) {
+            (void)view_->loadFont(kFontAsset, 44);
+        }
+        return;
+    }
+
+    // 后续 resize：只更新缩放，不重建视图、不重读字体。
+    // setScale 内部会判等，所以密集的 resize 事件里绝大多次是空操作。
+    const float old = scale_;
+    if (view_->setScale(next)) {
+        scale_ = next;
+        SDL_Log("[Cjing] 缩放变化 %.3f -> %.3f，字号已重设（字体未重新读取）",
+                static_cast<double>(old), static_cast<double>(next));
     }
 }
 
@@ -193,8 +205,23 @@ SDL_AppResult App::event(SDL_Event* e) {
         case SDL_EVENT_DID_ENTER_BACKGROUND:
         case SDL_EVENT_WILL_ENTER_FOREGROUND:
         case SDL_EVENT_DID_ENTER_FOREGROUND:
+            return SDL_APP_CONTINUE;
+
+        // 低内存：释放可重建资源，并把对局落盘。
+        // 为什么顺手存档：系统发这个事件时，进程随时可能被回收，
+        // 而我们无法保证之后还有机会收到 TERMINATING。
         case SDL_EVENT_LOW_MEMORY:
+            SDL_Log("[Cjing] LOW_MEMORY → 释放缓存并保存对局");
+            if (view_) view_->releaseCachedResources();
+            saveNow();
+            return SDL_APP_CONTINUE;
+
+        // 渲染设备重置（GPU 驱动重置 / 显卡切换 / 移动端上下文丢失）：
+        // 所有已创建的纹理都失效，必须丢弃并重建。
+        // 渲染器对象本身仍有效，不需要重建。
         case SDL_EVENT_RENDER_DEVICE_RESET:
+            SDL_Log("[Cjing] RENDER_DEVICE_RESET → 重建渲染资源");
+            if (view_) view_->onRenderDeviceReset();
             return SDL_APP_CONTINUE;
 
         // P2-T7/P2-T8：指针输入 —— 先换算到渲染坐标，再交给 Layout
@@ -217,6 +244,21 @@ SDL_AppResult App::event(SDL_Event* e) {
                 lastCell_ = -1;
             } else if (e->key.key == SDLK_ESCAPE) {
                 return SDL_APP_SUCCESS;
+#ifndef NDEBUG
+            } else if (e->key.key == SDLK_F9 || e->key.key == SDLK_F10) {
+                // 【仅 Debug】合成事件，用于在桌面上验证移动端才有的处理逻辑。
+                // 原因：macOS 后端不会自然产生 LOW_MEMORY / RENDER_DEVICE_RESET，
+                // 没有触发器就无法验证 P2-T10 的实现。
+                // 用 SDL_PushEvent 而不是直接调用处理函数：这样走的是真实事件循环，
+                // 能顺带验证"事件能否被正确投递与分发"。
+                SDL_Event synth{};
+                synth.type = (e->key.key == SDLK_F9) ? SDL_EVENT_LOW_MEMORY
+                                                     : SDL_EVENT_RENDER_DEVICE_RESET;
+                if (SDL_PushEvent(&synth)) {
+                    SDL_Log("[Cjing] 已合成事件 type=%u（方式：F9=低内存 / F10=设备重置）",
+                            synth.type);
+                }
+#endif
             }
             return SDL_APP_CONTINUE;
 
