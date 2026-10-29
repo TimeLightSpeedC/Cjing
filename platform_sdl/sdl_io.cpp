@@ -12,7 +12,14 @@ namespace {
 // 但仍做一次判断，避免调用方传入不带斜杠的路径时拼出 "dirassets/..."。
 std::string joinPath(const std::string& dir, std::string_view name) {
     std::string out = dir;
-    if (out.empty() || out.back() != '/') out.push_back('/');
+    // Windows 的 SDL_GetPrefPath / SDL_GetBasePath 返回的是带反斜杠的路径
+    // （如 C:\Users\x\AppData\Roaming\Org\App\）。
+    // 这里两种分隔符都认，避免拼出 "C:\...\App\/save.txt" 这种混合路径
+    // —— 虽然 Win32 能接受，但日志里看着别扭，也容易误导排查。
+    constexpr char kNativeSep = '\\';   // 在 C++ 源码里是单个反斜杠
+    if (out.empty() || (out.back() != '/' && out.back() != kNativeSep)) {
+        out.push_back('/');
+    }
     out.append(name);
     return out;
 }
