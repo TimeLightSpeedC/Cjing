@@ -84,6 +84,39 @@ jobs:
       - name: core/ 纯净性检查（架构原则 1）
         run: cmake --build build --target core_purity_check
 
+      # 离屏渲染截图：CI 没有显示器，但自测会把画面渲染到离屏纹理并导出 BMP，
+      # 因此能在每个平台拿到【真实渲染结果】，用于人工核对字体、几何与中文文案。
+      # 对 Windows 尤其有价值：字体选择与字形覆盖和 macOS/Linux 不同。
+      - name: 导出离屏截图
+        shell: bash
+        run: |
+          mkdir -p ci-shots
+          export SDL_VIDEODRIVER=dummy
+          export SDL_AUDIODRIVER=dummy
+          # 多配置生成器（Windows/VS）把可执行文件放在 bin/<Config>/，
+          # 单配置生成器（Ninja/Make）直接在 bin/ —— 用 find 兼容两种情况。
+          BIN=$(find build -name 'CjingSelfTest' -type f | head -1)
+          if [ -z "$BIN" ]; then
+            BIN=$(find build -name 'CjingSelfTest.exe' -type f | head -1)
+          fi
+          if [ -z "$BIN" ]; then
+            echo "找不到 CjingSelfTest 可执行文件" >&2
+            exit 1
+          fi
+          echo "使用: $BIN"
+          CJING_SHOT="$PWD/ci-shots/shot.bmp" "$BIN"
+          ls -la ci-shots/
+
+      # if-no-files-found: error 表示「没产出就算失败」，
+      # 这样 CI 变绿就等价于「三个平台的离屏渲染确实跑通了」。
+      - name: 上传截图
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-shots-${{ strategy.job-index }}
+          path: ci-shots/
+          if-no-files-found: error
+          retention-days: 14
+
       # 失败时上传日志，便于定位（公开仓库可通过 artifact 下载，无需仓库 admin 权限）
       - name: 收集失败日志
         if: failure()
