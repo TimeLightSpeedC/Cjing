@@ -94,6 +94,9 @@ jobs:
           BINDIR=$(dirname "$BIN")
           rm -rf relocated && mkdir -p relocated
           cp -a "$BINDIR"/. relocated/
+          # 资源必须随包分发：字体与音效都在 assets/ 下，
+          # 缺了它们程序能启动但会退化为无文字、无声。
+          cp -a assets relocated/assets
           echo "--- relocated 内容 ---"
           ls -la relocated/
           cd relocated

@@ -102,7 +102,11 @@ int main() {
 
     // 资源访问抽象。基目录给当前工作目录即可 —— SDLAssetIO 内部会向上回退几级，
     // 因此无论从项目根还是 build/bin 运行都能找到 assets/。
-    const ttt::sdl::SDLAssetIO assets(".");
+    // 资源基目录用【可执行文件所在目录】，与正式程序（App 用 SDL_GetBasePath）一致。
+    // 之前用 "."（当前工作目录）会让"从别处运行"的行为与产品不同，
+    // 也会掩盖资源打包缺失的问题 —— 正是搬移验证暴露出来的。
+    const char* exeDir = SDL_GetBasePath();
+    const ttt::sdl::SDLAssetIO assets(exeDir != nullptr ? exeDir : ".");
 
     // ---- 布局 ----
     const ttt::Layout layout = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
