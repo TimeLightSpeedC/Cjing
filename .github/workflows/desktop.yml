@@ -84,6 +84,23 @@ jobs:
       - name: core/ 纯净性检查（架构原则 1）
         run: cmake --build build --target core_purity_check
 
+      # P2-T21 验收：把可执行文件和动态库复制到【构建目录之外】再运行。
+      # 若库搜索路径仍指向构建目录，这一步会因找不到动态库而失败。
+      - name: 搬移后运行（验证运行时依赖自包含）
+        shell: bash
+        run: |
+          BIN=$(find build -name 'CjingSelfTest' -type f | head -1)
+          if [ -z "$BIN" ]; then BIN=$(find build -name 'CjingSelfTest.exe' -type f | head -1); fi
+          BINDIR=$(dirname "$BIN")
+          rm -rf relocated && mkdir -p relocated
+          cp -a "$BINDIR"/. relocated/
+          echo "--- relocated 内容 ---"
+          ls -la relocated/
+          cd relocated
+          export SDL_VIDEODRIVER=dummy
+          export SDL_AUDIODRIVER=dummy
+          ./CjingSelfTest
+
       # 离屏渲染截图：CI 没有显示器，但自测会把画面渲染到离屏纹理并导出 BMP，
       # 因此能在每个平台拿到【真实渲染结果】，用于人工核对字体、几何与中文文案。
       # 对 Windows 尤其有价值：字体选择与字形覆盖和 macOS/Linux 不同。

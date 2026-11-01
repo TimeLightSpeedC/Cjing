@@ -159,3 +159,23 @@ cmake -S . -B build-core -DCJING_FETCH_SDL3=OFF ...   # 仍需 SDL3 供 platform
 | HarmonyOS | **必须使用鸿蒙自带 CMake**（标准 CMake 无法识别该平台），且工程要以官方 `openharmony-project` 为模板 |
 
 详见 [技术验证结论.md](技术验证结论.md) 与 [路线图ProMax.md](路线图ProMax.md)。
+
+## 打包成可分发的目录（P2-T21）
+
+```bash
+cmake --build build --target dist
+```
+
+产物在 `build/dist/`，包含：
+
+| 内容 | 说明 |
+|---|---|
+| `CjingApp`（或 `CjingApp.exe`） | 可执行文件 |
+| `libSDL3*.dylib` / `SDL3*.dll` / `libSDL3*.so*` | 运行时动态库 |
+| `assets/` | 字体与音效 |
+
+因为库搜索路径已设为"相对于可执行文件"（macOS `@executable_path`、
+Linux `$ORIGIN`、Windows 默认搜索 exe 目录），**整个目录可以直接拷到别的机器运行**，
+不需要安装过程。
+
+第三方组件与其许可证见 [THIRD_PARTY.md](THIRD_PARTY.md)。

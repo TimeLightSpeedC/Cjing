@@ -23,3 +23,5 @@ endif()
 cjing_enable_sanitizers(CjingMinimal)
 
 message(STATUS "示例: 已加入 CjingMinimal（纯 C / 直接使用 SDL3）")
+
+cjing_bundle_runtime(CjingMinimal)

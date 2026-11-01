@@ -92,3 +92,9 @@ if(CJING_BUILD_SELFTEST)
     cjing_enable_sanitizers(CjingSelfTest)
     add_test(NAME cjing_selftest COMMAND CjingSelfTest)
 endif()
+
+# ---- 运行时依赖（P2-T21）：让构建产物可搬移 ----
+# 把 SDL3 / SDL3_ttf 的动态库复制到输出目录，
+# 并把查找路径改为相对可执行文件（macOS @executable_path / Linux $ORIGIN）。
+cjing_bundle_runtime(CjingApp)
+cjing_bundle_runtime(CjingSelfTest)

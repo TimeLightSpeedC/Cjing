@@ -395,7 +395,13 @@ Cjing/                          # 仓库根目录
     SDL 的 vsync 节流失效，`SDL_AppIterate` 以 ~20 万次/秒空转，CPU 占满、事件饿死，
     macOS 表现为**彩虹圈（应用无响应）**，任何操作都卡死
   - 正确做法：vsync 节流发生在 `SDL_RenderPresent` 内部 —— 内容可跳过重绘，present 不能跳过
-- [ ] P2-T21 处理 SDL3 运行时依赖：Windows 随包 DLL、macOS `Contents/Frameworks`、Linux 打包或依赖系统库；记录第三方库清单
+- [x] P2-T21 处理 SDL3 运行时依赖：Windows 随包 DLL、macOS `Contents/Frameworks`、Linux 打包或依赖系统库；记录第三方库清单
+> **P2-T21 实测记录（2026-11-01）**：新增 `cmake/CjingBundle.cmake`，把 SDL3 / SDL3_ttf 动态库复制到可执行文件旁，并将库搜索路径改为`@executable_path`（macOS）/ `$ORIGIN`（Linux）/ 默认（Windows）。
+> 新增 `dist` 目标组装「可执行文件 + 动态库 + assets」。
+> **本地实测**：把 `bin/` 整个复制到构建目录之外运行自测，全部通过；`otool -l` 确认构建目录绝对路径已消失；`dist/` 搬到别处可正常启动（字体、音频、存档均正常）。
+> **CI 验收**：新增「搬移后运行」步骤，任一平台依赖缺失即失败。
+> 第三方清单见 `docs/THIRD_PARTY.md`。
+> 已知限制：SDL3 / SDL3_ttf 仍 pin 在 `main`（3.5.0-dev），构建不完全可复现，留待 P5 决策。
 - [ ] P2-T22 三平台手动测试：对弈、胜负/平局、文字、音效、resize、安全区、重开
 - [ ] P2-T23 **鸿蒙 Go/No-Go 预检（不占额外工期）**：用 P0 锁定的 SHA 构建一个**鸿蒙空窗口 + 触摸回调 + 一行中文文字**的最小应用。**Go 判据 = 空窗口可显示 且 字体渲染成功**；音频为可降级项，不作为判据
 > **TTF 实测记录（2026-10-15）**：SDL3_ttf 3.3.0 以 **`SDLTTF_VENDORED=ON`** 构建成功。

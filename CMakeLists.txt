@@ -88,6 +88,7 @@ set(CJING_CACHE_DIR "${CMAKE_SOURCE_DIR}/.tools" CACHE PATH "第三方依赖本�
 
 include("${CMAKE_SOURCE_DIR}/cmake/CjingDeps.cmake")      # 依赖解析（缓存优先）
 include("${CMAKE_SOURCE_DIR}/cmake/CjingCompiler.cmake")  # 告警与 Sanitizer 封装
+include("${CMAKE_SOURCE_DIR}/cmake/CjingBundle.cmake")    # 运行时依赖打包（RPath/DLL 复制）
 
 # 依赖探测顺序：用户显式指定 → 约定目录 → 历史目录（向后兼容）→ 交给网络。
 # 候选路径可以写多个，命中第一个含 CMakeLists.txt 的目录即采用。
@@ -277,4 +278,29 @@ if(NOT CJING_OFFLINE AND CJING_FETCH_SDL3 AND "${CJING_SDL3_SOURCE_DIR}" STREQUA
     message(STATUS "提示：未找到 SDL3 本地缓存，本次将联网下载。")
     message(STATUS "      若网络受限，可把源码放到 ${CJING_CACHE_DIR}/sdl3-src，")
     message(STATUS "      或配置 -DCJING_SDL3_SOURCE_DIR=<目录>。")
+endif()
+
+# =============================================================================
+#  dist 目标（P2-T21）—— 组装"可直接拷走"的目录
+#
+#  内容：可执行文件 + 运行时动态库 + assets/
+#  因为各平台已把库搜索路径设为"相对于可执行文件"（见 CjingBundle.cmake），
+#  所以整个 dist/ 目录可以原样打包分发，不需要安装过程。
+#
+#  用法：cmake --build build --target dist
+#  产物：build/dist/
+# =============================================================================
+if(TARGET CjingApp)
+    cjing_runtime_dep_files(_cjing_dist_deps)
+    add_custom_target(dist
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${CMAKE_BINARY_DIR}/dist"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/dist"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:CjingApp> ${_cjing_dist_deps}
+                "${CMAKE_BINARY_DIR}/dist"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_SOURCE_DIR}/assets" "${CMAKE_BINARY_DIR}/dist/assets"
+        COMMAND_EXPAND_LISTS
+        DEPENDS CjingApp
+        COMMENT "组装可分发目录: ${CMAKE_BINARY_DIR}/dist")
 endif()
