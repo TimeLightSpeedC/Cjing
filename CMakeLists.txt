@@ -37,6 +37,34 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)   # 编译器不支持 C++20 就直接报错，而不是悄悄降级
 set(CMAKE_CXX_EXTENSIONS OFF)         # 禁用 gnu++20 扩展，保证跨编译器一致
 
+# -----------------------------------------------------------------------------
+# MSVC 的两个必需开关（真实踩坑，见下）
+#
+# ① /utf-8 —— 源码字符集与执行字符集都按 UTF-8
+#
+#    中文 Windows 的默认代码页是 936(GBK)。MSVC 默认按系统代码页解读源文件，
+#    于是源码里的 UTF-8 中文会被当成 GBK 解析：
+#        · 轻则字符串内容错乱
+#        · 重则报 "常量中有换行符"(C2001) 直接编译失败
+#
+#    ⚠️ 这个问题在【英文 Windows】（代码页 1252）上不会暴露 ——
+#       我们的 CI 一直是绿的，因为 runner 是英文环境。
+#       只有在中文/日文等系统上手动构建才会撞到。
+#
+# ② /EHsc —— 启用 C++ 异常展开语义
+#
+#    Catch2 的测试框架依赖异常。使用 Ninja + MSVC 时，若未继承该默认标志，
+#    编译 Catch2 会产生大量 C4530（"使用了异常处理程序，但未启用展开语义"）。
+#    Visual Studio 生成器自带它，所以 CI 同样看不到这个问题。
+#
+# 用 add_compile_options 而不是改 CMAKE_CXX_FLAGS：后者会覆盖 CMake 的默认
+# 标志集合，容易引发更难查的问题。
+# -----------------------------------------------------------------------------
+if(MSVC)
+    add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:/utf-8>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/EHsc>)
+endif()
+
 # 生成 compile_commands.json：clangd / clang-tidy / CLion 的代码分析依赖它
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
