@@ -33,6 +33,18 @@ public:
     // 格子索引 -> 该格中心点（供渲染 X/O）
     [[nodiscard]] bool cellCenter(int index, int& outX, int& outY) const noexcept;
 
+    // 状态文字两行的 Y 坐标（渲染坐标，逻辑单位）
+    //
+    // 为什么放在 Layout 里而不是各画各的：
+    //   正式程序与自测截图曾各写一套公式（12%/50% vs 1/3、2/3），
+    //   导致 CI 截图与真机画面的间距不一致 —— 这类偏差只有肉眼能发现。
+    //   统一到这里后，两边调用同一个函数，结构上不可能再分叉。
+    struct HudLines {
+        int statusY = 0;   // 状态行（"轮到 X" / "X 获胜！"）
+        int hintY   = 0;   // 提示行（"点击棋盘落子 …"）
+    };
+    [[nodiscard]] HudLines hudLines() const noexcept;
+
     // 单条网格线的起止点：i 取 1..2（第 1、2 条内部分隔线）
     [[nodiscard]] bool gridLine(int i, bool vertical, int& x1, int& y1,
                                 int& x2, int& y2) const noexcept;

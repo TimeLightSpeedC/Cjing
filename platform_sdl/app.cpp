@@ -288,11 +288,11 @@ void App::drawHud() {
     if (!view_) return;
     const Recti& b = layout_.boardRect();
     if (b.w <= 0) return;
-    // 状态区位于棋盘上方预留空间内：状态行靠上，提示行其下，与棋盘留出间距
-    const int statusY = (b.y * 12) / 100;
-    const int lineH   = (b.y * 38) / 100;
-    view_->drawText(statusText(), b.x, statusY, kHudR, kHudG, kHudB);
-    view_->drawText(hintText(), b.x, statusY + lineH, kHintR, kHintG, kHintB);
+    // 两行的位置由 Layout 统一给出：自测截图用的是同一份计算，
+    // 避免出现"CI 截图与真机画面间距不一致"这类只有肉眼能发现的偏差。
+    const Layout::HudLines hud = layout_.hudLines();
+    view_->drawText(statusText(), b.x, hud.statusY, kHudR, kHudG, kHudB);
+    view_->drawText(hintText(), b.x, hud.hintY, kHintR, kHintG, kHintB);
 }
 
 SDL_AppResult App::iterate() {

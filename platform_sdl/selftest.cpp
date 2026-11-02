@@ -16,6 +16,7 @@
 #include <ttt/layout.hpp>
 #include <ttt/text.hpp>
 
+#include "app.hpp"   // 复用 kLogicalSize 等平台常量
 #include "sdl_audio.hpp"
 #include "sdl_io.hpp"
 #include "sdl_view.hpp"
@@ -193,19 +194,27 @@ int main() {
                     }
                 }
                 // 截图模式下额外验证：加载字体并绘制中文 HUD
-                ttt::sdl::SDLView hud(ren, 1.0F, assets);
+                // 用与正式程序相同的换算得到缩放（outW / 逻辑边长）。
+                // 之前写死 1.0，导致截图字号比真机大（44 vs 39pt）。
+                int shotOutW = 0, shotOutH = 0;
+                SDL_GetRenderOutputSize(ren, &shotOutW, &shotOutH);
+                const float shotScale = (shotOutW > 0)
+                    ? static_cast<float>(shotOutW) / static_cast<float>(ttt::sdl::kLogicalSize)
+                    : 1.0F;
+                ttt::sdl::SDLView hud(ren, shotScale, assets);
                 if (const char* shotPath = SDL_getenv("CJING_SHOT")) {
                     if (hud.loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
                         ttt::Game g2;
                         view.beginFrame();
                         view.drawBoard(layout);
                         view.drawPieces(g2.state(), layout);
-                        hud.drawTextAt("轮到 X", layout.boardRect().x, layout.boardRect().y / 3,
-                                       236, 238, 244);
-                        hud.drawTextAt("点击棋盘落子 · R 重开 · ESC 退出",
-                                       layout.boardRect().x,
-                                       layout.boardRect().y / 3 + layout.boardRect().y / 3,
-                                       140, 144, 156);
+                        // 与正式程序同一套定位；字号也按真实缩放换算，
+                        // 否则截图会比真机"行距更大、字更大"。
+                        const ttt::Layout::HudLines hudLines = layout.hudLines();
+                        hud.drawText(ttt::TextId::TurnX, layout.boardRect().x,
+                                     hudLines.statusY, 236, 238, 244);
+                        hud.drawText(ttt::TextId::HintPlaying, layout.boardRect().x,
+                                     hudLines.hintY, 140, 144, 156);
                         if (SDL_Surface* s3 = SDL_RenderReadPixels(ren, nullptr)) {
                             SDL_Surface* c3 = SDL_ConvertSurface(s3, SDL_PIXELFORMAT_XRGB8888);
                             std::string hp = std::string(shotPath);

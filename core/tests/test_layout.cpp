@@ -87,3 +87,29 @@ TEST_CASE("退化输入不崩溃", "[layout][robust]") {
     const Layout bad = Layout::compute(900, 500, 500, 500, 500);
     REQUIRE(bad.cellSize() >= 0);   // 不得为负
 }
+
+// -----------------------------------------------------------------------------
+// HUD 定位
+//
+// 这组断言的价值：它锁住"状态区两行位置"的公式。
+// 之前正式程序与自测截图各写一套（12%/50% vs 1/3、2/3），
+// 导致 CI 截图与真机画面间距不一致 —— 人眼才能发现，自动测试抓不到。
+// 现在两边都调用 Layout::hudLines()，这里是它的契约。
+// -----------------------------------------------------------------------------
+TEST_CASE("HUD 定位：状态行 12%，提示行 50%，且提示行更靠下", "[layout]") {
+    const ttt::Layout l = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
+    REQUIRE(l.boardRect().y > 0);
+
+    const ttt::Layout::HudLines h = l.hudLines();
+    CHECK(h.statusY == l.boardRect().y * 12 / 100);
+    CHECK(h.hintY   == l.boardRect().y * 50 / 100);
+    CHECK(h.hintY > h.statusY);
+    CHECK(h.hintY < l.boardRect().y);          // 必须还在棋盘上方，否则会压住棋格
+}
+
+TEST_CASE("HUD 定位：无效布局返回 0，不产生负坐标", "[layout]") {
+    const ttt::Layout bad;                     // 默认构造 = 无效布局
+    const ttt::Layout::HudLines h = bad.hudLines();
+    CHECK(h.statusY == 0);
+    CHECK(h.hintY   == 0);
+}
