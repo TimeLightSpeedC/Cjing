@@ -168,3 +168,46 @@ entry/build/default/outputs/default/entry-default-unsigned.hap   (27 MB)
 
 > 未签名 hap 只能证明"能打包"。**安装到设备需要签名**，那一步必须在 DevEco 里完成
 > （登录华为账号 → 自动生成签名）。
+
+---
+
+## 实测结论（2026-11-02，API 24 模拟器）
+
+### 已证实 ✅
+
+| 项 | 证据 |
+|---|---|
+| 原生编译与打包 | hvigor 打包成功，hap 内含双架构 `libmain/libSDL3/libSDL3_ttf` 与中文字体 |
+| 应用启动 | 日志 `SDL_AppInit said continue! We are live!` |
+| **中文字体渲染** | TTF 生成文字表面 **504×64，抽样非透明 454 点** —— 汉字确实被画出来了 |
+| 渲染循环 | 持续 `eglSwapBuffers`，present 返回 true |
+| 触摸/窗口尺寸 | window/output 均为 1280×2566 |
+
+### 未通过 ❌
+
+**内容不上屏**：屏幕上只有清屏色 `(20,24,40)`，方块与文字都不可见。
+
+已排除的假设（都做过实验）：
+
+| 假设 | 实验 | 结果 |
+|---|---|---|
+| 逻辑呈现映射错误 | 关闭 `SDL_SetRenderLogicalPresentation`，直接用像素坐标 | 无效 |
+| viewport 为 0 | 显式 `SDL_SetRenderViewport(0,0,w,h)` | 无效（尺寸日志确认 1280×2566 正确） |
+| 软件渲染器可用 | `SDL_CreateRenderer("software")` | 画面变白（present 不到 XComponent 表面） |
+| GLES2 后端问题 | 改试 `vulkan` | 创建成功，但仍只有清屏色 |
+| 读取时机问题 | `SDL_RenderReadPixels` 读回中心像素 | GLES2 读到清屏色、Vulkan 读到黑色 |
+
+### 最可能的原因
+
+SDL3 官方文档写明：**支持 HarmonyOS 5.0.4 / API 16+，且仅在 Mate 80 上实测过**。
+本机 SDK 是 **6.1.1 / API 24**，而官方模板 `build-profile.json5` 的默认目标正是 **`5.0.4(16)`** ——
+我们为了能编译改成了 6.1.1(24)。这很可能就是渲染异常的原因。
+
+### 下一步（建议）
+
+1. 在 DevEco 的 SDK Manager 中安装 **HarmonyOS 5.0.4(16)** SDK
+2. 把 `build-profile.json5` 的 `targetSdkVersion` / `compatibleSdkVersion` 改回 `"5.0.4(16)"`
+3. 重新运行；若仍不显示，改用真机（官方唯一实测过的环境）
+
+> 调试期发现的可复用闭环：`hvigorw assembleHap` + `hdc install`（**未签名包模拟器可直接安装**）
+> + `snapshot_display` 截图，全程不需要 DevEco GUI。脚本思路见本文"命令行打包"。
