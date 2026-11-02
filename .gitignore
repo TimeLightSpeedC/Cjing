@@ -50,6 +50,10 @@ vcpkg_installed/
 # ------------------------------------------------ 四、macOS / Xcode
 # .DS_Store 是访达自动生成的目录元数据，与项目无关
 .DS_Store
+# ._* 是 macOS 扩展属性的伴随文件（AppleDouble）。
+# 从 Mac 打包/拷贝到 Windows 或 Linux 时会出现，
+# 它会让通配符收集源码的构建系统（如 SDL3 的 libm）收到二进制垃圾。
+._*
 DerivedData/
 
 # Xcode 的用户级状态（窗口位置、断点、scheme 选择等），因人而异
