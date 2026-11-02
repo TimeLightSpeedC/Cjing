@@ -175,6 +175,22 @@ entry/build/default/outputs/default/entry-default-unsigned.hap   (27 MB)
 
 ### 最终结论：**Go** ✅（真机 API 26）
 
+![真机运行画面](../../docs/images/ohos-precheck-api26.png)
+
+真机实测日志（API 26，1320×2590）：
+
+```
+渲染器后端 = gpu（请求 gpu）
+创建渲染器时：window=1320x2590 pixels=1320x2590 output=1320x2590
+字体已加载
+文字表面 504x64，抽样 2016 点，非透明 454 点
+方块中心读回 = (240,200,80)（期望 240,200,80）
+present 返回 1
+```
+
+> 注意 `渲染器后端 = gpu` —— 真机上 SDL_GPU 可用（模拟器上报告
+> `No supported SDL_GPU backend found`，这也印证了问题在模拟器图形栈）。
+
 | 环境 | 结果 |
 |---|---|
 | **HarmonyOS 真机（API 26）** | ✅ **窗口显示正常，中文渲染正常**（用户实测确认） |
