@@ -420,6 +420,14 @@ Cjing/                          # 仓库根目录
 > **验证盲区**：自测把画面渲染到 900×900 离屏纹理，逻辑呈现不作用于纹理目标，
 > 因此所有 CI 截图都在 scale=1 下生成，**无法发现缩放类缺陷** —— 必须真机改变窗口大小验证。
 - [ ] P2-T23 **鸿蒙 Go/No-Go 预检（不占额外工期）**：用 P0 锁定的 SHA 构建一个**鸿蒙空窗口 + 触摸回调 + 一行中文文字**的最小应用。**Go 判据 = 空窗口可显示 且 字体渲染成功**；音频为可降级项，不作为判据
+> **T23 预检进展（工程已就绪，待设备运行）**：
+> 基于 SDL 官方 `openharmony-project` 模板搭好 `platform_ohos/precheck/`，
+> 原生侧已用鸿蒙工具链验证：`libmain.so`（aarch64，导出 `SDL_AppInit/Event/Iterate/Quit`）、
+> `libSDL3.so`、`libSDL3_ttf.so` 均编译成功。
+> 命令行 `hvigorw assembleHap` **打包成功**，产物 27MB，包含
+> `libs/{arm64-v8a,x86_64}/` 双架构库与 `resources/rawfile/fonts/NotoSansSC-Regular.ttf`。
+> 剩余：在 DevEco 中登录华为账号生成签名 → 装到模拟器/真机 → 确认窗口显示与中文渲染。
+> 命令与踩坑（JAVA_HOME、HOME 重定向）见 `platform_ohos/precheck/README.md`。
 > **TTF 实测记录（2026-10-15）**：SDL3_ttf 3.3.0 以 **`SDLTTF_VENDORED=ON`** 构建成功。
 > 未启用 vendored 时会去找系统 FreeType/HarfBuzz，macOS/Windows 默认没有、鸿蒙/Android 更不会有 → configure 直接失败。
 > 运行日志确认字体加载：`[Cjing] 字体已加载: assets/fonts/NotoSansSC-Regular.ttf @ 39pt`

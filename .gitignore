@@ -97,3 +97,18 @@ logs_*/
 # 计划、审阅报告、多模型往返记录等，仅保留在本地，不公开。
 # 发布到仓库的项目文档在 docs/ 下（路线图、技术验证结论、构建说明）。
 plans/
+
+# ------------------------------------------------ 十、鸿蒙预检工程（P2-T23）
+# 源码链接与字体副本由 setup.sh 生成，不入库以免仓库膨胀或指向他人机器。
+platform_ohos/precheck/entry/src/main/cpp/SDL
+platform_ohos/precheck/entry/src/main/cpp/SDL_ttf
+platform_ohos/precheck/entry/src/main/resources/rawfile/fonts/
+
+# hvigor / DevEco 构建产物与本机配置
+platform_ohos/precheck/**/build/
+platform_ohos/precheck/.hvigor/
+platform_ohos/precheck/.hvigor-home/
+platform_ohos/precheck/entry/build/
+platform_ohos/precheck/oh_modules/
+platform_ohos/precheck/local.properties
+platform_ohos/precheck/.idea/
