@@ -25,6 +25,17 @@
 
 namespace ttt::sdl {
 
+// 把"按输出像素栅格化的文字尺寸"折回【逻辑单位】。
+//
+// 背景：字体按 (逻辑字号 × scale) 栅格化，纹理尺寸单位是输出像素；
+// 而绘制目标矩形用逻辑单位，渲染器会再按 letterbox 缩放一次。
+// 若直接把像素当逻辑用，文字相对大小会变成 scale² —— 窗口放大时溢出、
+// 缩小时过小。这个函数是那处换算的唯一实现，便于单元测试。
+[[nodiscard]] inline float textLogicalExtent(int pixels, float scale) noexcept {
+    return (scale > 0.0F) ? (static_cast<float>(pixels) / scale)
+                          : static_cast<float>(pixels);
+}
+
 class SDLView final : public IView {
 public:
     // scale：逻辑单位 -> 渲染输出像素（用于字体栅格化尺寸）

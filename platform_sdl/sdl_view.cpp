@@ -127,9 +127,14 @@ bool SDLView::setScale(float scale) {
     // 用相对容差判断"是否真的变了"：
     // 窗口 resize 事件非常密集，哪怕像素级抖动也不该触发重建。
     // 0.01 的阈值足以区分 Retina(2.0) 与 1x(1.0)，也不会被浮点噪声扰动。
-    if (std::fabs(next - scale_) < 0.01F) return false;
+    const bool significant = std::fabs(next - scale_) >= 0.01F;
 
+    // scale_ 必须【始终】更新：drawTextAt 用它把像素尺寸折回逻辑单位。
+    // 若只在显著变化时更新，缓慢拖动窗口期间文字尺寸会有 1% 级漂移。
     scale_ = next;
+
+    // 字体只在显著变化时重栅格化，避免密集 resize 反复重建字形。
+    if (!significant) return false;
 
 #ifdef CJING_HAVE_TTF
     if (font_ != nullptr && fontLogicalPt_ > 0) {
@@ -282,8 +287,18 @@ void SDLView::drawTextAt(std::string_view utf8, int x, int y, Uint8 r, Uint8 g, 
     }
 
     const TextEntry& e = it->second;
+    // ⚠️ 这里是【双重缩放】的修复点。
+    //
+    // 字体按 "逻辑字号 × scale_" 栅格化，所以 e.w/e.h 的单位是【输出像素】；
+    // 而 SDL_RenderTexture 的目标矩形用【逻辑单位】—— 渲染器会再按 letterbox
+    // 比例放大一次。若直接把像素尺寸当逻辑尺寸传入，文字相对大小就变成
+    // scale²（棋盘只有 scale），表现为：窗口放大时文字长得更快、右边被截断；
+    // 窗口缩小时文字缩得更狠。
+    //
+    // 正确做法：像素尺寸除以 scale_ 折回逻辑单位，交给渲染器统一缩放。
     const SDL_FRect dst{static_cast<float>(x), static_cast<float>(y),
-                        static_cast<float>(e.w), static_cast<float>(e.h)};
+                        textLogicalExtent(e.w, scale_),
+                        textLogicalExtent(e.h, scale_)};
     SDL_RenderTexture(renderer_, e.tex, nullptr, &dst);
 #else
     (void)utf8; (void)x; (void)y; (void)r; (void)g; (void)b;

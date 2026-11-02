@@ -11,10 +11,20 @@ constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
 
 void App::refreshScale() {
     // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方）
-    int outW = 0, outH = 0;
-    SDL_GetRenderOutputSize(renderer_, &outW, &outH);
-    const float next = (outW > 0) ? static_cast<float>(outW) / static_cast<float>(kLogicalSize)
-                                  : 1.0F;
+    // 以渲染器的【实际】缩放为准，而不是自己按宽度推算。
+    // 原因：LETTERBOX 取两个方向里较小的缩放比；只按宽度算，
+    // 窗口偏扁时（如 1600x900）会得到偏大的值，文字就会比棋盘更大。
+    float sx = 1.0F, sy = 1.0F;
+    float next = 1.0F;
+    if (SDL_GetRenderScale(renderer_, &sx, &sy) && sx > 0.0F) {
+        next = sx;
+    } else {
+        int outW = 0, outH = 0;
+        SDL_GetRenderOutputSize(renderer_, &outW, &outH);
+        const int shorter = (outW < outH) ? outW : outH;
+        next = (shorter > 0) ? static_cast<float>(shorter) / static_cast<float>(kLogicalSize)
+                             : 1.0F;
+    }
 
     // 首次调用：创建视图并加载字体（只发生一次）
     if (view_ == nullptr) {
@@ -131,7 +141,9 @@ void App::rebuildLayout() {
 
     int outW = 0, outH = 0;
     SDL_GetRenderOutputSize(renderer_, &outW, &outH);
-    const float s = (outW > 0) ? static_cast<float>(kLogicalSize) / static_cast<float>(outW) : 1.0F;
+    // 安全区是【输出像素】单位，换算到逻辑单位要除以渲染缩放；
+    // 与 refreshScale 用同一个 scale_，避免两处各算一套。
+    const float s = (scale_ > 0.0F) ? (1.0F / scale_) : 1.0F;
 
     const int insetTop    = static_cast<int>(static_cast<float>(safe.y) * s);
     const int insetLeft   = static_cast<int>(static_cast<float>(safe.x) * s);

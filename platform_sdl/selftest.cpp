@@ -60,6 +60,11 @@ int main() {
     // 隐藏窗口（CI 的 Linux runner 无显示器）。
     // 若当前视频驱动不可用（无 DISPLAY / WAYLAND_DISPLAY），自动回退到 dummy 驱动，
     // 使本测试可在任何环境运行，无需 CI 特判。
+    // 注意：自测把画面渲染到 900x900 的【离屏纹理】，
+    // 而逻辑呈现（letterbox）只作用于窗口，不作用于纹理目标，
+    // 因此这里所有截图都在 scale == 1 下生成。
+    // 影响：文字缩放相关的缺陷（如"窗口放大后文字溢出"）无法被这些截图发现，
+    //       必须靠真机改变窗口大小来验证 —— 这条限制请勿删除。
     auto createHidden = [] {
         return SDL_CreateWindow("selftest", 800, 900,
                                 SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
@@ -196,11 +201,12 @@ int main() {
                 // 截图模式下额外验证：加载字体并绘制中文 HUD
                 // 用与正式程序相同的换算得到缩放（outW / 逻辑边长）。
                 // 之前写死 1.0，导致截图字号比真机大（44 vs 39pt）。
-                int shotOutW = 0, shotOutH = 0;
-                SDL_GetRenderOutputSize(ren, &shotOutW, &shotOutH);
-                const float shotScale = (shotOutW > 0)
-                    ? static_cast<float>(shotOutW) / static_cast<float>(ttt::sdl::kLogicalSize)
-                    : 1.0F;
+                float shotScale = 1.0F;
+                {
+                    float ssx = 1.0F, ssy = 1.0F;
+                    if (!SDL_GetRenderScale(ren, &ssx, &ssy) || ssx <= 0.0F) ssx = 1.0F;
+                    shotScale = ssx;
+                }
                 ttt::sdl::SDLView hud(ren, shotScale, assets);
                 if (const char* shotPath = SDL_getenv("CJING_SHOT")) {
                     if (hud.loadFont("fonts/NotoSansSC-Regular.ttf", 44)) {
@@ -325,6 +331,15 @@ int main() {
             check(missing == 0, "所有文案的字符都能被字体正确渲染（无缺字）");
         }
 #endif
+    }
+
+    // ---- 文字尺寸换算（双重缩放回归）----
+    // 直接验证公式：栅格化像素 -> 逻辑单位必须除以缩放比。
+    // 若这里退化成"直接返回像素"，窗口放大时文字就会比棋盘长得快。
+    {
+        check(ttt::sdl::textLogicalExtent(88, 2.0F) == 44.0F, "文字尺寸：scale=2 时折半");
+        check(ttt::sdl::textLogicalExtent(39, 1.0F) == 39.0F, "文字尺寸：scale=1 时不变");
+        check(ttt::sdl::textLogicalExtent(40, 0.0F) == 40.0F, "文字尺寸：scale=0 时安全退化");
     }
 
     // ---- 缩放增量更新（修复 resize 时反复重读字体）----
