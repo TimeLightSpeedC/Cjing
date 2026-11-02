@@ -211,3 +211,31 @@ SDL3 官方文档写明：**支持 HarmonyOS 5.0.4 / API 16+，且仅在 Mate 80
 
 > 调试期发现的可复用闭环：`hvigorw assembleHap` + `hdc install`（**未签名包模拟器可直接安装**）
 > + `snapshot_display` 截图，全程不需要 DevEco GUI。脚本思路见本文"命令行打包"。
+
+---
+
+## SDK 版本与签名（踩坑记录）
+
+`build-profile.json5` 里的两个字段决定了"能装到哪些设备"：
+
+| 字段 | 值 | 含义 |
+|---|---|---|
+| `compatibleSdkVersion` | `5.0.4(16)` | **最低**支持的 API。设成 24 就装不进 API 16 的模拟器 |
+| `targetSdkVersion` | `5.0.4(16)` | 编译目标；官方模板默认值，也是 SDL3 官方声明支持的环境 |
+| `signingConfig` | `"default"` | **产物必须引用签名配置**；删掉它 DevEco 会提示"未检测到签名配置" |
+
+### 两个典型报错
+
+**1. `未检测到签名配置`**
+
+`signingConfig` 字段被删了。DevEco 的"自动生成签名"会写入 `signingConfigs` 块，
+但 product 里还需要 `"signingConfig": "default"` 去引用它。
+
+**2. `compatibleSdkVersion 与设备上的 apiVersion 不匹配`**
+
+`compatibleSdkVersion` 高于设备 API。例如设成 `6.1.1(24)` 就装不进 API 16 的模拟器。
+按目标设备改小（API 16 用 `5.0.4(16)`）。
+
+> **本机现状**：只装了 API 24（6.1.1）的 SDK。
+> 要跑 API 16 的模拟器，需要先在 DevEco 的 SDK Manager 里安装 **HarmonyOS 5.0.4（API 16）**。
+> 这也是 SDL3 官方唯一声明支持并实测过的版本。
