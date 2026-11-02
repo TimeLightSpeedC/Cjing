@@ -171,7 +171,49 @@ entry/build/default/outputs/default/entry-default-unsigned.hap   (27 MB)
 
 ---
 
-## 实测结论（2026-11-02，API 24 模拟器）
+## 实测结论（2026-11-02）
+
+### 最终结论：**Go** ✅（真机 API 26）
+
+| 环境 | 结果 |
+|---|---|
+| **HarmonyOS 真机（API 26）** | ✅ **窗口显示正常，中文渲染正常**（用户实测确认） |
+| 模拟器（API 24） | ⚠️ 只有清屏色，无几何 |
+| 模拟器（API 16） | ❌ 启动即崩溃 |
+
+### 模拟器两条失败的根因（均为模拟器图形栈问题，与本项目无关）
+
+**API 16 模拟器崩溃栈**（`cppcrash` 日志）：
+
+```
+#01 memcpy_s (libutils)
+#02 replace_external_shader_source()  ← libdgles.z.so
+#03 d_glShaderSource_special()
+#04 glShaderSource()
+#05..#08 libSDL3.so → SDL_CreateRendererWithProperties
+#09 libmain.so → SDL_AppInit
+```
+
+`libdgles` 是模拟器的 **GLES→Vulkan 翻译层**。日志显示 Vulkan 驱动不可用
+（`vkCreateInstance(): VK_ERROR_INCOMPATIBLE_DRIVER`），该翻译层在改写着色器源码时
+`memcpy` 越界 → SIGSEGV。
+
+**API 24 模拟器"只有清屏色"**：同一翻译层把 SDL 的着色器改坏，
+固定管线实现的 `glClear` 仍生效，而所有几何绘制失效。真机不经这层翻译，故正常。
+
+### 已证实的完整链路（真机）
+
+- 编译 / 打包 / 安装 / 启动 ✅
+- SDL 初始化 + 原生回调 ✅
+- **TTF 中文渲染 ✅**（CPU 侧抽样 2016 点中非透明 454 点；真机画面可见）
+- 窗口显示内容 ✅
+
+---
+
+## 附：调试期排除过的假设（API 24 模拟器）
+
+原文『实测结论（2026-11-02，API 24 模拟器）』保留如下，作为排错记录：
+
 
 ### 已证实 ✅
 
