@@ -179,3 +179,65 @@ Linux `$ORIGIN`、Windows 默认搜索 exe 目录），**整个目录可以直�
 不需要安装过程。
 
 第三方组件与其许可证见 [THIRD_PARTY.md](THIRD_PARTY.md)。
+
+---
+
+## Windows 上手动构建（中文系统注意事项）
+
+在 **"x64 Native Tools Command Prompt for VS 2022"** 中执行，不要用普通 PowerShell
+（否则缺 `INCLUDE` / `LIB`，报 `stdarg.h` 或 `kernel32.lib` 找不到）。
+
+```bat
+cmake -S . -B build -G Ninja
+cmake --build build --parallel
+```
+
+### 三个容易踩的坑
+
+| 现象 | 原因 | 处理 |
+|---|---|---|
+| `C2001 常量中有换行符` / `C4819` | 源码是 UTF-8，MSVC 按系统代码页（中文为 936）解读 | **已在 CMake 中统一加 `/utf-8`**；若仍出现，确认已拉取最新代码 |
+| 大量 `注意: 包含文件` 刷屏 | CMake 需要识别 `/showIncludes` 的本地化前缀 | 构建前 `set VSLANG=1033`（让 MSVC 输出英文） |
+| `LNK1181 kernel32.lib 找不到` | 不在 VS 开发者环境 | 用 Native Tools 命令提示符，或先 `call vcvars64.bat` |
+
+### 从 macOS 拷贝源码时
+
+会带上 `._xxx`（AppleDouble 扩展属性文件）。SDL3 用通配符收集 `src/libm/*.c`，
+会把这些二进制元数据当源码，导致 `C4821/C4828`。清理：
+
+```powershell
+Get-ChildItem -Recurse -Force -File -Filter "._*" | Remove-Item -Force
+Remove-Item build -Recurse -Force   # 通配符结果在 configure 阶段生成，必须重新配置
+```
+
+### 存档位置
+
+默认在 `%APPDATA%\TimeLightSpeedC\Cjing\save.txt`。
+C 盘紧张时可以用环境变量改到别的盘：
+
+```bat
+setx CJING_SAVE_DIR "E:\Codements\save"
+```
+
+---
+
+## 验证能力与盲区（重要）
+
+CI 提供三类证据，但**不能替代真机**：
+
+| 证据 | 能证明什么 | 不能证明什么 |
+|---|---|---|
+| 单元测试 | 逻辑正确性（规则、布局、序列化、文案表） | 任何渲染行为 |
+| 离屏截图 artifact | 各平台"能画出正确画面" | **缩放相关缺陷**（见下） |
+| 搬移后运行 | 运行时依赖自包含 | 交互、音频、DPI |
+
+### 已知盲区：离屏截图固定在 scale = 1
+
+自测把画面渲染到 **900×900 的离屏纹理**，而逻辑呈现（letterbox）只作用于窗口、
+不作用于纹理目标。因此所有 CI 截图都在 **scale = 1** 下生成。
+
+**后果**：文字双重缩放、窗口尺寸相关的比例错误，**在 CI 中不可见**，
+必须通过真机改变窗口大小来验证。
+
+> 这条盲区是靠真机发现的：Windows 上把窗口放大后，文字比棋盘长得更快并右侧溢出，
+> 而 CI 截图当时完全正常。相关修复见 `textLogicalExtent()`。
