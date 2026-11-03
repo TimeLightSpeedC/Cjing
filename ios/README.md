@@ -75,3 +75,28 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 - 签名：需要你的 Apple 开发者账号（Team ID），模拟器不需要
 - `PrivacyInfo.xcprivacy` 隐私清单（T16）
 - Archive / IPA 导出验证（T19）
+
+## 用 Xcode 构建与调试（交互式）
+
+命令行 Ninja 适合 CI；交互式调试用 Xcode 更方便（断点、调试器、Instruments）：
+
+```bash
+./scripts/ios-xcode.sh            # 生成并打开模拟器版工程
+./scripts/ios-xcode.sh device     # 生成真机版工程（需在 Xcode 里配 Team）
+```
+
+打开后：选 scheme `cjing` → 选模拟器 → `Cmd + R`。
+
+- 生成目录 `build-ios-xcode/`，与 Ninja 的 `build-ios-sim/` **互不影响**
+- 改 `CMakeLists.txt` 后 Xcode 会通过 `ZERO_CHECK` 自动重跑 cmake
+- 产物：`build-ios-xcode/Debug-iphonesimulator/cjing.app`
+
+## 为什么 iOS 只有可执行文件，没有 `.so`
+
+| 平台 | 产物 | 原因 |
+|---|---|---|
+| Android | `libmain.so` + `libSDL3.so` + `libSDL3_ttf.so`（每个 ABI 一套） | 应用进程只能 `dlopen` 动态库，不能 exec ELF；`SDLActivity` 按名字加载 |
+| iOS | 单一可执行文件 `cjing` | 静态链接，无嵌入库 → 不需要 Embed & Sign，也没有"Archive 前移除 framework"的步骤 |
+
+关键开关就是配置里的 `-DBUILD_SHARED_LIBS=OFF`：
+不加它，SDL3 在 iOS 上默认生成 dylib（见 SDL3 `CMakeLists.txt:233` 的分支）。
