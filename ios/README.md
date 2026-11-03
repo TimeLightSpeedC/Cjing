@@ -59,6 +59,8 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 
 ## 已验证（iPhone 17 Pro 模拟器 / iOS 26.5）
 
+![iOS 模拟器运行画面](../docs/images/ios-simulator.png)
+
 | 项 | 结果 |
 |---|---|
 | 构建 | ✅ CMake + Ninja，无 Xcode 工程 |
