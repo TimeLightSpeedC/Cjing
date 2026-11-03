@@ -24,7 +24,8 @@ add_subdirectory(SDL)
 add_subdirectory(SDL_ttf)
 
 # 仓库根目录（jni 在 android/app/jni，向上四级）
-get_filename_component(CJING_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
+# jni 位于 <repo>/android/app/jni，向上三级即仓库根
+get_filename_component(CJING_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
 
 add_library(main SHARED
     ${CJING_ROOT}/core/src/game.cpp
