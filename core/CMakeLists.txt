@@ -16,7 +16,8 @@ add_library(ttt_core STATIC
     src/game.cpp
     src/layout.cpp
     src/io.cpp
-    src/text.cpp)   # 文案表：TextId -> 字符串（纯数据，可单测）
+    src/text.cpp    # 文案表：TextId -> 字符串（纯数据，可单测）
+    src/tap.cpp)    # 双击判定（移动端重开的入口规则）
 
 # PUBLIC 的含义：所有链接 ttt_core 的目标都自动获得这个头文件搜索路径，
 # 不需要各自再写一遍 include_directories。

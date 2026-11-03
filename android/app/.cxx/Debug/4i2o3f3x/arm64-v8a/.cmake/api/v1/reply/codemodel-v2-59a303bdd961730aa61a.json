@@ -81,7 +81,7 @@
 				{
 					"build" : "SDL_ttf/external/freetype-build",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-SDL_ttf.external.freetype-build-Debug-bcea82e01c33fb57edba.json",
+					"jsonFile" : "directory-SDL_ttf.external.freetype-build-Debug-5d7f3ceb743c793262c7.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.0"
@@ -175,49 +175,49 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "SDL3-shared::@e7c329919722962a2ad4",
-					"jsonFile" : "target-SDL3-shared-Debug-e90c03e035cc777f9210.json",
+					"jsonFile" : "target-SDL3-shared-Debug-47e0434f04b16d12e5d1.json",
 					"name" : "SDL3-shared",
 					"projectIndex" : 1
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "SDL3_test::@e7c329919722962a2ad4",
-					"jsonFile" : "target-SDL3_test-Debug-b44206ef7d6fbcfd9903.json",
+					"jsonFile" : "target-SDL3_test-Debug-23c7261d998a4905ee50.json",
 					"name" : "SDL3_test",
 					"projectIndex" : 1
 				},
 				{
 					"directoryIndex" : 2,
 					"id" : "SDL3_ttf-shared::@b80ba31c6455629d7a9d",
-					"jsonFile" : "target-SDL3_ttf-shared-Debug-b4b9d1562356e365d4a8.json",
+					"jsonFile" : "target-SDL3_ttf-shared-Debug-5839cf7d30c275cc122a.json",
 					"name" : "SDL3_ttf-shared",
 					"projectIndex" : 2
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "SDL_uclibc::@e7c329919722962a2ad4",
-					"jsonFile" : "target-SDL_uclibc-Debug-4c3fb6df014ee4fa368c.json",
+					"jsonFile" : "target-SDL_uclibc-Debug-526c31e40240284ae2a1.json",
 					"name" : "SDL_uclibc",
 					"projectIndex" : 1
 				},
 				{
 					"directoryIndex" : 4,
 					"id" : "freetype::@05f1794f0df613a4a417",
-					"jsonFile" : "target-freetype-Debug-bb9c70c2d6c4f1484fce.json",
+					"jsonFile" : "target-freetype-Debug-457b4059ce57381c28fd.json",
 					"name" : "freetype",
 					"projectIndex" : 4
 				},
 				{
 					"directoryIndex" : 3,
 					"id" : "harfbuzz::@e63f5ea7debcb57f403d",
-					"jsonFile" : "target-harfbuzz-Debug-8b3e860823f70824a06e.json",
+					"jsonFile" : "target-harfbuzz-Debug-49de23f014cb9f766642.json",
 					"name" : "harfbuzz",
 					"projectIndex" : 3
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "main::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-main-Debug-a8755ead83964a46b287.json",
+					"jsonFile" : "target-main-Debug-26fccf7b22c17010b11e.json",
 					"name" : "main",
 					"projectIndex" : 0
 				}
@@ -227,7 +227,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64",
+		"build" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a",
 		"source" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni"
 	},
 	"version" : 

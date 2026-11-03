@@ -21,6 +21,11 @@
 },
 {
   "directory": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64",
+  "command": "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=x86_64-none-linux-android21 --sysroot=/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -DCJING_HAVE_TTF=1 -Dmain_EXPORTS -I/Users/c/Desktop/MacMiniTest/Cjing/core/include -I/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/include-revision -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/include -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -std=gnu++20 -o CMakeFiles/main.dir/Users/c/Desktop/MacMiniTest/Cjing/core/src/tap.cpp.o -c /Users/c/Desktop/MacMiniTest/Cjing/core/src/tap.cpp",
+  "file": "/Users/c/Desktop/MacMiniTest/Cjing/core/src/tap.cpp"
+},
+{
+  "directory": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64",
   "command": "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=x86_64-none-linux-android21 --sysroot=/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -DCJING_HAVE_TTF=1 -Dmain_EXPORTS -I/Users/c/Desktop/MacMiniTest/Cjing/core/include -I/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/include-revision -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/include -I/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -std=gnu++20 -o CMakeFiles/main.dir/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl/app.cpp.o -c /Users/c/Desktop/MacMiniTest/Cjing/platform_sdl/app.cpp",
   "file": "/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl/app.cpp"
 },

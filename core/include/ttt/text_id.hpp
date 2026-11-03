@@ -24,6 +24,10 @@ enum class TextId : std::uint8_t {
     DifficultyHard,
     HintPlaying,      // 对局中的提示行（落子 / 重开 / 退出）
     HintOver,         // 终局后的提示行（重开 / 退出）
+
+    // 触屏平台专用（没有实体键盘，提示里不能出现 R / ESC）
+    HintPlayingTouch, // 对局中：说明如何重开
+    HintOverTouch,    // 终局后：说明如何再来一局
     _Count  // 计数哨兵，勿作 UI 使用
 };
 

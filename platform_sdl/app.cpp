@@ -128,6 +128,29 @@ SDL_AppResult App::init() {
     }
 
 
+    // 是否"没有实体键盘"的平台：决定提示文案（不能对手机说"按 R"）。
+    //
+    // 判据用**视频驱动**而不是"有没有触摸设备"：
+    //   带触摸屏的 Windows 笔记本既有触摸也有键盘，R/ESC 依然可用，
+    //   若按触摸设备判定会错误地隐藏键盘提示。
+    //   而 android / uikit / openharmony 这三个驱动才是真正的移动平台。
+    {
+        const char* driver = SDL_GetCurrentVideoDriver();
+        const bool mobile = (driver != nullptr) &&
+                            (SDL_strcmp(driver, "android") == 0 ||
+                             SDL_strcmp(driver, "uikit") == 0 ||
+                             SDL_strcmp(driver, "openharmony") == 0);
+
+        int touchCount = 0;
+        SDL_TouchID* devs = SDL_GetTouchDevices(&touchCount);   // 堆分配，需 SDL_free
+        if (devs != nullptr) SDL_free(devs);
+
+        touchMode_ = mobile;
+        SDL_Log("[Cjing] 输入模式: %s（视频驱动 %s，触摸设备 %d 个）",
+                touchMode_ ? "触屏" : "键盘/鼠标",
+                (driver != nullptr) ? driver : "?", touchCount);
+    }
+
     // ---- 音频（可选能力）----
     // create() 失败返回 nullptr（无设备/子系统初始化失败），此时 play() 不会被调用，
     // 游戏照常运行 —— 音频不该成为启动的硬依赖。
@@ -197,6 +220,38 @@ void App::rebuildLayout() {
 }
 
 void App::handlePointer(int renderX, int renderY) {
+    // ---- 触屏的重开入口：双击提示行 ----
+    //
+    // 为什么需要它：移动端没有实体键盘，R / ESC 这两条提示无法执行。
+    // 桌面端保留键盘快捷键，同时这里也生效（双击无副作用）。
+    //
+    // 命中带取"提示行所在的水平条"，而不是精确到每个字：
+    // 文字宽度随语言变化，按字做命中区既脆弱又没必要；
+    // 这条带子位于棋盘上方，不会与落子区域重叠。
+    {
+        const Recti& b = layout_.boardRect();
+        const Layout::HudLines hud = layout_.hudLines();
+        if (b.w > 0) {
+            const int top    = hud.hintY - 8;
+            const int bottom = hud.hintY + 56;      // 44pt 行高 + 余量
+            const int left   = b.x;
+            const int right  = kLogicalSize;        // 文案可能比棋盘宽，右侧放开
+
+            if (renderY >= top && renderY <= bottom && renderX >= left && renderX <= right) {
+                const Tap now{SDL_GetTicks(), renderX, renderY, true};
+                if (isDoubleTap(lastTap_, now)) {
+                    game_.reset();
+                    lastCell_ = -1;
+                    lastTap_  = Tap{};
+                    SDL_Log("[Cjing] 双击提示行 → 重开");
+                } else {
+                    lastTap_ = now;
+                }
+                return;   // 提示行区域不参与落子
+            }
+        }
+    }
+
     const int cell = layout_.cellAt(renderX, renderY);
     if (cell < 0) return;
 
@@ -335,7 +390,12 @@ TextId App::statusText() const {
 }
 
 TextId App::hintText() const {
-    return game_.state().isOver() ? TextId::HintOver : TextId::HintPlaying;
+    // 触屏平台用"双击这行字"的文案：手机上没有 R 键可按。
+    const bool over = game_.state().isOver();
+    if (touchMode_) {
+        return over ? TextId::HintOverTouch : TextId::HintPlayingTouch;
+    }
+    return over ? TextId::HintOver : TextId::HintPlaying;
 }
 
 void App::drawHud() {

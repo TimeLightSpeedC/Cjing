@@ -32,6 +32,7 @@ add_library(main SHARED
     ${CJING_ROOT}/core/src/layout.cpp
     ${CJING_ROOT}/core/src/io.cpp
     ${CJING_ROOT}/core/src/text.cpp
+    ${CJING_ROOT}/core/src/tap.cpp
     ${CJING_ROOT}/platform_sdl/app.cpp
     ${CJING_ROOT}/platform_sdl/main_callbacks.cpp
     ${CJING_ROOT}/platform_sdl/sdl_view.cpp

@@ -214,12 +214,12 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 6,
-			"id" : "SDL3-shared::@e7c329919722962a2ad4"
-		},
-		{
 			"backtrace" : 7,
 			"id" : "harfbuzz::@e63f5ea7debcb57f403d"
+		},
+		{
+			"backtrace" : 6,
+			"id" : "SDL3-shared::@e7c329919722962a2ad4"
 		}
 	],
 	"id" : "SDL3_ttf-shared::@b80ba31c6455629d7a9d",

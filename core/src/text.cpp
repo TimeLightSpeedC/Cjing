@@ -28,6 +28,8 @@ constexpr std::array<std::string_view, kTextCount> kTexts = {
     /* DifficultyHard  */ "困难",
     /* HintPlaying     */ "点击棋盘落子 · R 重开 · ESC 退出",
     /* HintOver        */ "按 R 再来一局 · ESC 退出",
+    /* HintPlayingTouch*/ "点击棋盘落子 · 双击这行字重开",
+    /* HintOverTouch   */ "双击这行字再来一局",
 };
 
 }  // namespace

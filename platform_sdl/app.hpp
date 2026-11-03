@@ -11,6 +11,7 @@
 
 #include <ttt/game.hpp>
 #include <ttt/layout.hpp>
+#include <ttt/tap.hpp>
 
 #include "sdl_audio.hpp"
 #include "sdl_io.hpp"
@@ -62,6 +63,12 @@ private:
     std::unique_ptr<SDLSaveIO>  saveIO_;
     std::unique_ptr<SDLAudio>   audio_;     // 可能为 nullptr：无音频设备时静音运行
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
+
+    // ---- 触屏适配（P3）----
+    // 移动端没有实体键盘，提示文案里不能出现 R / ESC；
+    // 重开改用「双击提示行」。是否触屏在 init 时探测一次。
+    bool          touchMode_ = false;
+    Tap           lastTap_{};         // 上一次点击（用于双击判定）
 };
 
 }  // namespace ttt::sdl
