@@ -484,16 +484,22 @@ Cjing/                          # 仓库根目录
   - ⚠️ 桌面形态是**可执行文件**（`CjingApp`），不能复用：需在 CMake 中按平台切换目标形态
     （`add_executable` ↔ `add_library(main SHARED)`），见 `技术验证结论.md` 2.3
 - [x] P3-T6 Android：配置 `AndroidManifest.xml`（屏幕方向、`targetSdk` 按商店当期要求）；确认可零权限运行
-- [ ] P3-T7 Android：`SDL_AppEvent` 中处理生命周期事件（**F3 的事件名**）：
+- [x] P3-T7 Android：`SDL_AppEvent` 中处理生命周期事件（**F3 的事件名**）：
+> **Android 代码核对（2026-11-02，详见 `docs/Android核对.md`）**：
+> T7 生命周期、T9 安全区、T10 输入复用、T11 JNI 边界均已用源码证据核对通过。
+> 本次修正：把 `/` 触摸相关的两条 hint 从 `SDL_Init()` 之后移到之前 ——
+> 原写法依赖 SDL 的 hint 回调已注册这一隐含时序，虽实测有效但不稳健。
+> T8（APK assets 加载）代码已修（`SDL_GetBasePath()` 在 Android 上返回 `assets://`），
+> 但按任务定义仍需真机确认，故**保持未勾选**。
   - `SDL_EVENT_WILL_ENTER_BACKGROUND`：停止渲染循环、`SDL_SetRenderTarget(renderer, NULL)`、禁止渲染调用、**经 `SaveIO` 落盘存档**（棋盘 9 格 + 当前玩家 + 可选历史）
   - `SDL_EVENT_DID_ENTER_BACKGROUND`
   - `SDL_EVENT_WILL_ENTER_FOREGROUND`：恢复渲染循环、从存档还原局面
   - `SDL_EVENT_DID_ENTER_FOREGROUND`
   - `SDL_EVENT_TERMINATING` / `SDL_EVENT_LOW_MEMORY`（释放纹理）/ `SDL_EVENT_RENDER_DEVICE_RESET`（重建纹理）
 - [ ] P3-T8 Android：资源解析按锁定 SHA 实现（F7：锁定开发版 3.5.0 下 `SDL_GetBasePath()` 返回 `"./"`，不支持 `assets://`）；在真机验证字体与音效能否从 APK assets 加载
-- [ ] P3-T9 Android：安全区 —— 用 `SDL_GetWindowSafeArea()` 注入 `Layout`（Android 15+ 窗口默认铺满全屏，必做）；**不要**用 viewport
-- [ ] P3-T10 Android：输入沿用 P2-T7 的统一换算路径，**不另写坐标换算**；沿用 P2-T9 的去重策略
-- [ ] P3-T11 Android：异常边界 —— 所有 JNI 处 `try/catch(...)` 兜底转错误码；渲染/UI 在主线程；跨库内存"谁分配谁释放"
+- [x] P3-T9 Android：安全区 —— 用 `SDL_GetWindowSafeArea()` 注入 `Layout`（Android 15+ 窗口默认铺满全屏，必做）；**不要**用 viewport
+- [x] P3-T10 Android：输入沿用 P2-T7 的统一换算路径，**不另写坐标换算**；沿用 P2-T9 的去重策略
+- [x] P3-T11 Android：异常边界 —— 所有 JNI 处 `try/catch(...)` 兜底转错误码；渲染/UI 在主线程；跨库内存"谁分配谁释放"
 - [ ] P3-T12 Android：真机验证「切后台 → 系统回收 → 重新进入 → 局面正确恢复」（不依赖进程不被杀）；不得出现一次触摸落两子
 - [ ] P3-T13 Android：生成调试 APK 真机测试，随后配置签名与 AAB
 - [ ] P3-T14 iOS：创建 `ios/` 工程（CMake iOS 目标或 SDL3 官方 iOS 模板 / `SDL3.xcframework`）

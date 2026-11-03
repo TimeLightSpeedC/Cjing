@@ -47,6 +47,22 @@ void App::refreshScale() {
 }
 
 SDL_AppResult App::init() {
+    // ---------------------------------------------------------------------
+    // 触摸/鼠标去重（P2-T9 / P3-T10）：必须在 SDL_Init 之前设置。
+    //
+    // SDL_HINT_TOUCH_MOUSE_EVENTS 默认 "1"：触摸会合成鼠标事件。
+    // 我们采用【方案 A】——只处理鼠标事件，显式忽略 SDL_EVENT_FINGER_*，
+    // 这样桌面鼠标与移动端触摸走完全相同的代码路径，不会一次触摸落两子。
+    //
+    // 为什么放在 Init 之前：
+    //   SDL 在鼠标子系统初始化时通过 SDL_AddHintCallback 注册回调，
+    //   之后再 SDL_SetHint 虽然也会触发回调（实测 SDL_SetHintWithPriority
+    //   会同步派发），但那依赖"注册早于设置"的隐含时序，容易在版本变化时失效。
+    //   在初始化前设置是唯一不依赖时序的写法。
+    // ---------------------------------------------------------------------
+    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+
     // SDL3: SDL_Init 返回 bool（true = 成功），不再是 0
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::fprintf(stderr, "[Cjing] SDL_Init 失败: %s\n", SDL_GetError());
@@ -78,12 +94,6 @@ SDL_AppResult App::init() {
         SDL_Log("[Cjing] 无法启用 vsync（%s），将依赖 present 自身的节流", SDL_GetError());
     }
 
-    // P2-T9 触摸/鼠标去重：选定【方案 A】—— 只处理鼠标事件。
-    // SDL_HINT_TOUCH_MOUSE_EVENTS 默认为 "1"（触摸会合成鼠标事件），
-    // 因此移动端触摸与桌面鼠标走完全相同的代码路径；
-    // 同时【显式忽略】 SDL_EVENT_FINGER_*，避免一次触摸落两子。
-    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
-    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
     // ---- 资源访问：根目录由 SDL 给出（桌面是可执行文件目录，移动端为 assets://）----
     const char* base = SDL_GetBasePath();
