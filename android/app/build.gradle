@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    // SDL 的 Java 类（SDLActivity 等）位于 org.libsdl.app，namespace 保持不动
+    namespace = "org.libsdl.app"
+    compileSdkVersion 35
+    ndkVersion = "28.2.13676358"
+
+    defaultConfig {
+        applicationId "com.timelightspeed.cjing"
+        minSdkVersion 21
+        targetSdkVersion 35
+        versionCode 2000
+        versionName "0.2.0"
+
+        externalNativeBuild {
+            cmake {
+                // 与桌面/鸿蒙一致：统一走 CMake，不用 ndk-build
+                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_static"
+                // P3-T3：开发期 arm64-v8a（真机）+ x86_64（模拟器）；
+                // 发布版收敛为 arm64-v8a（见 P5 打包）
+                abiFilters 'arm64-v8a', 'x86_64'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    // assets 合并必须在原生构建之后（模板原有逻辑：保证 .so 与资源一起打包）
+    applicationVariants.all { variant ->
+        tasks["merge${variant.name.capitalize()}Assets"]
+            .dependsOn("externalNativeBuild${variant.name.capitalize()}")
+    }
+
+    sourceSets.main {
+        jniLibs.srcDir 'libs'
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'jni/CMakeLists.txt'
+        }
+    }
+
+    lint {
+        abortOnError = false
+    }
+}

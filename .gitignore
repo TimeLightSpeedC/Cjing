@@ -112,3 +112,16 @@ platform_ohos/precheck/entry/build/
 platform_ohos/precheck/oh_modules/
 platform_ohos/precheck/local.properties
 platform_ohos/precheck/.idea/
+
+# ------------------------------------------------ 十一、Android 工程（P3）
+# 源码链接与 assets 副本由 android/setup.sh 生成
+android/app/jni/SDL
+android/app/jni/SDL_ttf
+android/app/src/main/assets/
+
+# Gradle / Android 构建产物与本机配置
+android/**/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/app/libs/

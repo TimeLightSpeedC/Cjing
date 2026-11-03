@@ -3,20 +3,16 @@
 #include <SDL3/SDL.h>
 
 #include <cstdio>
-#include <cstring>
 
 namespace ttt::sdl {
 namespace {
 
-// 把 name 拼到 dir 后面。dir 约定以 '/' 结尾（SDL_GetBasePath/GetPrefPath 都是），
-// 但仍做一次判断，避免调用方传入不带斜杠的路径时拼出 "dirassets/..."。
+// 把 name 拼到 dir 后面。dir 约定以 '/' 或 '\' 结尾
+// （SDL_GetBasePath / SDL_GetPrefPath 在 Windows 上返回反斜杠结尾）。
+// 两种分隔符都认，避免拼出 "C:\...\App\/save.txt" 这类混合路径。
 std::string joinPath(const std::string& dir, std::string_view name) {
     std::string out = dir;
-    // Windows 的 SDL_GetPrefPath / SDL_GetBasePath 返回的是带反斜杠的路径
-    // （如 C:\Users\x\AppData\Roaming\Org\App\）。
-    // 这里两种分隔符都认，避免拼出 "C:\...\App\/save.txt" 这种混合路径
-    // —— 虽然 Win32 能接受，但日志里看着别扭，也容易误导排查。
-    constexpr char kNativeSep = '\\';   // 在 C++ 源码里是单个反斜杠
+    constexpr char kNativeSep = '\\';
     if (out.empty() || (out.back() != '/' && out.back() != kNativeSep)) {
         out.push_back('/');
     }
@@ -26,38 +22,78 @@ std::string joinPath(const std::string& dir, std::string_view name) {
 
 }  // namespace
 
+// -----------------------------------------------------------------------------
+//  assetCandidates —— 资源候选路径（详见头文件说明）
+//
+//  两种 base 形态：
+//    · "assets://"           包内资源 URI（Android / HarmonyOS），直接拼名字
+//    · 普通目录               <base>/assets/<name>，并尝试若干父目录回退
+// -----------------------------------------------------------------------------
+std::vector<std::string> assetCandidates(std::string_view base, std::string_view name) {
+    std::vector<std::string> out;
+
+    // ---- 形态 1：包内资源 URI ----
+    constexpr std::string_view kAssetsUri = "assets://";
+    if (base.substr(0, kAssetsUri.size()) == kAssetsUri) {
+        std::string candidate(base);
+        if (candidate.back() != '/') candidate.push_back('/');
+
+        // 去掉前导斜杠，避免出现 assets:///fonts/...
+        std::string_view clean = name;
+        while (!clean.empty() && clean.front() == '/') clean.remove_prefix(1);
+
+        candidate.append(clean);
+        out.push_back(std::move(candidate));
+        return out;
+    }
+
+    // ---- 形态 2：普通文件系统目录 ----
+    // 开发构建中可执行文件位于 build/bin，与源码树相差数级，故需父目录回退。
+    std::string root(base);
+    if (!root.empty() && root.back() != '/' && root.back() != '\\') {
+        root.push_back('/');
+    }
+
+    static const char* kPrefixes[] = {"", "../..", "../../..", "../../../.."};
+    for (const char* prefix : kPrefixes) {
+        std::string candidate = root;
+        // prefix 非空时补一个分隔符，避免拼出 "/tmp/x//assets/" 这种双斜杠
+        if (prefix[0] != '\0') {
+            candidate.append(prefix);
+            candidate.push_back('/');
+        }
+        candidate.append("assets/");
+        candidate.append(name);
+        out.push_back(std::move(candidate));
+    }
+    return out;
+}
+
 // =============================================================================
 //  SDLAssetIO
 // =============================================================================
 
 SDLAssetIO::SDLAssetIO(std::string baseDir) : base_(std::move(baseDir)) {
-    // 规范化：确保以 '/' 结尾，内部拼接逻辑就不用反复判断
-    while (base_.size() > 1 && base_.back() == '/') base_.pop_back();
+    // 包内资源 URI 必须【原样保留】：若按目录习惯裁掉尾斜杠，
+    // "assets://" 会变成 "assets:/"，SDL 就不认这个 scheme 了。
+    constexpr std::string_view kAssetsUri = "assets://";
+    if (base_.substr(0, kAssetsUri.size()) == kAssetsUri) return;
+
+    // 普通目录：统一成以 '/' 结尾
+    while (base_.size() > 1 && (base_.back() == '/' || base_.back() == '\\')) base_.pop_back();
     if (!base_.empty()) base_.push_back('/');
 }
 
 std::optional<std::vector<std::byte>>
 SDLAssetIO::read(std::string_view name) const {
-    // 资源定位：先试 assets/<name>，找不到再向父目录回退几级。
-    //
-    // 为什么需要回退：开发时资源在项目根的 assets/，
-    // 而可执行文件在 build/bin/ —— 两者相差两级目录。
-    // 打包后资源通常就在可执行文件旁边，第一级就能命中。
-    // 这段逻辑集中在这里，渲染层/逻辑层都不必关心目录结构。
-    static const char* kPrefixes[] = {"", "../..", "../../..", "../../../.."};
-
-    for (const char* prefix : kPrefixes) {
-        std::string candidate = base_;
-        candidate.append(prefix);
-        candidate.append("/assets/");
-        candidate.append(name);
+    for (const std::string& candidate : assetCandidates(base_, name)) {
         lastTried_ = candidate;
 
         SDL_IOStream* io = SDL_IOFromFile(candidate.c_str(), "rb");
         if (io == nullptr) continue;          // 该候选不存在，试下一个
 
         // 先问大小，一次性读入内存。
-        // GetIOSize 失败时返回 -1：转成 size_t 前必须检查，否则会变成极大值。
+        // GetIOSize 失败返回 -1：转成 size_t 前必须检查，否则会变成极大值。
         const Sint64 size = SDL_GetIOSize(io);
         if (size <= 0) {
             SDL_CloseIO(io);
@@ -77,7 +113,7 @@ SDLAssetIO::read(std::string_view name) const {
         return data;
     }
 
-    SDL_Log("[Cjing] 找不到资源: assets/%s（最后一次尝试 %s）",
+    SDL_Log("[Cjing] 找不到资源: %s（最后一次尝试 %s）",
             std::string(name).c_str(), lastTried_.c_str());
     return std::nullopt;
 }
@@ -87,7 +123,7 @@ SDLAssetIO::read(std::string_view name) const {
 // =============================================================================
 
 SDLSaveIO::SDLSaveIO(std::string dir) : dir_(std::move(dir)) {
-    while (dir_.size() > 1 && dir_.back() == '/') dir_.pop_back();
+    while (dir_.size() > 1 && (dir_.back() == '/' || dir_.back() == '\\')) dir_.pop_back();
     if (!dir_.empty()) dir_.push_back('/');
 }
 

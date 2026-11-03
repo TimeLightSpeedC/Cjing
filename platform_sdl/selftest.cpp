@@ -342,6 +342,24 @@ int main() {
         check(ttt::sdl::textLogicalExtent(40, 0.0F) == 40.0F, "文字尺寸：scale=0 时安全退化");
     }
 
+    // ---- 资源候选路径：桌面目录 vs 包内 assets:// ----
+    // 这条规则同时服务 Android 与 HarmonyOS：两者的 SDL_GetBasePath()
+    // 都返回 "assets://"，直接拼名字即可，不能再插一层 "assets/"。
+    {
+        const auto uri = ttt::sdl::assetCandidates("assets://", "fonts/a.ttf");
+        check(uri.size() == 1 && uri[0] == "assets://fonts/a.ttf",
+              "assets:// 基址只拼名字（不重复插入 assets 段）");
+
+        const auto uriSlash = ttt::sdl::assetCandidates("assets://", "/fonts/a.ttf");
+        check(uriSlash.size() == 1 && uriSlash[0] == "assets://fonts/a.ttf",
+              "assets:// 基址会去掉名字的前导斜杠");
+
+        const auto dir = ttt::sdl::assetCandidates("/tmp/x/", "a.ttf");
+        check(!dir.empty() && dir[0] == "/tmp/x/assets/a.ttf",
+              "普通目录：首选项为 <base>/assets/<name>");
+        check(dir.size() == 4, "普通目录：保留父目录回退（共 4 个候选）");
+    }
+
     // ---- 缩放增量更新（修复 resize 时反复重读字体）----
     // 关键行为：只有缩放【真的变了】才重建字号；重复设置同一值必须是空操作，
     // 否则密集的 resize 事件会退化成"每次重读 10MB 字体"。

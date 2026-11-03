@@ -26,6 +26,22 @@
 
 namespace ttt::sdl {
 
+// 计算资源文件的候选路径（按顺序尝试，命中第一个存在的即可）。
+//
+// 两种 base 形态，规则不同：
+//
+//   1) 包内资源 URI："assets://"（Android / HarmonyOS 的 SDL_GetBasePath 都返回它）
+//      资源根就是 APK/HAP 的 assets 目录，直接拼名字即可：
+//          base="assets://", name="fonts/a.ttf" -> "assets://fonts/a.ttf"
+//      **不能**再插一层 "assets/" —— 那会得到 assets:///assets/...，必然找不到。
+//      也不需要"向父目录回退"，资产 URI 没有目录层级概念。
+//
+//   2) 普通文件系统目录（桌面）：资源在 <base>/assets/<name> 下。
+//      开发构建中可执行文件在 build/bin 里，与源码树差几级，
+//      所以还要尝试若干父目录回退。
+[[nodiscard]] std::vector<std::string>
+assetCandidates(std::string_view base, std::string_view name);
+
 // -----------------------------------------------------------------------------
 // SDLAssetIO —— 只读资源（字体、音效）
 //
