@@ -50,8 +50,6 @@
     <!-- <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" /> -->
     <!-- <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /> -->
 
-    <!-- Allow access to the vibrator -->
-    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Allow access to Internet -->
     <!-- if you want to connect to the network or internet, uncomment this. -->

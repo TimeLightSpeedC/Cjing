@@ -52,13 +52,23 @@ jobs:
             "ndk;28.2.13676358"
 
       # .tools/ 不入库（体积大且可重新获取），CI 上需要先拉到本地。
-      # 用浅克隆 + 浅子模块：SDL_ttf 的 FreeType/HarfBuzz 就是子模块。
-      - name: 获取 SDL3 / SDL3_ttf 源码
+      # 按路线图 P3-T4：必须与 P0 锁定的【同一 SHA】，不能用浮动分支，
+      # 否则 CI 验证的版本与本地/发布版本可能不同。
+      - name: 获取 SDL3 / SDL3_ttf 源码（锁定 SHA）
         run: |
+          set -e
+          SDL_SHA=b64293b342c2cde123285199818803f83dbac612
+          TTF_SHA=e7cf7ceeb41fbb59f67f27af6aa99401cc9eb888
           mkdir -p .tools
+
           git clone --depth 1 https://github.com/libsdl-org/SDL.git .tools/sdl3-src
-          git clone --depth 1 --recurse-submodules --shallow-submodules \
-            https://github.com/libsdl-org/SDL_ttf.git .tools/sdltff-src
+          git -C .tools/sdl3-src fetch --depth 1 origin "$SDL_SHA"
+          git -C .tools/sdl3-src checkout --detach "$SDL_SHA"
+
+          git clone --depth 1 https://github.com/libsdl-org/SDL_ttf.git .tools/sdltff-src
+          git -C .tools/sdltff-src fetch --depth 1 origin "$TTF_SHA"
+          git -C .tools/sdltff-src checkout --detach "$TTF_SHA"
+          git -C .tools/sdltff-src submodule update --init --recursive --depth 1
 
       - name: 准备工程（源码链接 + assets）
         run: ./android/setup.sh
@@ -68,6 +78,18 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon --stacktrace assembleDebug
+
+      # P3-T5 的验收点：libmain.so 必须真实存在于 APK 内（且是共享库），
+      # 否则 SDLActivity 加载时会在运行期才报错 —— 那种问题最难查。
+      - name: 校验 APK 内含原生库
+        run: |
+          APK=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
+          echo "检查: $APK"
+          unzip -l "$APK" | grep -E 'lib/(arm64-v8a|x86_64)/lib(main|SDL3|SDL3_ttf)\.so' || {
+            echo "APK 中缺少必要的原生库"; exit 1; }
+          unzip -l "$APK" | grep -q 'assets/fonts/NotoSansSC-Regular.ttf' || {
+            echo "APK 中缺少中文字体"; exit 1; }
+          echo "✓ 原生库与字体均已打包"
 
       - name: 上传 APK
         uses: actions/upload-artifact@v4

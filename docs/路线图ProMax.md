@@ -467,14 +467,23 @@ Cjing/                          # 仓库根目录
 > **里程碑 M3**：Android / iOS 真机可玩，触摸准确，切后台状态不丢失
 > **前提**：坐标换算、逻辑分辨率、指针语义已在 P2 完成。**若本阶段需要改渲染或布局代码，说明 P2 抽象没做对 —— 应回头修 P2，而不是在此打补丁。**
 
-- [ ] P3-T1 Android：创建 `android/` 模块（Gradle + NDK + CMake），配置 `externalNativeBuild` 指向根 CMake
-- [ ] P3-T2 Android：确认工具链 **SDK 35+ / NDK r28c+ / 最低 API 21**
-- [ ] P3-T3 Android：`abiFilters` 策略写死 —— 开发期 `arm64-v8a` + `x86_64`（模拟器），**发布仅 `arm64-v8a`**（与 P5 打包一致）
-- [ ] P3-T4 Android：以 P0 锁定的**同一 SHA** 引入 SDL3 与 SDL3_ttf 源码（不使用系统/包管理器 SDL）
-- [ ] P3-T5 Android：编译为 `.so` 共享库（**非可执行文件**；Android 要求目标为名为 `main` 的共享库），由 `SDLActivity` 子类加载
+- [x] P3-T1 Android：创建 `android/` 模块（Gradle + NDK + CMake），配置 `externalNativeBuild` 指向根 CMake
+> **P3 进展（Android 工程骨架已就绪，2026-11-02）**：
+> `android/` 模块可编译出 Debug APK（12.8 MB，双 ABI），CI 每次验证：
+> 安装 SDK 35 + NDK 28.2 → 按 **P0 锁定 SHA** 拉取 SDL3/SDL3_ttf → Gradle 构建 →
+> 校验 APK 内含 `lib/{arm64-v8a,x86_64}/libmain|libSDL3|libSDL3_ttf.so` 与中文字体 → 上传 artifact。
+> 关键实现：`libmain.so` 为共享库（导出 `SDL_main`，由 `MainActivity` 继承 SDLActivity 加载）；
+> 开发期 ABI 为 arm64-v8a + x86_64；清单零权限。
+> **顺带修正过时结论**：Android 的 `SDL_GetBasePath()` 实际返回 `assets://`（与鸿蒙一致），
+> 原记录「返回 ./、不支持 assets://」有误；SDLAssetIO 已按 `assets://` 规则修正并加测试。
+> 待办：真机运行验证（T8/T9/T10/T12）。
+- [x] P3-T2 Android：确认工具链 **SDK 35+ / NDK r28c+ / 最低 API 21**
+- [x] P3-T3 Android：`abiFilters` 策略写死 —— 开发期 `arm64-v8a` + `x86_64`（模拟器），**发布仅 `arm64-v8a`**（与 P5 打包一致）
+- [x] P3-T4 Android：以 P0 锁定的**同一 SHA** 引入 SDL3 与 SDL3_ttf 源码（不使用系统/包管理器 SDL）
+- [x] P3-T5 Android：编译为 `.so` 共享库（**非可执行文件**；Android 要求目标为名为 `main` 的共享库），由 `SDLActivity` 子类加载
   - ⚠️ 桌面形态是**可执行文件**（`CjingApp`），不能复用：需在 CMake 中按平台切换目标形态
     （`add_executable` ↔ `add_library(main SHARED)`），见 `技术验证结论.md` 2.3
-- [ ] P3-T6 Android：配置 `AndroidManifest.xml`（屏幕方向、`targetSdk` 按商店当期要求）；确认可零权限运行
+- [x] P3-T6 Android：配置 `AndroidManifest.xml`（屏幕方向、`targetSdk` 按商店当期要求）；确认可零权限运行
 - [ ] P3-T7 Android：`SDL_AppEvent` 中处理生命周期事件（**F3 的事件名**）：
   - `SDL_EVENT_WILL_ENTER_BACKGROUND`：停止渲染循环、`SDL_SetRenderTarget(renderer, NULL)`、禁止渲染调用、**经 `SaveIO` 落盘存档**（棋盘 9 格 + 当前玩家 + 可选历史）
   - `SDL_EVENT_DID_ENTER_BACKGROUND`
