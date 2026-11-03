@@ -514,7 +514,16 @@ Cjing/                          # 仓库根目录
 > 「双击这行字重开」，双击判定（450ms / 48 逻辑单位）放进 core 并由单元测试覆盖。
 > 退出交给系统（Android 返回键；iOS 不允许应用自杀）。
 - [ ] P3-T13 Android：生成调试 APK 真机测试，随后配置签名与 AAB
-- [ ] P3-T14 iOS：创建 `ios/` 工程（CMake iOS 目标或 SDL3 官方 iOS 模板 / `SDL3.xcframework`）
+- [x] P3-T14 iOS：创建 `ios/` 工程（CMake iOS 目标或 SDL3 官方 iOS 模板 / `SDL3.xcframework`）
+> **iOS 工程已跑通（2026-11-03，iPhone 17 Pro 模拟器 / iOS 26.5）**：
+> 采用「源码静态链接 + CMake/Ninja」，不依赖 Xcode 工程，也避免了 T19 的
+> "移除嵌入 framework" 问题；已确认中文字体、音效、布局、触屏文案全部正常。
+> 期间修复两个**跨平台真实缺陷**：
+> ① 安全区单位不一致（iOS 用点、呈现矩形用像素）导致棋盘 0×0；
+> ② `refreshScale` 误用 `SDL_GetRenderScale`（恒为 1.0），导致 Retina/iOS 文字发糊。
+> 另需注意：SDL_ttf 的 GL 文本引擎在 iOS 编译不过（SDL_opengl.h 在 iOS 为空），
+> 已在 iOS 构建中排除该源文件。
+> 待办：签名（需开发者账号）、隐私清单(T16)、Archive/IPA(T19)。
 - [ ] P3-T15 iOS：配置 Bundle ID、签名、`Info.plist`（方向、显示名、最低部署版本）、**LaunchScreen（缺失会被拒审）**
 - [ ] P3-T16 iOS：**`PrivacyInfo.xcprivacy` 隐私清单**（使用 Apple Required Reason API 时缺失会导致审核被拒）
 - [ ] P3-T17 iOS：处理触摸（沿用 P2-T9 策略）、安全区（`SDL_GetWindowSafeArea`）、后台生命周期（事件名同 P3-T7）

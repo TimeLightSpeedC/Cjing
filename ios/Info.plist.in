@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ==========================================================================
+     iOS 应用清单（路线图 P3-T15）
+     说明：
+       * MACOSX_BUNDLE_ 前缀的变量由 CMake 在生成阶段替换
+         （来自 CMakeLists 的 set_target_properties）；
+       * UILaunchScreen 是现代 iOS 的启动屏声明——**缺失会导致审核被拒**
+         （Apple 要求应用必须提供启动屏）；<dict/> 即"使用纯色默认启动屏"。
+       * 只允许竖屏：棋盘是正方形，横屏无收益，且与 HUD 布局一致。
+     ========================================================================== -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>zh_CN</string>
+
+    <key>CFBundleExecutable</key>
+    <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <key>CFBundleName</key>
+    <string>${MACOSX_BUNDLE_BUNDLE_NAME}</string>
+
+    <!-- 桌面图标下显示的名字 -->
+    <key>CFBundleDisplayName</key>
+    <string>井字棋</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+
+    <key>CFBundleVersion</key>
+    <string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <key>MinimumOSVersion</key>
+    <string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
+
+    <!-- 启动屏（缺失会被拒审） -->
+    <key>UILaunchScreen</key>
+    <dict/>
+
+    <!-- 只允许竖屏 -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+
+    <!-- 允许外接鼠标/触控板（iPadOS 指针支持） -->
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- 游戏不需要状态栏，交给全屏绘制 -->
+    <key>UIStatusBarHidden</key>
+    <true/>
+</dict>
+</plist>

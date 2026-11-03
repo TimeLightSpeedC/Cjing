@@ -10,15 +10,25 @@ constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
 }  // namespace
 
 void App::refreshScale() {
-    // 逻辑单位 -> 渲染输出像素 的换算（唯一读取像素尺寸的地方）
-    // 以渲染器的【实际】缩放为准，而不是自己按宽度推算。
-    // 原因：LETTERBOX 取两个方向里较小的缩放比；只按宽度算，
-    // 窗口偏扁时（如 1600x900）会得到偏大的值，文字就会比棋盘更大。
-    float sx = 1.0F, sy = 1.0F;
+    // 逻辑单位 -> 输出像素 的真实比例（唯一读取像素尺寸的地方）。
+    //
+    // ⚠️ 不能用 SDL_GetRenderScale：它返回的是"用户缩放"（SDL_SetRenderScale），
+    //    默认恒为 1.0，**并不是** 像素/逻辑单位。只有在窗口恰好等于逻辑尺寸时
+    //    两者才碰巧相同——所以在 Retina 屏和 iPhone 上文字会按 1x 栅格化再放大，
+    //    表现为发糊（P3 在 iOS 上发现）。
+    //
+    // 正确来源：逻辑呈现矩形（letterbox 后的实际绘制区域）宽度 / 逻辑宽。
     float next = 1.0F;
-    if (SDL_GetRenderScale(renderer_, &sx, &sy) && sx > 0.0F) {
-        next = sx;
-    } else {
+    bool  ok   = false;
+
+    SDL_FRect present{0.0F, 0.0F, 0.0F, 0.0F};
+    if (SDL_GetRenderLogicalPresentationRect(renderer_, &present) &&
+        present.w > 0.0F) {
+        next = present.w / static_cast<float>(kLogicalSize);
+        ok   = true;
+    }
+
+    if (!ok) {
         int outW = 0, outH = 0;
         SDL_GetRenderOutputSize(renderer_, &outW, &outH);
         const int shorter = (outW < outH) ? outW : outH;
@@ -203,6 +213,19 @@ void App::rebuildLayout() {
         present = SDL_FRect{0.0F, 0.0F, static_cast<float>(ow), static_cast<float>(oh)};
     }
 
+    // ⚠️ 单位陷阱：iOS 上 SDL_GetWindowSafeArea 返回的是【点】（402x874），
+    //    而逻辑呈现矩形是【像素】（1206x1206）。两者直接相减会得到荒谬的内缩，
+    //    把可用高度算成负数（棋盘 0x0）。Android 上恰好都是像素，掩盖了这个问题。
+    //
+    //    这里先把安全区换算到像素空间：ppu = 逻辑呈现宽度 / 窗口宽度。
+    int windowW = 0, windowH = 0;
+    SDL_GetWindowSize(window_, &windowW, &windowH);
+    const float ppu = (windowW > 0) ? (present.w / static_cast<float>(windowW)) : 1.0F;
+    (void)windowH;
+
+    const SDL_FRect safePx{safe.x * ppu, safe.y * ppu,
+                           safe.w * ppu, safe.h * ppu};
+
     const float pxPerLogical = present.w / static_cast<float>(kLogicalSize);
     const float k = (pxPerLogical > 0.0F) ? (1.0F / pxPerLogical) : 1.0F;
 
@@ -210,10 +233,10 @@ void App::rebuildLayout() {
         return (v > 0.0F) ? static_cast<int>(v) : 0;
     };
 
-    const int insetLeft   = clamp0((safe.x - present.x) * k);
-    const int insetTop    = clamp0((safe.y - present.y) * k);
-    const int insetRight  = clamp0(((present.x + present.w) - (safe.x + safe.w)) * k);
-    const int insetBottom = clamp0(((present.y + present.h) - (safe.y + safe.h)) * k);
+    const int insetLeft   = clamp0((safePx.x - present.x) * k);
+    const int insetTop    = clamp0((safePx.y - present.y) * k);
+    const int insetRight  = clamp0(((present.x + present.w) - (safePx.x + safePx.w)) * k);
+    const int insetBottom = clamp0(((present.y + present.h) - (safePx.y + safePx.h)) * k);
 
     layout_ = Layout::compute(kLogicalSize, insetTop, insetRight, insetBottom, insetLeft,
                               kReserveTop);
