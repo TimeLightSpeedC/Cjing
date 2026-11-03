@@ -91,4 +91,8 @@ add_custom_command(TARGET cjing POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CJING_ROOT}/assets"
             "$<TARGET_BUNDLE_DIR:cjing>/assets"
-    COMMENT "复制资源到 app bundle")
+    # 隐私清单（P3-T16）：必须位于 .app 根目录，否则不会被收录
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy"
+            "$<TARGET_BUNDLE_DIR:cjing>/PrivacyInfo.xcprivacy"
+    COMMENT "复制资源与隐私清单到 app bundle")

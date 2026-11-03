@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ==========================================================================
+     隐私清单（路线图 P3-T16）
+
+     iOS 17 起，App Store 要求声明对「Required Reason API」的使用。
+     缺失或申报不实会在审核阶段被拒。
+
+     本应用的实际情况：
+       · 不追踪用户（NSPrivacyTracking = false）
+       · 不收集任何数据（无账号、无统计、无广告）
+       · 唯一的 Required Reason API 使用来自 SDL 的 uikit 后端：
+         [NSUserDefaults standardUserDefaults]（SDL_uikitevents.m:271）
+         用途仅限本应用自身的偏好读写 → 理由码 CA92.1
+
+     理由码说明（Apple 官方）：
+       CA92.1 = 仅访问本应用自身可访问的 user defaults，
+                用于读写应用自身的设置与状态。
+     ========================================================================== -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

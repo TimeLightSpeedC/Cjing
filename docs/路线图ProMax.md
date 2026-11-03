@@ -525,9 +525,20 @@ Cjing/                          # 仓库根目录
 > 已在 iOS 构建中排除该源文件。
 > 待办：签名（需开发者账号）、隐私清单(T16)、Archive/IPA(T19)。
 - [ ] P3-T15 iOS：配置 Bundle ID、签名、`Info.plist`（方向、显示名、最低部署版本）、**LaunchScreen（缺失会被拒审）**
-- [ ] P3-T16 iOS：**`PrivacyInfo.xcprivacy` 隐私清单**（使用 Apple Required Reason API 时缺失会导致审核被拒）
-- [ ] P3-T17 iOS：处理触摸（沿用 P2-T9 策略）、安全区（`SDL_GetWindowSafeArea`）、后台生命周期（事件名同 P3-T7）
-- [ ] P3-T18 iOS：ObjC/Swift 回调处 `try/catch(...)` 兜底；验证 Retina 下清晰度与触摸命中精度
+- [x] P3-T16 iOS：**`PrivacyInfo.xcprivacy` 隐私清单**（使用 Apple Required Reason API 时缺失会导致审核被拒）
+> **T16–T18 实测记录（2026-11-03，iPhone 17 Pro 模拟器 / iOS 26.5）**：
+> **T16 隐私清单**：`ios/PrivacyInfo.xcprivacy` 已随构建复制进 `.app` 根目录（`plutil` 校验通过）。
+> 申报内容：不追踪、不收集数据；唯一 Required Reason API 是 SDL uikit 后端的
+> `NSUserDefaults`（`SDL_uikitevents.m:271`），理由码 `CA92.1`。
+> **T17 后台生命周期**：启动「设置」把应用切到后台，日志确认
+> `WILL_ENTER_BACKGROUND → 保存对局` 且存档写入成功；冷启动日志 `已恢复对局`。
+> **T18 Retina 与兜底**：`scale_` 实测 1.340（= 1206/900），确认按物理像素栅格化，
+> 文字清晰；本项目**没有自有的 ObjC/Swift 回调代码**（全部走 SDL 的 C 接口），
+> 因此 try/catch 兜底项为空操作，已在文档说明。
+> 说明：iOS 模拟器命令行无法注入触摸事件（`simctl` 无对应能力），
+> 触摸命中精度由单元测试（`cellAt` 往返映射）覆盖，真机手感需人工点按验证。
+- [x] P3-T17 iOS：处理触摸（沿用 P2-T9 策略）、安全区（`SDL_GetWindowSafeArea`）、后台生命周期（事件名同 P3-T7）
+- [x] P3-T18 iOS：ObjC/Swift 回调处 `try/catch(...)` 兜底；验证 Retina 下清晰度与触摸命中精度
 - [ ] P3-T19 iOS：生成 Archive 前**必须用脚本移除嵌入的 SDL3 framework**（否则无法成功分发）；导出 IPA 验证可安装
 - [ ] P3-T20 里程碑 `v0.3.0`：Android/iOS 可玩（含 TTF 文字、存档恢复、安全区）＋ **渲染/布局相对 P2 零改动**（若有改动，回到 P2 修抽象）
 
