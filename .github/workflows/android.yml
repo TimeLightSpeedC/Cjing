@@ -51,6 +51,15 @@ jobs:
             "build-tools;35.0.0" \
             "ndk;28.2.13676358"
 
+      # .tools/ 不入库（体积大且可重新获取），CI 上需要先拉到本地。
+      # 用浅克隆 + 浅子模块：SDL_ttf 的 FreeType/HarfBuzz 就是子模块。
+      - name: 获取 SDL3 / SDL3_ttf 源码
+        run: |
+          mkdir -p .tools
+          git clone --depth 1 https://github.com/libsdl-org/SDL.git .tools/sdl3-src
+          git clone --depth 1 --recurse-submodules --shallow-submodules \
+            https://github.com/libsdl-org/SDL_ttf.git .tools/sdltff-src
+
       - name: 准备工程（源码链接 + assets）
         run: ./android/setup.sh
 
