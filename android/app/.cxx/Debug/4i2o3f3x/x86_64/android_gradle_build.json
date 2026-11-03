@@ -1,0 +1,115 @@
+{
+  "buildFiles": [
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/CMakeLists.txt",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/CMakeLists.txt",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/3rdparty.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/FindLibUSB.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/GetGitRevisionDescription.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/GetGitRevisionDescription.cmake.in",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedDOSCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedEmscriptenCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedHaikuCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedMSVCCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedNokiaNGageCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/PreseedOpenHarmonyCache.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/SDL3Config.cmake.in",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/macros.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlchecks.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlcommands.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlcompilers.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlcpu.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlmanpages.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/cmake/sdlplatform.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/include/build_config/SDL_build_config.h.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL/include/build_config/SDL_revision.h.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/CMakeLists.txt",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/GetGitRevisionDescription.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/PkgConfigHelper.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/PrivateSdlFunctions.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/sdlcpu.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/sdlmanpages.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/cmake/sdlplatform.cmake",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/external/freetype/CMakeLists.txt",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/jni/SDL_ttf/external/harfbuzz/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "SDL3-shared::@e7c329919722962a2ad4": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL3-shared",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3.so",
+      "runtimeFiles": []
+    },
+    "SDL3_test::@e7c329919722962a2ad4": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL3_test",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/libSDL3_test.a"
+    },
+    "SDL3_ttf-shared::@b80ba31c6455629d7a9d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL3_ttf-shared",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3_ttf.so",
+      "runtimeFiles": [
+        "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3.so"
+      ]
+    },
+    "SDL_uclibc::@e7c329919722962a2ad4": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL_uclibc",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/libSDL_uclibc.a"
+    },
+    "freetype::@05f1794f0df613a4a417": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "freetype",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/freetype-build/libfreetyped.a"
+    },
+    "harfbuzz::@e63f5ea7debcb57f403d": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "harfbuzz",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/harfbuzz-build/libharfbuzz.a"
+    },
+    "main::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "main",
+      "output": "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libmain.so",
+      "runtimeFiles": [
+        "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3_ttf.so",
+        "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": [
+    "cxx",
+    "cpp",
+    "cc"
+  ]
+}

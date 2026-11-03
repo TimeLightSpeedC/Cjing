@@ -114,6 +114,20 @@ SDL_AppResult App::init() {
     refreshScale();
     rebuildLayout();
 
+    // 诊断：打印一次布局与缩放，便于在真机/模拟器上核对"棋盘是否正方形"
+    {
+        int ww = 0, wh = 0, ow = 0, oh = 0;
+        float rsx = 0.0f, rsy = 0.0f;
+        SDL_GetWindowSize(window_, &ww, &wh);
+        SDL_GetCurrentRenderOutputSize(renderer_, &ow, &oh);
+        SDL_GetRenderScale(renderer_, &rsx, &rsy);
+        const Recti& br = layout_.boardRect();
+        SDL_Log("[Cjing] 布局: window=%dx%d output=%dx%d 渲染缩放=%.3fx%.3f 棋盘=%dx%d@(%d,%d) 格子=%d scale_=%.3f",
+                ww, wh, ow, oh, rsx, rsy, br.w, br.h, br.x, br.y,
+                layout_.cellSize(), static_cast<double>(scale_));
+    }
+
+
     // ---- 音频（可选能力）----
     // create() 失败返回 nullptr（无设备/子系统初始化失败），此时 play() 不会被调用，
     // 游戏照常运行 —— 音频不该成为启动的硬依赖。
@@ -145,20 +159,38 @@ SDL_AppResult App::init() {
 }
 
 void App::rebuildLayout() {
-    // F6/P2-T11：安全区注入 Layout（Android 15+ / 刘海屏必做，PC 端为窗口装饰留白）
+    // F6/P2-T11：安全区注入 Layout（Android 15+ / 刘海屏必做）
+    //
+    // ⚠️ 这里不能把"安全区像素"直接除以缩放就当作逻辑内缩。
+    // 启用逻辑呈现（LETTERBOX）后，900x900 的逻辑方形被居中放进窗口，
+    // 竖屏手机上状态栏/手势条都位于这个方形【之外】——此时内缩应为 0。
+    // 早期实现忽略了 letterbox 偏移，导致棋盘被压小、文字起始点右移后溢出。
+    //
+    // 正确做法：取"安全区"与"逻辑呈现区域"的交集，
+    // 只有真正遮挡到逻辑区域的那部分才换算成内缩。
     SDL_Rect safe{0, 0, 0, 0};
     SDL_GetWindowSafeArea(window_, &safe);
 
-    int outW = 0, outH = 0;
-    SDL_GetRenderOutputSize(renderer_, &outW, &outH);
-    // 安全区是【输出像素】单位，换算到逻辑单位要除以渲染缩放；
-    // 与 refreshScale 用同一个 scale_，避免两处各算一套。
-    const float s = (scale_ > 0.0F) ? (1.0F / scale_) : 1.0F;
+    SDL_FRect present{0, 0, 0, 0};   // 逻辑呈现区域（输出像素坐标）
+    if (!SDL_GetRenderLogicalPresentationRect(renderer_, &present) ||
+        present.w <= 0.0F || present.h <= 0.0F) {
+        // 拿不到就退化为"整个窗口即逻辑区域"
+        int ow = 0, oh = 0;
+        SDL_GetRenderOutputSize(renderer_, &ow, &oh);
+        present = SDL_FRect{0.0F, 0.0F, static_cast<float>(ow), static_cast<float>(oh)};
+    }
 
-    const int insetTop    = static_cast<int>(static_cast<float>(safe.y) * s);
-    const int insetLeft   = static_cast<int>(static_cast<float>(safe.x) * s);
-    const int insetBottom = static_cast<int>(static_cast<float>(outH - safe.y - safe.h) * s);
-    const int insetRight  = static_cast<int>(static_cast<float>(outW - safe.x - safe.w) * s);
+    const float pxPerLogical = present.w / static_cast<float>(kLogicalSize);
+    const float k = (pxPerLogical > 0.0F) ? (1.0F / pxPerLogical) : 1.0F;
+
+    auto clamp0 = [](float v) -> int {
+        return (v > 0.0F) ? static_cast<int>(v) : 0;
+    };
+
+    const int insetLeft   = clamp0((safe.x - present.x) * k);
+    const int insetTop    = clamp0((safe.y - present.y) * k);
+    const int insetRight  = clamp0(((present.x + present.w) - (safe.x + safe.w)) * k);
+    const int insetBottom = clamp0(((present.y + present.h) - (safe.y + safe.h)) * k);
 
     layout_ = Layout::compute(kLogicalSize, insetTop, insetRight, insetBottom, insetLeft,
                               kReserveTop);

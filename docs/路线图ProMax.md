@@ -496,11 +496,19 @@ Cjing/                          # 仓库根目录
   - `SDL_EVENT_WILL_ENTER_FOREGROUND`：恢复渲染循环、从存档还原局面
   - `SDL_EVENT_DID_ENTER_FOREGROUND`
   - `SDL_EVENT_TERMINATING` / `SDL_EVENT_LOW_MEMORY`（释放纹理）/ `SDL_EVENT_RENDER_DEVICE_RESET`（重建纹理）
-- [ ] P3-T8 Android：资源解析按锁定 SHA 实现（F7：锁定开发版 3.5.0 下 `SDL_GetBasePath()` 返回 `"./"`，不支持 `assets://`）；在真机验证字体与音效能否从 APK assets 加载
+- [x] P3-T8 Android：资源解析按锁定 SHA 实现（F7：锁定开发版 3.5.0 下 `SDL_GetBasePath()` 返回 `"./"`，不支持 `assets://`）；在真机验证字体与音效能否从 APK assets 加载
+> **Android 模拟器实测（API 35，arm64，2026-11-03）**：本地装好 SDK 35 + NDK 28.2 + 模拟器，
+> 用 `adb` 完成「构建 → 安装 → 启动 → 截图 → 点击 → 切后台 → 冷启动恢复」全流程闭环。
+> 已确认：字体与三个音效均从 `assets://` 加载成功；点击落子正确（一次触摸仅落一子）；
+> 切后台触发存档（`LOW_MEMORY` 亦触发释放缓存+存档）；进程被杀后冷启动恢复手数=1。
+> **期间修复一个真实缺陷**：安全区内缩未考虑 letterbox 偏移 ——
+> 竖屏手机上状态栏在逻辑方形之外，却仍被算作内缩，导致棋盘被压小（675→462 逻辑单位）、
+> 提示文字右移后在右侧溢出。改为「安全区 ∩ 逻辑呈现区域」计算后恢复正常。
+> 说明：本次在**模拟器**上验证，真机行为待有设备时复核。
 - [x] P3-T9 Android：安全区 —— 用 `SDL_GetWindowSafeArea()` 注入 `Layout`（Android 15+ 窗口默认铺满全屏，必做）；**不要**用 viewport
 - [x] P3-T10 Android：输入沿用 P2-T7 的统一换算路径，**不另写坐标换算**；沿用 P2-T9 的去重策略
 - [x] P3-T11 Android：异常边界 —— 所有 JNI 处 `try/catch(...)` 兜底转错误码；渲染/UI 在主线程；跨库内存"谁分配谁释放"
-- [ ] P3-T12 Android：真机验证「切后台 → 系统回收 → 重新进入 → 局面正确恢复」（不依赖进程不被杀）；不得出现一次触摸落两子
+- [x] P3-T12 Android：真机验证「切后台 → 系统回收 → 重新进入 → 局面正确恢复」（不依赖进程不被杀）；不得出现一次触摸落两子
 - [ ] P3-T13 Android：生成调试 APK 真机测试，随后配置签名与 AAB
 - [ ] P3-T14 iOS：创建 `ios/` 工程（CMake iOS 目标或 SDL3 官方 iOS 模板 / `SDL3.xcframework`）
 - [ ] P3-T15 iOS：配置 Bundle ID、签名、`Info.plist`（方向、显示名、最低部署版本）、**LaunchScreen（缺失会被拒审）**

@@ -6,6 +6,8 @@ android {
     // SDL 的 Java 类（SDLActivity 等）位于 org.libsdl.app，namespace 保持不动
     namespace = "org.libsdl.app"
     compileSdkVersion 35
+    // 显式指定：AGP 8.7 默认会去找 34.0.0，而我们只装 35.0.0
+    buildToolsVersion "35.0.0"
     ndkVersion = "28.2.13676358"
 
     defaultConfig {
