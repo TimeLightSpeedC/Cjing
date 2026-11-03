@@ -125,3 +125,9 @@ android/.gradle/
 android/local.properties
 android/.idea/
 android/app/libs/
+
+# ------------------------------------------------ 十二、早期残留（已废弃）
+# 早期控制台原型与手工 Xcode 工程：已删除，改为 CMake 生成
+# 保留忽略规则，避免再次误提交
+/Cjing/
+/Cjing.xcodeproj/
