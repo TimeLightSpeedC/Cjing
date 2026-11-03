@@ -28,15 +28,23 @@
 #   TARGET_SONAME_FILE 给出的正是"加载器会去找的那个名字"。
 function(cjing_runtime_dep_files out_var)
     set(_files)
-    foreach(_dep IN ITEMS SDL3::SDL3 SDL3_ttf::SDL3_ttf)
-        if(TARGET ${_dep})
-            if(WIN32)
-                list(APPEND _files $<TARGET_FILE:${_dep}>)
-            else()
-                list(APPEND _files $<TARGET_SONAME_FILE:${_dep}>)
+        foreach(_dep IN ITEMS SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+            if(TARGET ${_dep})
+                # 静态链接（CJING_STATIC=ON）时没有运行时库可复制：
+                # 静态库没有 SONAME，$<TARGET_SONAME_FILE:...> 会直接报错，
+                # 因此按目标类型过滤。
+                get_target_property(_dep_type ${_dep} TYPE)
+                if(NOT _dep_type STREQUAL "SHARED_LIBRARY")
+                    continue()
+                endif()
+
+                if(WIN32)
+                    list(APPEND _files $<TARGET_FILE:${_dep}>)
+                else()
+                    list(APPEND _files $<TARGET_SONAME_FILE:${_dep}>)
+                endif()
             endif()
-        endif()
-    endforeach()
+        endforeach()
     set(${out_var} "${_files}" PARENT_SCOPE)
 endfunction()
 

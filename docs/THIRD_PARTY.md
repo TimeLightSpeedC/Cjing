@@ -14,8 +14,8 @@
 
 | 组件 | 版本 | 许可证 | 用途 | 分发形式 |
 |---|---|---|---|---|
-| **SDL3** | 3.5.0-dev（commit `b64293b3`） | zlib | 窗口、渲染、输入、音频、文件 IO | 动态库（`SDL3.dll` / `libSDL3.0.dylib` / `libSDL3.so.0`） |
-| **SDL3_ttf** | 3.3.0-dev（commit `e7cf7ce`） | zlib | TrueType 字体渲染 | 动态库（同上） |
+| **SDL3** | 3.5.0-dev（commit `b64293b3`） | zlib | 窗口、渲染、输入、音频、文件 IO | 桌面临时：动态库（`SDL3.dll` / `libSDL3.0.dylib` / `libSDL3.so.0`）<br>iOS：静态编入<br>桌面可选：`-DCJING_STATIC=ON` 静态编入 |
+| **SDL3_ttf** | 3.3.0-dev（commit `e7cf7ce`） | zlib | TrueType 字体渲染 | 同 SDL3（动态 / 静态可选；iOS 固定静态） |
 | **FreeType** | 随 SDL3_ttf 内置 | FTL（FreeType License） | 字形光栅化 | **静态编入** SDL3_ttf |
 | **HarfBuzz** | 随 SDL3_ttf 内置 | MIT | 复杂文本整形（中文排版必需） | **静态编入** SDL3_ttf |
 | **plutosvg / plutovg** | 随 SDL3_ttf 内置 | MIT | 彩色 SVG 字体 | **未启用**（`SDLTTF_PLUTOSVG=OFF`） |
@@ -78,3 +78,25 @@
   而我们用的 `main` 是 3.5.0-dev —— 直接降级有 API 风险，
   因此**留到 P5 发布阶段再决定是否锁定**，届时需要完整跑一轮回归。
 - 记录实际使用的提交号，是当前阶段保证可追溯性的手段（见本文开头的版本表）。
+
+---
+
+## 静态链接与协议（重要说明）
+
+**本项目的全部依赖都是宽松许可，静态链接不会产生"传染"义务：**
+
+| 许可证 | 静态链接的后果 |
+|---|---|
+| zlib（SDL3 / SDL3_ttf） | 只需保留版权与许可声明，**无需公开源码** |
+| FTL（FreeType） | 同上（BSD 风格，保留声明即可） |
+| MIT（HarfBuzz、plutosvg） | 同上 |
+| OFL 1.1（Noto Sans SC） | 可随应用分发；不得单独售卖字体；保留许可文本 |
+
+真正的"传染"来自 **GPL / LGPL**：
+
+- **GPL**：无论静态还是动态链接，都被视为衍生作品，必须按 GPL 公开源码；
+  且与 App Store 的条款冲突（苹果 DRM 不允许用户自行替换二进制）。
+- **LGPL**：动态链接可闭源；**静态链接**则要求提供目标文件等，使用户能重新链接
+  （LGPL v2.1 §6 / v3 §4）。
+
+因此本项目**禁止引入 GPL/LGPL 依赖**；如果将来必须使用，只能走动态链接且满足 LGPL 条件。

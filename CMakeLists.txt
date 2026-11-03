@@ -97,6 +97,7 @@ option(CJING_BUILD_EXAMPLES    "构建学习用示例（examples/）"           
 option(CJING_SANITIZE          "为本项目目标启用 ASan/UBSan（第三方依赖不受影响）"  OFF)
 option(CJING_WERROR            "把告警当作错误（仅本项目代码）"                     OFF)
 option(CJING_OFFLINE           "禁止联网：依赖必须来自本地缓存，否则直接报错"        OFF)
+option(CJING_STATIC            "静态链接 SDL3/SDL3_ttf：产物自包含，不生成也不复制动态库" OFF)
 
 # SDL3 的版本选择：
 #   用分支名 main 而不是 tag —— 因为鸿蒙后端（src/video/openharmony/）已合入主线，
@@ -176,6 +177,26 @@ if(CJING_FETCH_SDL3)
         GIT_SHALLOW    TRUE)
     # GIT_SHALLOW TRUE：只取最新一个提交（约 34MB，而非全历史 75MB）。
     # 全历史克隆在受限网络下经常被 reset；浅克隆稳定得多。
+
+    # -------------------------------------------------------------------------
+    # 链接方式（默认动态，与既有 CI/发布流程一致）
+    #
+    # 静态链接（-DCJING_STATIC=ON）：
+    #   · SDL3 用 SDL_SHARED / SDL_STATIC 控制（见其 CMakeLists.txt:233 的分支）
+    #   · SDL3_ttf 用标准的 BUILD_SHARED_LIBS
+    #   必须在 SDL3 的 CMakeLists 执行【之前】设置，否则选项已被缓存。
+    #
+    # 静态的好处：产物自包含，分发时不需要随包复制 .dll/.dylib/.so；
+    # 代价：二进制更大，升级 SDL 要重新编译整包。
+    # -------------------------------------------------------------------------
+    if(CJING_STATIC)
+        set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+        set(SDL_STATIC ON  CACHE BOOL "" FORCE)
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+        message(STATUS "链接方式: 静态（SDL3 / SDL3_ttf 编入可执行文件）")
+    else()
+        message(STATUS "链接方式: 动态（随包分发 .dll/.dylib/.so）")
+    endif()
 
     FetchContent_MakeAvailable(SDL3)
     # 成功后会得到 SDL3::SDL3 目标（SDL3 自身提供，静态/动态库二选一）

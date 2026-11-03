@@ -241,3 +241,30 @@ CI 提供三类证据，但**不能替代真机**：
 
 > 这条盲区是靠真机发现的：Windows 上把窗口放大后，文字比棋盘长得更快并右侧溢出，
 > 而 CI 截图当时完全正常。相关修复见 `textLogicalExtent()`。
+
+---
+
+## 静态链接（可选，`-DCJING_STATIC=ON`）
+
+默认是**动态链接**：构建后会把 `libSDL3*.dylib` / `.so` / `.dll` 复制到可执行文件旁边。
+
+如果希望**产物自包含**（单文件分发、不复制动态库）：
+
+```bash
+cmake -S . -B build-static -G Ninja -DCJING_STATIC=ON
+cmake --build build-static
+```
+
+实测对比（macOS arm64，Release）：
+
+| 方案 | 分发内容 | 体积 |
+|---|---|---|
+| 动态（默认） | `CjingApp` + `libSDL3.0.dylib` + `libSDL3_ttf.0.dylib` | 267 KB + 4.8 MB + 6.1 MB ≈ 11 MB |
+| **静态** | 仅 `CjingApp` | **11 MB** |
+
+- 体积基本持平（动态库原本也占这么多），收益是**分发简单**：一个文件即可运行；
+- `otool -L` 确认不再依赖任何 SDL / FreeType 动态库；
+- 静态库没有 SONAME，`cmake/CjingBundle.cmake` 会自动跳过复制步骤。
+
+> iOS 固定为静态（`ios/CMakeLists.txt` 里的 `-DBUILD_SHARED_LIBS=OFF`），
+> 原因见 `docs/构建流程对比.md`。
