@@ -87,9 +87,21 @@ done
 
 echo
 echo "=== sdkmanager 识别情况 ==="
-"$DST/cmdline-tools/latest/bin/sdkmanager" --list_installed 2>/dev/null \
-  | grep -E "build-tools;35|platforms;android-35|system-images|ndk;28|cmake;3.22" \
-  | sed 's/^/  /' || true
+# sdkmanager 是 Java 程序；macOS 默认没装 JRE 时会报
+# "Unable to locate a Java Runtime"。优先用 Android Studio 自带的 JBR。
+SDKMAN_JAVA="${JAVA_HOME:-}"
+if [ -z "$SDKMAN_JAVA" ] && [ -x "/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java" ]; then
+    SDKMAN_JAVA="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+fi
+if [ -n "$SDKMAN_JAVA" ]; then
+    JAVA_HOME="$SDKMAN_JAVA" "$DST/cmdline-tools/latest/bin/sdkmanager" --list_installed 2>/dev/null \
+      | grep -E "build-tools;35|platforms;android-35|system-images|ndk;28|cmake;3.22" \
+      | sed 's/^/  /' || true
+else
+    echo "  （未找到 Java，跳过此项校验；不影响合并结果）"
+    echo "  如需查看：JAVA_HOME='/Applications/Android Studio.app/Contents/jbr/Contents/Home' \\"
+    echo "            $DST/cmdline-tools/latest/bin/sdkmanager --list_installed"
+fi
 
 echo
 echo "完成。下一步："

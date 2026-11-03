@@ -11,7 +11,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "arm64-v8a"
+			"value" : "x86_64"
 		},
 		{
 			"name" : "ANDROID_NDK",
@@ -23,7 +23,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358"
 		},
 		{
 			"name" : "ANDROID_PLATFORM",
@@ -75,7 +75,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-addr2line"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-addr2line"
 		},
 		{
 			"name" : "CMAKE_ANDROID_ARCH_ABI",
@@ -87,7 +87,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "arm64-v8a"
+			"value" : "x86_64"
 		},
 		{
 			"name" : "CMAKE_ANDROID_NDK",
@@ -99,7 +99,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358"
 		},
 		{
 			"name" : "CMAKE_AR",
@@ -115,7 +115,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
 		},
 		{
 			"name" : "CMAKE_ASM_FLAGS",
@@ -175,7 +175,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -223,7 +223,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/cmake"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/bin/cmake"
 		},
 		{
 			"name" : "CMAKE_CPACK_COMMAND",
@@ -235,7 +235,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/cpack"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/bin/cpack"
 		},
 		{
 			"name" : "CMAKE_CTEST_COMMAND",
@@ -247,7 +247,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/ctest"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/bin/ctest"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER",
@@ -279,7 +279,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_RANLIB",
@@ -295,7 +295,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
 		},
 		{
 			"name" : "CMAKE_CXX_FLAGS",
@@ -423,7 +423,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ar"
 		},
 		{
 			"name" : "CMAKE_C_COMPILER_RANLIB",
@@ -439,7 +439,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
 		},
 		{
 			"name" : "CMAKE_C_FLAGS",
@@ -551,7 +551,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-dlltool"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-dlltool"
 		},
 		{
 			"name" : "CMAKE_EDIT_COMMAND",
@@ -563,7 +563,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/ccmake"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/bin/ccmake"
 		},
 		{
 			"name" : "CMAKE_EXECUTABLE_FORMAT",
@@ -1055,7 +1055,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/arm64-v8a"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64"
 		},
 		{
 			"name" : "CMAKE_LINKER",
@@ -1071,7 +1071,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/ld.lld"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/ld.lld"
 		},
 		{
 			"name" : "CMAKE_MAKE_PROGRAM",
@@ -1083,7 +1083,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/bin/ninja"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/bin/ninja"
 		},
 		{
 			"name" : "CMAKE_MODULE_LINKER_FLAGS",
@@ -1179,7 +1179,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-nm"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-nm"
 		},
 		{
 			"name" : "CMAKE_NUMBER_OF_MAKEFILES",
@@ -1207,7 +1207,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-objcopy"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-objcopy"
 		},
 		{
 			"name" : "CMAKE_OBJDUMP",
@@ -1223,7 +1223,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-objdump"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-objdump"
 		},
 		{
 			"name" : "CMAKE_PLATFORM_INFO_INITIALIZED",
@@ -1347,7 +1347,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-ranlib"
 		},
 		{
 			"name" : "CMAKE_READELF",
@@ -1363,7 +1363,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf"
 		},
 		{
 			"name" : "CMAKE_ROOT",
@@ -1375,7 +1375,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/cmake/3.22.1/share/cmake-3.22"
+			"value" : "/Users/c/Library/Android/sdk/cmake/3.22.1/share/cmake-3.22"
 		},
 		{
 			"name" : "CMAKE_RUNTIME_OUTPUT_DIRECTORY",
@@ -1387,7 +1387,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/arm64-v8a"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64"
 		},
 		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS",
@@ -1595,7 +1595,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip"
 		},
 		{
 			"name" : "CMAKE_SYSTEM_NAME",
@@ -1631,7 +1631,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake"
+			"value" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/build/cmake/android.toolchain.cmake"
 		},
 		{
 			"name" : "CMAKE_UNAME",
@@ -1674,24 +1674,36 @@
 			"value" : "1"
 		},
 		{
-			"name" : "COMPILER_SUPPORTS_ARMNEON",
+			"name" : "COMPILER_SUPPORTS_AVX",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Test COMPILER_SUPPORTS_ARMNEON"
+					"value" : "Test COMPILER_SUPPORTS_AVX"
 				}
 			],
 			"type" : "INTERNAL",
 			"value" : "1"
 		},
 		{
-			"name" : "COMPILER_SUPPORTS_ARMSVE2",
+			"name" : "COMPILER_SUPPORTS_AVX2",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Test COMPILER_SUPPORTS_ARMSVE2"
+					"value" : "Test COMPILER_SUPPORTS_AVX2"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_AVX512F",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_AVX512F"
 				}
 			],
 			"type" : "INTERNAL",
@@ -1728,6 +1740,78 @@
 				{
 					"name" : "HELPSTRING",
 					"value" : "Test COMPILER_SUPPORTS_GCC_ATOMICS"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_MMX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_MMX"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_SSE",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_SSE"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_SSE2",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_SSE2"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_SSE3",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_SSE3"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_SSE4_1",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_SSE4_1"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "1"
+		},
+		{
+			"name" : "COMPILER_SUPPORTS_SSE4_2",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Test COMPILER_SUPPORTS_SSE4_2"
 				}
 			],
 			"type" : "INTERNAL",
@@ -4455,7 +4539,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL"
 		},
 		{
 			"name" : "SDL3_IS_TOP_LEVEL",
@@ -4491,7 +4575,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL_ttf"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf"
 		},
 		{
 			"name" : "SDL3_ttf_IS_TOP_LEVEL",
@@ -4638,30 +4722,6 @@
 			"value" : "OFF"
 		},
 		{
-			"name" : "SDL_ARMNEON",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Use NEON assembly routines"
-				}
-			],
-			"type" : "BOOL",
-			"value" : "ON"
-		},
-		{
-			"name" : "SDL_ARMSVE2",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Use SVE2 assembly routines"
-				}
-			],
-			"type" : "BOOL",
-			"value" : "ON"
-		},
-		{
 			"name" : "SDL_ASAN",
 			"properties" : 
 			[
@@ -4704,6 +4764,42 @@
 				{
 					"name" : "HELPSTRING",
 					"value" : "Enable the Audio subsystem"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_AVX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use AVX assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_AVX2",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use AVX2 assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_AVX512F",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use AVX512F assembly routines"
 				}
 			],
 			"type" : "BOOL",
@@ -4839,7 +4935,7 @@
 				}
 			],
 			"type" : "BOOL",
-			"value" : "1"
+			"value" : "0"
 		},
 		{
 			"name" : "SDL_CPU_ARM64EC",
@@ -4971,7 +5067,7 @@
 				}
 			],
 			"type" : "BOOL",
-			"value" : "0"
+			"value" : "1"
 		},
 		{
 			"name" : "SDL_CPU_X86",
@@ -5274,6 +5370,18 @@
 			"value" : "OFF"
 		},
 		{
+			"name" : "SDL_MMX",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use MMX assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
 			"name" : "SDL_NOTIFICATION",
 			"properties" : 
 			[
@@ -5476,6 +5584,66 @@
 			],
 			"type" : "BOOL",
 			"value" : "OFF"
+		},
+		{
+			"name" : "SDL_SSE",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use SSE assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_SSE2",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use SSE2 assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_SSE3",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use SSE3 assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_SSE4_1",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use SSE4.1 assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
+		},
+		{
+			"name" : "SDL_SSE4_2",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Use SSE4.2 assembly routines"
+				}
+			],
+			"type" : "BOOL",
+			"value" : "ON"
 		},
 		{
 			"name" : "SDL_SYSTEM_ICONV",
@@ -5727,7 +5895,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64"
 		},
 		{
 			"name" : "cjing_IS_TOP_LEVEL",
@@ -5763,7 +5931,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL_ttf/external/freetype-build"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/freetype-build"
 		},
 		{
 			"name" : "freetype_IS_TOP_LEVEL",
@@ -5811,7 +5979,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL_ttf/external/harfbuzz-build"
+			"value" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/harfbuzz-build"
 		},
 		{
 			"name" : "harfbuzz_IS_TOP_LEVEL",

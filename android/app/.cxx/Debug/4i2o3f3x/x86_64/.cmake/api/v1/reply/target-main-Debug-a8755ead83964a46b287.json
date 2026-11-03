@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/arm64-v8a/libmain.so"
+			"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libmain.so"
 		}
 	],
 	"backtrace" : 1,
@@ -84,7 +84,7 @@
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL/include-revision"
+					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/include-revision"
 				},
 				{
 					"backtrace" : 2,
@@ -118,7 +118,7 @@
 			],
 			"sysroot" : 
 			{
-				"path" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+				"path" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
 			}
 		}
 	],
@@ -144,12 +144,12 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/arm64-v8a/libSDL3_ttf.so",
+				"fragment" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3_ttf.so",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/arm64-v8a/libSDL3.so",
+				"fragment" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libSDL3.so",
 				"role" : "libraries"
 			},
 			{
@@ -160,7 +160,7 @@
 		"language" : "CXX",
 		"sysroot" : 
 		{
-			"path" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+			"path" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
 		}
 	},
 	"name" : "main",

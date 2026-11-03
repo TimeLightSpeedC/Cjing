@@ -85,7 +85,7 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL_ttf/external/freetype-build/include"
+					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/freetype-build/include"
 				},
 				{
 					"backtrace" : 5,
@@ -93,7 +93,7 @@
 				},
 				{
 					"backtrace" : 5,
-					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL_ttf/external/freetype-build/include/freetype/config"
+					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL_ttf/external/freetype-build/include/freetype/config"
 				},
 				{
 					"backtrace" : 2,
@@ -148,7 +148,7 @@
 			],
 			"sysroot" : 
 			{
-				"path" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+				"path" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
 			}
 		}
 	],

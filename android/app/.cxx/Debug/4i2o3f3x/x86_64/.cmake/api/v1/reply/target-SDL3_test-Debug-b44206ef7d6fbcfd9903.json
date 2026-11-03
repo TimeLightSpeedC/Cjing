@@ -257,7 +257,7 @@
 			[
 				{
 					"backtrace" : 26,
-					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a/SDL/include-revision"
+					"path" : "/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL/include-revision"
 				},
 				{
 					"backtrace" : 26,
@@ -280,7 +280,7 @@
 			],
 			"sysroot" : 
 			{
-				"path" : "/Users/c/Desktop/MacMiniTest/Cjing/.tools/android-sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+				"path" : "/Users/c/Library/Android/sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
 			}
 		}
 	],

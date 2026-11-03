@@ -75,3 +75,34 @@ base = "assets://", name = "fonts/a.ttf"  ->  "assets://fonts/a.ttf"
 本地无 Android SDK 时，可依赖 CI：
 `.github/workflows/android.yml` 会在 Ubuntu 上安装 SDK 35 + NDK 28.2，
 执行 `setup.sh` 与 `./gradlew assembleDebug`，并上传 APK 作为 artifact。
+
+---
+
+## 与 Android Studio 共用 SDK（本机特殊情况）
+
+本机曾因 `sdkmanager` 的 Java TLS 握手失败无法装包，组件是用
+`scripts/install-android-sdk.sh`（curl 下载官方 zip）装到 `.tools/android-sdk` 的，
+导致 IDE 与命令行 SDK 路径不一致。
+
+用以下脚本合并到 Android Studio 的默认 SDK（**只复制，不删除**）：
+
+```bash
+./scripts/merge-android-sdk.sh
+```
+
+它会：
+
+1. 复制 build-tools / platform / ndk / cmake / system-images / cmdline-tools
+2. 把 `android/local.properties` 指向默认 SDK
+3. 把手工创建的 AVD 搬到 `~/.android/avd`
+
+> macOS 默认没有 JRE：`sdkmanager` 需要 Java。
+> 脚本会自动使用 Android Studio 自带的 JBR
+> （`/Applications/Android Studio.app/Contents/jbr/Contents/Home`）；
+> 手动执行时可显式设置 `JAVA_HOME`。
+
+合并完成后可用默认 SDK 直接构建（已验证）：
+
+```bash
+cd android && ./gradlew clean assembleDebug
+```
