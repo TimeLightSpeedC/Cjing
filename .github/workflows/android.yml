@@ -1,7 +1,7 @@
 # Android 构建验证（路线图 P3-T1/T2）
 #
-# 目的：在没有本地 Android SDK 的机器上也能验证"工程能编译出 APK"。
-# 只做构建，不做真机测试 —— 真机测试需要 adb 连接的设备（本地进行）。
+# 目的：在没有本地 Android SDK 的机器上验证"工程能编译出 APK"。
+# 只做构建；真机测试需要 adb 连接的设备（本地进行）。
 name: Android
 
 on:
@@ -9,6 +9,10 @@ on:
     branches: [ main, master ]
   pull_request:
   workflow_dispatch:
+
+env:
+  ANDROID_HOME: ${{ github.workspace }}/.android-sdk
+  ANDROID_SDK_ROOT: ${{ github.workspace }}/.android-sdk
 
 jobs:
   build-apk:
@@ -24,11 +28,24 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # 不用第三方 action：直接下载 Google 官方 commandline-tools。
+      # 这样版本与安装路径完全可控，失败时也容易定位。
       - name: 安装 Android 命令行工具
-        uses: android-actions/setup-android@v3
-
-      - name: 安装 SDK 35 与 NDK 28.2
         run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends unzip
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          cd "$ANDROID_HOME/cmdline-tools"
+          curl -fsSL -o tools.zip \
+            https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q tools.zip
+          mv cmdline-tools latest
+          rm tools.zip
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: 接受许可并安装 SDK 35 / NDK 28.2
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
           sdkmanager --install \
             "platforms;android-35" \
             "build-tools;35.0.0" \
