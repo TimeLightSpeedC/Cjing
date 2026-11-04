@@ -61,10 +61,30 @@ $HDC shell snapshot_display -f /data/local/tmp/shot.jpeg
 $HDC file recv /data/local/tmp/shot.jpeg ./shot.jpeg
 ```
 
-## 待验证项
+## 验证结果（HarmonyOS 模拟器 API 26，2026-11-04）
 
-- [ ] 中文渲染（预检已通过，产品文案不同）
-- [ ] 音效能否加载（鸿蒙后端音频支持程度未知，失败时静音运行）
-- [ ] 触摸落子 + 双击提示行重开
-- [ ] 切后台存档与恢复
-- [ ] 安全区（鸿蒙后端会调用 `SDL_SetWindowSafeAreaInsets`）
+![鸿蒙运行画面](../../docs/images/ohos-product.png)
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| 构建 | ✅ | `hvigorw assembleHap` → unsigned HAP 27MB |
+| 安装 | ✅ | 未签名 HAP 可安装（真机则要求签名，见下） |
+| 中文渲染 | ✅ | 画面「轮到 X / 点击棋盘落子 · 双击这行字重开」 |
+| 棋盘布局 | ✅ | 正方形，居中，无裁切 |
+| 触摸落子 | ✅ | `uitest uiInput click` 后 X 落在左上格，状态转「轮到 O」 |
+| 双击重开 | ✅ | 两次点击提示行后棋盘清空（截图 `ohos-restart.png`） |
+| 切后台存档 | ✅ | `files/Cjing/save.txt` 内容 `TTT1,X........,O,1` |
+| 冷启动恢复 | ✅ | 重启后 X 与「轮到 O」正确恢复 |
+| 音效 | ⚠️ 未确认 | 应用不依赖音频，缺失时静音运行 |
+| 安全区 | ⚠️ 未确认 | 鸿蒙后端会调用 `SDL_SetWindowSafeAreaInsets`，当前画面未见遮挡 |
+
+> **真机注意**：真机上未签名 HAP 会被拒绝（`error: no signature file`），
+> 模拟器则允许。真机验证需要先配置签名（DevEco 的 Signing Configs）。
+
+## 调试提示
+
+- 应用日志：`hdc shell hilog -x | grep -iE "cjing|SDL"`（SDL 的 `SDL_Log` 不一定进 hilog）
+- 触摸注入：`hdc shell uitest uiInput click <x> <y>`
+- 按键注入：`hdc shell uitest uiInput keyEvent Home`
+- 截图：`hdc shell snapshot_display -f /data/local/tmp/s.jpeg` + `hdc file recv`
+- 存档路径：`/data/app/el2/100/base/com.timelightspeed.cjing/files/Cjing/save.txt`

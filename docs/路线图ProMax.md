@@ -548,7 +548,11 @@ Cjing/                          # 仓库根目录
 > `libmain.so`，SDL3/SDL3_ttf 源码一并编译，资源进 `resources/rawfile/`。
 > 命令行构建通过（未签名 HAP 27MB，含两个 ABI 的 `libmain.so` 与字体音效）。
 > 签名暂缓：`build-profile.json5` 已移除 signingConfig，调试用未签名 HAP 安装。
-> 待真机验证：中文渲染、音效、触摸、存档、安全区。
+> **已在模拟器完成全流程验证（2026-11-04）**：中文渲染 ✅ 触摸落子 ✅
+> 双击提示行重开 ✅ 切后台存档 ✅ 冷启动恢复 ✅（存档实测 `TTT1,X........,O,1`）。
+> 唯一未确认的是音效（应用不依赖音频）与安全区（画面未见遮挡）。
+> **真机限制**：真机拒绝未签名 HAP（`no signature file`），模拟器允许；
+> 真机验证需先配置 DevEco 签名。预检工程 `platform_ohos/precheck/` 已归档。
 
 ## P4 HarmonyOS 适配（约 2–3 周）
 
