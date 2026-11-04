@@ -3,6 +3,7 @@
     "products": [
       {
         "name": "default",
+        "signingConfig": "default",
         // 签名延后处理：调试阶段用未签名 HAP + hdc install。
         // 需要签名时在 DevEco Studio 的 Project Structure → Signing Configs 生成。
         "targetSdkVersion": "5.0.4(16)",
@@ -30,13 +31,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.cer",
+          "certpath": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B8FB05B05E6343C3B0966E8A25688A2D3BCB19AD0A5169309C460E06CB38BB9898A4C4E57B6F765",
-          "profile": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.p7b",
+          "keyPassword": "0000001B8ADF5221E461DA1B105ED4957DA3173A57F0E14A01647C380240684EB5E340E830D1540DD63FC5",
+          "profile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.p12",
-          "storePassword": "0000001B719102E638284174849D3343E7E69A02AC1735A52C1C41B9285BC3B8CEE91844EB2B0FC37FB741"
+          "storeFile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p12",
+          "storePassword": "0000001B2F8CAAECD312504850F15AB67F3DF019C1468EF309973248A6E98C8B86478FE6BE9A5A1303A1C4"
         }
       }
     ]

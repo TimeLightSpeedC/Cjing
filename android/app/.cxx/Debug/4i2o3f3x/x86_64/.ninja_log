@@ -331,3 +331,6 @@
 1	18	0	/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/CMakeFiles/cmake.verify_globs	f86711c9242c04ab
 7	426	1793709780570057292	CMakeFiles/main.dir/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl/app.cpp.o	eca1a3d34548bc2d
 426	501	1793709780638771466	/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libmain.so	352119c4c49e2aa3
+2	30	0	/Users/c/Desktop/MacMiniTest/Cjing/android/app/.cxx/Debug/4i2o3f3x/x86_64/CMakeFiles/cmake.verify_globs	f86711c9242c04ab
+23	619	1793801991072715369	CMakeFiles/main.dir/Users/c/Desktop/MacMiniTest/Cjing/platform_sdl/app.cpp.o	eca1a3d34548bc2d
+619	737	1793801991181857175	/Users/c/Desktop/MacMiniTest/Cjing/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libmain.so	352119c4c49e2aa3

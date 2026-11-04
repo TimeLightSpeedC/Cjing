@@ -61,7 +61,7 @@ $HDC shell snapshot_display -f /data/local/tmp/shot.jpeg
 $HDC file recv /data/local/tmp/shot.jpeg ./shot.jpeg
 ```
 
-## 验证结果（HarmonyOS 模拟器 API 26，2026-11-04）
+## 验证结果（模拟器 API 26 + 真机，2026-11-04）
 
 ![鸿蒙运行画面](../../docs/images/ohos-product.png)
 
@@ -78,8 +78,50 @@ $HDC file recv /data/local/tmp/shot.jpeg ./shot.jpeg
 | 音效 | ⚠️ 未确认 | 应用不依赖音频，缺失时静音运行 |
 | 安全区 | ⚠️ 未确认 | 鸿蒙后端会调用 `SDL_SetWindowSafeAreaInsets`，当前画面未见遮挡 |
 
-> **真机注意**：真机上未签名 HAP 会被拒绝（`error: no signature file`），
-> 模拟器则允许。真机验证需要先配置签名（DevEco 的 Signing Configs）。
+### 真机验证（Mate 系列，`6BEUT26106000176`）
+
+![真机运行画面](../../docs/images/ohos-real-device.png)
+
+| 项 | 结果 | 证据 |
+|---|---|---|
+| 签名安装 | ✅ | `entry-default-signed.hap` 安装成功 |
+| 渲染 | ✅ | 中文、正方形棋盘、1320×2856 全屏 |
+| 触摸落子 | ✅ | `uitest uiInput click` → X 落左上格 |
+| 双击重开 | ✅ | 点两次提示行 → 棋盘清空 |
+| 切后台存档 | ✅ | `files/Cjing/save.txt` = `TTT1,X........,O,1` |
+| 冷启动恢复 | ✅ | 重启后 X 与「轮到 O」都在 |
+
+## ⚠️ 签名配置的坑（出现过两次，务必注意）
+
+**症状**：在 DevEco 里点了 *Automatically generate signature*，构建仍报
+「未检测到签名配置 / The bundleName ... does not match」。
+
+**根因**：`build-profile.json5` 里 **product 必须显式引用签名配置**：
+
+```json5
+"products": [
+  {
+    "name": "default",
+    "signingConfig": "default",   // ← 少了这一行就报「未检测到签名配置」
+    ...
+  }
+]
+```
+
+`signingConfigs` 里即使有完整材料（证书路径、密码），**没有这一行引用也不会生效**。
+
+**排查步骤**：
+
+1. 确认 product 里有 `"signingConfig": "default"`
+2. 确认 `signingConfigs[0].material` 指向的 `.p12/.cer/.p7b` 存在（`~/.ohos/config/`）
+3. 确认 profile 里的 `bundle-name` 与 `AppScope/app.json5` 的 `bundleName` 一致：
+   ```bash
+   strings ~/.ohos/config/default_app_*.p7b | grep bundle-name
+   ```
+4. 包名改过之后，旧签名材料会因 bundleName 不匹配而失败，需在 DevEco 里**重新生成**
+
+> 签名材料（含加密后的密码）是**机器相关**的，提交在仓库里只为让本机可复现；
+> 其他开发者应各自在 DevEco 生成，或把 `signingConfigs` 段替换为自己的材料。
 
 ## 调试提示
 
