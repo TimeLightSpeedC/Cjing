@@ -18,6 +18,10 @@ bool validSoundId(SoundId id) noexcept {
 std::unique_ptr<SDLAudio> SDLAudio::create(const AssetIO& assets) {
     // 音频是【可选能力】：初始化失败不应该阻止游戏运行。
     // 这也照顾了 CI（无音频设备）与静音系统。
+    // 低延迟：默认缓冲可能较大（数千帧，百毫秒级），鸿蒙后端还会再叠加缓冲，
+    // 实测音效延迟 0.5~1 秒。这里把期望缓冲帧数调小（后端不支持时会被忽略）。
+    SDL_SetHint(SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES, "512");
+
     if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
         SDL_Log("[Cjing] 音频子系统初始化失败（%s），将以静音运行", SDL_GetError());
         return nullptr;
@@ -31,7 +35,16 @@ std::unique_ptr<SDLAudio> SDLAudio::create(const AssetIO& assets) {
         return nullptr;
     }
 
-    SDL_Log("[Cjing] 音频设备已打开（device id=%u）", static_cast<unsigned>(dev));
+    // 记录实际格式与缓冲帧数：排查延迟时最关键的数值
+    SDL_AudioSpec got{};
+    int frames = 0;
+    if (SDL_GetAudioDeviceFormat(dev, &got, &frames)) {
+        SDL_Log("[Cjing] 音频设备已打开（id=%u，%d Hz，%d 声道，缓冲 %d 帧 ≈ %.0f ms）",
+                static_cast<unsigned>(dev), got.freq, got.channels, frames,
+                (got.freq > 0) ? (1000.0 * frames / got.freq) : 0.0);
+    } else {
+        SDL_Log("[Cjing] 音频设备已打开（device id=%u）", static_cast<unsigned>(dev));
+    }
     return std::unique_ptr<SDLAudio>(new SDLAudio(assets, dev));
 }
 

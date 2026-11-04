@@ -43,11 +43,13 @@ add_library(main SHARED
     ${CJING_ROOT}/platform_sdl/main_callbacks.cpp
     ${CJING_ROOT}/platform_sdl/sdl_view.cpp
     ${CJING_ROOT}/platform_sdl/sdl_io.cpp
-    ${CJING_ROOT}/platform_sdl/sdl_audio.cpp)
+    ${CJING_ROOT}/platform_sdl/sdl_audio.cpp
+    ${CJING_ROOT}/platform_sdl/ohos_log.cpp)
 
 target_include_directories(main PRIVATE
     ${CJING_ROOT}/core/include
     ${CJING_ROOT}/platform_sdl)
 
-target_link_libraries(main PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+# hilog_ndk.z：OH_LOG_Print 所在库（鸿蒙 NDK 的日志接口）
+target_link_libraries(main PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf hilog_ndk.z)
 target_compile_definitions(main PRIVATE CJING_HAVE_TTF=1)

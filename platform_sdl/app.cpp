@@ -1,5 +1,7 @@
 #include "app.hpp"
 
+#include "ohos_log.hpp"
+
 #include <cstdio>
 
 namespace ttt::sdl {
@@ -70,6 +72,9 @@ SDL_AppResult App::init() {
     //   会同步派发），但那依赖"注册早于设置"的隐含时序，容易在版本变化时失效。
     //   在初始化前设置是唯一不依赖时序的写法。
     // ---------------------------------------------------------------------
+    // 鸿蒙：把 SDL 日志接进 hilog（否则 SDL_Log 全丢，排查全靠猜）
+    installOhosLog();
+
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
@@ -87,6 +92,11 @@ SDL_AppResult App::init() {
     }
 
     renderer_ = SDL_CreateRenderer(window_, nullptr);
+    if (renderer_ != nullptr) {
+        // 记录实际选中的后端：鸿蒙上不同模拟器 API 版本差异极大
+        // （API26 手机走 gpu 正常；API24 手机/平板疑似走 GLES 翻译层，只出背景色）
+        SDL_Log("[Cjing] 渲染器后端: %s", SDL_GetRendererName(renderer_));
+    }
     if (renderer_ == nullptr) {
         std::fprintf(stderr, "[Cjing] 创建渲染器失败: %s\n", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -146,19 +156,28 @@ SDL_AppResult App::init() {
     //   而 android / uikit / openharmony 这三个驱动才是真正的移动平台。
     {
         const char* driver = SDL_GetCurrentVideoDriver();
-        const bool mobile = (driver != nullptr) &&
-                            (SDL_strcmp(driver, "android") == 0 ||
-                             SDL_strcmp(driver, "uikit") == 0 ||
-                             SDL_strcmp(driver, "openharmony") == 0);
+        bool mobile = (driver != nullptr) &&
+                      (SDL_strcmp(driver, "android") == 0 ||
+                       SDL_strcmp(driver, "uikit") == 0 ||
+                       SDL_strcmp(driver, "openharmony") == 0);
+
+        // 鸿蒙同时覆盖手机/平板/PC(2in1)，光看驱动不够：
+        // 有物理键盘或鼠标时按桌面处理（R/ESC 可用），改用键盘文案。
+        const bool hasKeyboard = SDL_HasKeyboard();
+        const bool hasMouse    = SDL_HasMouse();
+        if (mobile && (hasKeyboard || hasMouse)) {
+            mobile = false;
+        }
 
         int touchCount = 0;
         SDL_TouchID* devs = SDL_GetTouchDevices(&touchCount);   // 堆分配，需 SDL_free
         if (devs != nullptr) SDL_free(devs);
 
         touchMode_ = mobile;
-        SDL_Log("[Cjing] 输入模式: %s（视频驱动 %s，触摸设备 %d 个）",
+        SDL_Log("[Cjing] 输入模式: %s（视频驱动 %s，触摸设备 %d，键盘 %d，鼠标 %d）",
                 touchMode_ ? "触屏" : "键盘/鼠标",
-                (driver != nullptr) ? driver : "?", touchCount);
+                (driver != nullptr) ? driver : "?", touchCount,
+                hasKeyboard ? 1 : 0, hasMouse ? 1 : 0);
     }
 
     // ---- 音频（可选能力）----
@@ -213,15 +232,22 @@ void App::rebuildLayout() {
         present = SDL_FRect{0.0F, 0.0F, static_cast<float>(ow), static_cast<float>(oh)};
     }
 
-    // ⚠️ 单位陷阱：iOS 上 SDL_GetWindowSafeArea 返回的是【点】（402x874），
-    //    而逻辑呈现矩形是【像素】（1206x1206）。两者直接相减会得到荒谬的内缩，
-    //    把可用高度算成负数（棋盘 0x0）。Android 上恰好都是像素，掩盖了这个问题。
+    // ⚠️ 单位陷阱：SDL_GetWindowSafeArea 返回的是【窗口单位】，
+    //    iOS 上是"点"（402x874），Android 上是像素。
     //
-    //    这里先把安全区换算到像素空间：ppu = 逻辑呈现宽度 / 窗口宽度。
+    //    换算必须用 **窗口像素 / 窗口单位**（即 DPI 缩放），不能用
+    //    "逻辑呈现宽度 / 窗口宽度" —— 后者只在 letterbox 由宽度决定时才对。
+    //    鸿蒙电脑（2in1）是横屏窗口，letterbox 由高度决定，用宽度算会得到
+    //    ppu=0.63（实际 1.0），内缩被放大 → 棋盘从 ~675 缩到 396。
     int windowW = 0, windowH = 0;
+    int pixelW  = 0, pixelH  = 0;
     SDL_GetWindowSize(window_, &windowW, &windowH);
-    const float ppu = (windowW > 0) ? (present.w / static_cast<float>(windowW)) : 1.0F;
+    SDL_GetWindowSizeInPixels(window_, &pixelW, &pixelH);
+    const float ppu = (windowW > 0 && pixelW > 0)
+                          ? (static_cast<float>(pixelW) / static_cast<float>(windowW))
+                          : 1.0F;
     (void)windowH;
+    (void)pixelH;
 
     const SDL_FRect safePx{safe.x * ppu, safe.y * ppu,
                            safe.w * ppu, safe.h * ppu};
