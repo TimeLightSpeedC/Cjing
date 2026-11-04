@@ -120,8 +120,34 @@ $HDC file recv /data/local/tmp/shot.jpeg ./shot.jpeg
    ```
 4. 包名改过之后，旧签名材料会因 bundleName 不匹配而失败，需在 DevEco 里**重新生成**
 
-> 签名材料（含加密后的密码）是**机器相关**的，提交在仓库里只为让本机可复现；
-> 其他开发者应各自在 DevEco 生成，或把 `signingConfigs` 段替换为自己的材料。
+### 签名材料不入库（当前状态）
+
+`build-profile.json5` 里的 `signingConfigs` 已清空为**注释模板** ——
+签名材料含加密后的 keystore 密码，属于机器相关的东西，不应提交到公开仓库。
+
+**启用签名的两步**：
+
+1. DevEco Studio → *File → Project Structure → Signing Configs*
+   → 勾选 *Automatically generate signature*（登录华为账号）
+   —— 这一步会把材料写进 `signingConfigs`，文件落在 `~/.ohos/config/`
+2. **手动把这一行加回 products**（DevEco 不会自动加，这是最常见的问题）：
+
+```json5
+"signingConfig": "default",
+```
+
+未配置签名时，命令行构建产出 `entry-default-unsigned.hap`：
+模拟器可安装，**真机拒装**（`no signature file`）。
+
+### 应用名称
+
+| 工程 | 桌面显示名 | 定义位置 |
+|---|---|---|
+| `platform_ohos/app` | **井字棋** | `AppScope/.../string.json` 的 `app_name` + `entry/.../string.json` 的 `EntryAbility_label` |
+| `platform_ohos/precheck` | **井字棋预检** | 同上（历史工程，用于区分） |
+
+改包名后记得同步：签名 profile 里的 `bundle-name` 必须与 `AppScope/app.json5` 的
+`bundleName` 一致，否则签名失败。
 
 ## 调试提示
 

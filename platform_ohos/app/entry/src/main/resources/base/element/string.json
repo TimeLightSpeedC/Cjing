@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "SDL Application"
+      "value": "井字棋（Cjing）"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "SDL Application"
+      "value": "井字棋（Cjing）"
     },
     {
       "name": "EntryAbility_label",
-      "value": "SDL App"
+      "value": "井字棋"
     },
     {
       "name": "perm_reason_MICROPHONE",
@@ -30,4 +30,3 @@
     }
   ]
 }
-

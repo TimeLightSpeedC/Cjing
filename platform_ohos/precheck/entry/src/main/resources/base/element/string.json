@@ -2,15 +2,15 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "SDL Application"
+      "value": "SDK 预检工程"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "SDL Application"
+      "value": "SDK 预检工程"
     },
     {
       "name": "EntryAbility_label",
-      "value": "SDL App"
+      "value": "井字棋预检"
     },
     {
       "name": "perm_reason_MICROPHONE",
@@ -30,4 +30,3 @@
     }
   ]
 }
-

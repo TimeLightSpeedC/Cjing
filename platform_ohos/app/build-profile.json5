@@ -3,9 +3,9 @@
     "products": [
       {
         "name": "default",
-        "signingConfig": "default",
-        // 签名延后处理：调试阶段用未签名 HAP + hdc install。
-        // 需要签名时在 DevEco Studio 的 Project Structure → Signing Configs 生成。
+        // 签名：材料不入库（说明见文件末尾 signingConfigs）。
+        // 在 DevEco 生成后，把这一行加回来："signingConfig": "default",
+        // 未配置时产出未签名 HAP（模拟器可装，真机拒装）。
         "targetSdkVersion": "5.0.4(16)",
         "compatibleSdkVersion": "5.0.4(16)",
         "runtimeOS": "HarmonyOS",
@@ -27,19 +27,32 @@
       }
     ],
     "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001B8ADF5221E461DA1B105ED4957DA3173A57F0E14A01647C380240684EB5E340E830D1540DD63FC5",
-          "profile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p12",
-          "storePassword": "0000001B2F8CAAECD312504850F15AB67F3DF019C1468EF309973248A6E98C8B86478FE6BE9A5A1303A1C4"
-        }
-      }
+      // =====================================================================
+      //  这里是【本机】签名材料，不提交到仓库（含加密后的 keystore 密码）。
+      //
+      //  首次使用请在 DevEco Studio 里生成：
+      //    File → Project Structure → Signing Configs
+      //    → 勾选 Automatically generate signature（需登录华为账号）
+      //
+      //  DevEco 会在此处写入类似下面的内容，并生成材料到 ~/.ohos/config/：
+      //
+      //  {
+      //    "name": "default",
+      //    "type": "HarmonyOS",
+      //    "material": {
+      //      "certpath": "~/.ohos/config/default_app_xxx.cer",
+      //      "keyAlias": "debugKey",
+      //      "keyPassword": "<加密串>",
+      //      "profile": "~/.ohos/config/default_app_xxx.p7b",
+      //      "signAlg": "SHA256withECDSA",
+      //      "storeFile": "~/.ohos/config/default_app_xxx.p12",
+      //      "storePassword": "<加密串>"
+      //    }
+      //  }
+      //
+      //  ⚠️ 生成后请务必确认 products 里出现这一行（否则报「未检测到签名配置」）：
+      //      "signingConfig": "default",
+      // =====================================================================
     ]
   },
   "modules": [
