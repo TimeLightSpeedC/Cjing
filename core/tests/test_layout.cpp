@@ -6,7 +6,7 @@
 using namespace ttt;
 
 TEST_CASE("无安全区时棋盘为正方形且居中", "[layout]") {
-    const Layout L = Layout::compute(900, 0, 0, 0, 0);
+    const Layout L = Layout::compute(900, 900, 0, 0, 0, 0);
     REQUIRE(L.boardRect().w > 0);
     REQUIRE(L.boardRect().w == L.boardRect().h);          // 正方形
     REQUIRE(L.cellSize() == L.boardRect().w / kSize);
@@ -20,14 +20,14 @@ TEST_CASE("无安全区时棋盘为正方形且居中", "[layout]") {
 
 TEST_CASE("非正方形窗口下棋盘仍是正方形", "[layout]") {
     // 逻辑空间恒为正方形；此处用安全区制造不对称可用区域
-    const Layout L = Layout::compute(900, 100, 0, 0, 0);
+    const Layout L = Layout::compute(900, 900, 100, 0, 0, 0);
     REQUIRE(L.boardRect().w == L.boardRect().h);
     REQUIRE(L.boardRect().y >= 100);   // 不侵入顶部安全区
 }
 
 TEST_CASE("安全区把棋盘压小且不越界", "[layout]") {
-    const Layout none = Layout::compute(900, 0, 0, 0, 0);
-    const Layout safe = Layout::compute(900, 60, 60, 60, 60);
+    const Layout none = Layout::compute(900, 900, 0, 0, 0, 0);
+    const Layout safe = Layout::compute(900, 900, 60, 60, 60, 60);
     REQUIRE(safe.boardRect().w < none.boardRect().w);
     REQUIRE(safe.boardRect().x >= 60);
     REQUIRE(safe.boardRect().y >= 60);
@@ -36,7 +36,7 @@ TEST_CASE("安全区把棋盘压小且不越界", "[layout]") {
 }
 
 TEST_CASE("四角与中心映射到正确格子", "[layout]") {
-    const Layout L = Layout::compute(900, 0, 0, 0, 0);
+    const Layout L = Layout::compute(900, 900, 0, 0, 0, 0);
     const Recti& r = L.boardRect();
 
     // 每格中心必须映射回自身索引
@@ -50,7 +50,7 @@ TEST_CASE("四角与中心映射到正确格子", "[layout]") {
 }
 
 TEST_CASE("棋盘外与非法输入返回 -1", "[layout]") {
-    const Layout L = Layout::compute(900, 0, 0, 0, 0);
+    const Layout L = Layout::compute(900, 900, 0, 0, 0, 0);
     REQUIRE(L.cellAt(-1, -1) == -1);
     REQUIRE(L.cellAt(2000, 2000) == -1);
     // 左上角留白区（棋盘之外）
@@ -58,7 +58,7 @@ TEST_CASE("棋盘外与非法输入返回 -1", "[layout]") {
 }
 
 TEST_CASE("网格线落在棋盘范围内", "[layout]") {
-    const Layout L = Layout::compute(900, 0, 0, 0, 0);
+    const Layout L = Layout::compute(900, 900, 0, 0, 0, 0);
     for (int i = 1; i < kSize; ++i) {
         int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
         REQUIRE(L.gridLine(i, /*vertical=*/true, x1, y1, x2, y2));
@@ -77,14 +77,14 @@ TEST_CASE("网格线落在棋盘范围内", "[layout]") {
 }
 
 TEST_CASE("退化输入不崩溃", "[layout][robust]") {
-    const Layout zero = Layout::compute(0, 0, 0, 0, 0);
+    const Layout zero = Layout::compute(0, 0, 0, 0, 0, 0);
     REQUIRE(zero.cellSize() == 0);
     REQUIRE(zero.cellAt(0, 0) == -1);
     int a = 0, b = 0;
     REQUIRE_FALSE(zero.cellCenter(0, a, b));
 
     // 安全区大于逻辑尺寸
-    const Layout bad = Layout::compute(900, 500, 500, 500, 500);
+    const Layout bad = Layout::compute(900, 900, 500, 500, 500, 500);
     REQUIRE(bad.cellSize() >= 0);   // 不得为负
 }
 
@@ -97,7 +97,7 @@ TEST_CASE("退化输入不崩溃", "[layout][robust]") {
 // 现在两边都调用 Layout::hudLines()，这里是它的契约。
 // -----------------------------------------------------------------------------
 TEST_CASE("HUD 定位：状态行 12%，提示行 50%，且提示行更靠下", "[layout]") {
-    const ttt::Layout l = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
+    const ttt::Layout l = ttt::Layout::compute(900, 900, 0, 0, 0, 0, 120);
     REQUIRE(l.boardRect().y > 0);
 
     const ttt::Layout::HudLines h = l.hudLines();
@@ -112,4 +112,57 @@ TEST_CASE("HUD 定位：无效布局返回 0，不产生负坐标", "[layout]") 
     const ttt::Layout::HudLines h = bad.hudLines();
     CHECK(h.statusY == 0);
     CHECK(h.hintY   == 0);
+}
+
+// -----------------------------------------------------------------------------
+// 宽屏/竖屏排布（平板、电脑、自由窗口）
+//
+// 背景：逻辑画布不再固定 900×900 —— 短边固定 900，长边跟随窗口宽高比。
+// 宽屏时棋盘靠左、HUD 占右侧一列；竖屏保持 HUD 在棋盘上方。
+// -----------------------------------------------------------------------------
+TEST_CASE("排布模式：按可用区高宽比选择", "[layout]") {
+    CHECK(ttt::Layout::compute(900, 1600, 0, 0, 0, 0).mode() == ttt::Layout::Mode::Vertical);
+    CHECK(ttt::Layout::compute(900, 900, 0, 0, 0, 0).mode() == ttt::Layout::Mode::Vertical);
+    // 1000x900 只有 1.11，仍算竖屏（阈值 1.15）
+    CHECK(ttt::Layout::compute(1000, 900, 0, 0, 0, 0).mode() == ttt::Layout::Mode::Vertical);
+    CHECK(ttt::Layout::compute(1600, 900, 0, 0, 0, 0).mode() == ttt::Layout::Mode::Wide);
+}
+
+TEST_CASE("宽屏模式：棋盘仍是正方形且靠左，HUD 在其右侧", "[layout]") {
+    const ttt::Layout L = ttt::Layout::compute(1600, 900, 0, 0, 0, 0, 120);
+    REQUIRE(L.cellSize() > 0);
+    const ttt::Recti& b = L.boardRect();
+
+    CHECK(b.w == b.h);                      // 正方形约束不能破
+    CHECK(b.x >= 0);
+    CHECK(b.x + b.w <= 1600);               // 不超出画布
+    CHECK(b.y >= 0);
+    CHECK(b.y + b.h <= 900);
+
+    const ttt::Layout::HudLines h = L.hudLines();
+    CHECK(h.statusX > b.x + b.w);           // HUD 在棋盘右侧
+    CHECK(h.hintX   == h.statusX);
+    CHECK(h.hintY   > h.statusY);           // 提示行在状态行下方
+    CHECK(h.hintBand.w > 0);
+    CHECK(h.hintBand.x >= h.hintX);
+    CHECK(h.hintBand.x + h.hintBand.w <= 1600);
+}
+
+TEST_CASE("宽屏模式：棋盘比竖屏同高度时更大", "[layout]") {
+    const ttt::Layout tall = ttt::Layout::compute(900, 1600, 0, 0, 0, 0, 120);
+    const ttt::Layout wide = ttt::Layout::compute(1600, 900, 0, 0, 0, 0, 120);
+    REQUIRE(tall.cellSize() > 0);
+    REQUIRE(wide.cellSize() > 0);
+    // 宽屏可用高度虽只有 900，但宽度充裕；棋盘应比 900x1600 竖屏更大
+    CHECK(wide.cellSize() > tall.cellSize());
+}
+
+TEST_CASE("宽屏模式：安全区仍被尊重", "[layout]") {
+    const ttt::Layout L = ttt::Layout::compute(1600, 900, 40, 30, 40, 30);
+    REQUIRE(L.cellSize() > 0);
+    const ttt::Recti& b = L.boardRect();
+    CHECK(b.x >= 30);
+    CHECK(b.y >= 40);
+    CHECK(b.x + b.w <= 1600 - 30);
+    CHECK(b.y + b.h <= 900 - 40);
 }

@@ -55,6 +55,10 @@ public:
     void drawBoard(const Layout& layout) override;
     void drawPieces(const GameState& state, const Layout& layout) override;
     void drawWinningLine(const GameState& state, const Layout& layout) override;
+    // 量出某条文案在【逻辑单位】下的尺寸（用于布局：保证 HUD 放得下）。
+    // 返回 false 表示字体不可用或 TTF 未启用。
+    [[nodiscard]] bool textLogicalSize(TextId id, int& outW, int& outH);
+
     void drawText(TextId id, int x, int y,
                   std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 

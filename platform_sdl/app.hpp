@@ -39,6 +39,8 @@ public:
 
 private:
     void rebuildLayout();
+    // 按窗口宽高比重算逻辑画布尺寸（短边固定 900）
+    void updateLogicalSize();
     void refreshScale();
     void handlePointer(int renderX, int renderY);
 
@@ -57,6 +59,11 @@ private:
     Layout        layout_{};
     Game          game_{};
     float         scale_    = 1.0F;   // 逻辑单位 -> 输出像素
+
+    // 逻辑画布尺寸：短边固定为 kLogicalSize，长边随窗口宽高比变化。
+    // 这样横屏/平板/电脑窗口不会出现"正方形逻辑区两侧大片空白"。
+    int           logicalW_ = kLogicalSize;
+    int           logicalH_ = kLogicalSize;
 
     // 平台资源、存档与音频（core 只定义接口，实现留在这里）
     std::unique_ptr<SDLAssetIO> assetIO_;

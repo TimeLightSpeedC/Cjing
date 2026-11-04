@@ -17,11 +17,24 @@ struct Recti {
 
 class Layout {
 public:
-    // logical: 逻辑分辨率边长（如 900）；insets: 安全区在各边占用的逻辑单位
-    // reserveTop: 顶部额外预留（如状态文字区），棋盘在这个范围内居中
-    static Layout compute(int logical, int insetTop, int insetRight,
+    // 排布模式：竖屏（HUD 在棋盘上方）或宽屏（HUD 在棋盘右侧）
+    //
+    // 为什么需要两种：手机竖屏只有上下空间；平板/电脑/自由窗口是横向的，
+    // 把正方形棋盘塞进一个居中的逻辑方形会浪费两侧大片空间，
+    // 且文字相对棋盘会显得过大。宽屏模式把 HUD 挪到右侧，棋盘可以更大。
+    enum class Mode { Vertical, Wide };
+
+    // width/height: 逻辑分辨率（随窗口宽高比变化，短边固定为 900）
+    // insets: 安全区在各边占用的逻辑单位；reserveTop: 竖屏顶部额外预留
+    // hudMinWidth：HUD 文字所需的逻辑宽度（由平台层量出后传入）。
+    // 宽屏模式下据此保证右侧一列放得下文字，避免长文案被窗口裁掉。
+    static Layout compute(int width, int height,
+                          int insetTop, int insetRight,
                           int insetBottom, int insetLeft,
-                          int reserveTop = 0) noexcept;
+                          int reserveTop = 0,
+                          int hudMinWidth = 0) noexcept;
+
+    [[nodiscard]] Mode mode() const noexcept { return mode_; }
 
     // 棋盘整体区域（正方形、居中、已扣安全区）
     [[nodiscard]] const Recti& boardRect() const noexcept { return board_; }
@@ -40,8 +53,14 @@ public:
     //   导致 CI 截图与真机画面的间距不一致 —— 这类偏差只有肉眼能发现。
     //   统一到这里后，两边调用同一个函数，结构上不可能再分叉。
     struct HudLines {
-        int statusY = 0;   // 状态行（"轮到 X" / "X 获胜！"）
-        int hintY   = 0;   // 提示行（"点击棋盘落子 …"）
+        int statusX = 0;   // 状态行左端
+        int statusY = 0;   // 状态行顶端
+        int hintX   = 0;   // 提示行左端
+        int hintY   = 0;   // 提示行顶端
+
+        // 提示行的点击命中带（双击重开用）。比文字本身略高，
+        // 且横向覆盖整行可用宽度 —— 文字宽度随语言变化，逐字命中既脆弱又没必要。
+        Recti hintBand{};
     };
     [[nodiscard]] HudLines hudLines() const noexcept;
 
@@ -52,6 +71,10 @@ public:
 private:
     Recti board_{};
     int   cell_ = 0;
+    Mode  mode_ = Mode::Vertical;
+    int   width_ = 0;
+    int   height_ = 0;
+    HudLines hud_{};
 };
 
 }  // namespace ttt

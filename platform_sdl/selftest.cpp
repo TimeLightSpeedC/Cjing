@@ -92,7 +92,7 @@ int main() {
     if (ren == nullptr) {
         // dummy 驱动可能不提供渲染器：跳过渲染相关检查，但仍验证布局与逻辑
         std::printf("  · 渲染器不可用（%s），跳过渲染检查\n", SDL_GetError());
-        ttt::Layout l = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
+        ttt::Layout l = ttt::Layout::compute(900, 900, 0, 0, 0, 0, 120);
         check(l.cellSize() > 0, "布局计算（无渲染器环境）");
         bool allOk = true;
         for (int i = 0; i < ttt::kCellCount; ++i) { int cx=0, cy=0; if(!l.cellCenter(i,cx,cy) || l.cellAt(cx,cy)!=i) { allOk=false; break; } }
@@ -115,7 +115,7 @@ int main() {
     const ttt::sdl::SDLAssetIO assets(exeDir != nullptr ? exeDir : ".");
 
     // ---- 布局 ----
-    const ttt::Layout layout = ttt::Layout::compute(900, 0, 0, 0, 0, 120);
+    const ttt::Layout layout = ttt::Layout::compute(900, 900, 0, 0, 0, 0, 120);
     check(layout.cellSize() > 0, "布局计算：格子尺寸 > 0");
 
     // ---- 渲染一帧（含全部绘制路径）----

@@ -268,3 +268,13 @@ cmake --build build-static
 
 > iOS 固定为静态（`ios/CMakeLists.txt` 里的 `-DBUILD_SHARED_LIBS=OFF`），
 > 原因见 `docs/构建流程对比.md`。
+
+---
+
+## 桌面端调试用的环境变量
+
+| 变量 | 作用 |
+|---|---|
+| `CJING_WINDOW=宽x高` | 指定初始窗口尺寸（验证竖屏/宽屏排布，如 `1600x900`） |
+| `CJING_SHOT=/path/out.bmp` | 渲染 30 帧后把画面读回存盘并退出（不受其它窗口遮挡，可用于 CI） |
+| `CJING_SAVE_DIR=/path` | 存档目录覆盖（便携模式/自动化测试） |

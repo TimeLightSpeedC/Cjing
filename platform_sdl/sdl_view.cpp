@@ -305,6 +305,25 @@ void SDLView::drawTextAt(std::string_view utf8, int x, int y, Uint8 r, Uint8 g, 
 #endif
 }
 
+bool SDLView::textLogicalSize(TextId id, int& outW, int& outH) {
+#ifdef CJING_HAVE_TTF
+    if (font_ == nullptr) return false;
+    const std::string_view sv = textOf(id);
+    if (sv.empty()) return false;
+
+    int tw = 0, th = 0;
+    if (!TTF_GetStringSize(font_, sv.data(), sv.size(), &tw, &th)) return false;
+
+    // 字体按 逻辑字号 × scale_ 栅格化，所以像素尺寸要除回逻辑单位
+    outW = static_cast<int>(textLogicalExtent(tw, scale_));
+    outH = static_cast<int>(textLogicalExtent(th, scale_));
+    return outW > 0;
+#else
+    (void)id; (void)outW; (void)outH;
+    return false;
+#endif
+}
+
 void SDLView::drawText(TextId id, int x, int y,
                        std::uint8_t r, std::uint8_t g, std::uint8_t b) {
     // 视图不再持有文案表：统一向 core 的文案表查询。

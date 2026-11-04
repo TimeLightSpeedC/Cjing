@@ -11,6 +11,28 @@ constexpr Uint8 kHudR = 236, kHudG = 238, kHudB = 244;
 constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
 }  // namespace
 
+void App::updateLogicalSize() {
+    int ww = 0, wh = 0;
+    SDL_GetWindowSize(window_, &ww, &wh);
+    if (ww <= 0 || wh <= 0) {
+        logicalW_ = kLogicalSize;
+        logicalH_ = kLogicalSize;
+        return;
+    }
+
+    // 短边固定为 kLogicalSize；长边按窗口宽高比放大。
+    // 用整数运算，避免不同平台的浮点差异导致尺寸抖动。
+    if (ww >= wh) {
+        logicalH_ = kLogicalSize;
+        logicalW_ = static_cast<int>(static_cast<long long>(kLogicalSize) * ww / wh);
+    } else {
+        logicalW_ = kLogicalSize;
+        logicalH_ = static_cast<int>(static_cast<long long>(kLogicalSize) * wh / ww);
+    }
+    if (logicalW_ < 1) logicalW_ = 1;
+    if (logicalH_ < 1) logicalH_ = 1;
+}
+
 void App::refreshScale() {
     // 逻辑单位 -> 输出像素 的真实比例（唯一读取像素尺寸的地方）。
     //
@@ -26,7 +48,7 @@ void App::refreshScale() {
     SDL_FRect present{0.0F, 0.0F, 0.0F, 0.0F};
     if (SDL_GetRenderLogicalPresentationRect(renderer_, &present) &&
         present.w > 0.0F) {
-        next = present.w / static_cast<float>(kLogicalSize);
+        next = present.w / static_cast<float>(logicalW_);
         ok   = true;
     }
 
@@ -84,7 +106,18 @@ SDL_AppResult App::init() {
         return SDL_APP_FAILURE;
     }
 
-    window_ = SDL_CreateWindow("Tic-Tac-Toe", 800, 900,
+    // 窗口初始尺寸。可用 CJING_WINDOW=宽x高 覆盖，便于验证宽屏/竖屏两种排布
+    // （平板、自由窗口、电脑端都走同一套布局逻辑）。
+    int winW = 800;
+    int winH = 900;
+    if (const char* sz = SDL_getenv("CJING_WINDOW")) {
+        int w = 0, h = 0;
+        if (std::sscanf(sz, "%dx%d", &w, &h) == 2 && w > 0 && h > 0) {
+            winW = w;
+            winH = h;
+        }
+    }
+    window_ = SDL_CreateWindow("Tic-Tac-Toe", winW, winH,
                                SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
     if (window_ == nullptr) {
         std::fprintf(stderr, "[Cjing] 创建窗口失败: %s\n", SDL_GetError());
@@ -107,7 +140,12 @@ SDL_AppResult App::init() {
     }
 
     // F4/P2-T2：逻辑分辨率 + letterbox —— DPI 与窗口缩放全交给 SDL
-    SDL_SetRenderLogicalPresentation(renderer_, kLogicalSize, kLogicalSize,
+    //
+    // 逻辑画布不再是固定 900×900：短边固定 900，长边跟随窗口宽高比。
+    // 这样在平板/电脑/自由窗口（横向）里，布局能拿到真实的宽屏画布，
+    // 由 Layout 决定"棋盘靠左、HUD 靠右"，而不是把正方形塞进中间。
+    updateLogicalSize();
+    SDL_SetRenderLogicalPresentation(renderer_, logicalW_, logicalH_,
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
     // 显式启用 vsync（每帧等待显示器刷新）。
@@ -146,9 +184,13 @@ SDL_AppResult App::init() {
         SDL_GetCurrentRenderOutputSize(renderer_, &ow, &oh);
         SDL_GetRenderScale(renderer_, &rsx, &rsy);
         const Recti& br = layout_.boardRect();
-        SDL_Log("[Cjing] 布局: window=%dx%d output=%dx%d 渲染缩放=%.3fx%.3f 棋盘=%dx%d@(%d,%d) 格子=%d scale_=%.3f",
-                ww, wh, ow, oh, rsx, rsy, br.w, br.h, br.x, br.y,
-                layout_.cellSize(), static_cast<double>(scale_));
+        SDL_Log("[Cjing] 布局: window=%dx%d output=%dx%d 逻辑=%dx%d(%s) 渲染缩放=%.3fx%.3f "
+                "棋盘=%dx%d@(%d,%d) 格子=%d HUD带=%d scale_=%.3f",
+                ww, wh, ow, oh, logicalW_, logicalH_,
+                (layout_.mode() == Layout::Mode::Wide) ? "宽屏" : "竖屏",
+                rsx, rsy, br.w, br.h, br.x, br.y,
+                layout_.cellSize(), layout_.hudLines().hintBand.w,
+                static_cast<double>(scale_));
     }
 
 
@@ -205,12 +247,12 @@ SDL_AppResult App::init() {
         SDL_Log("[Cjing] 字体不可用，将以几何方式表达状态");
     }
 
-    SDL_Log("Cjing %s | SDL %d.%d.%d | 逻辑分辨率 %d",
+    SDL_Log("Cjing %s | SDL %d.%d.%d | 逻辑分辨率 %dx%d",
             "0.2.0",
             SDL_VERSIONNUM_MAJOR(SDL_GetVersion()),
             SDL_VERSIONNUM_MINOR(SDL_GetVersion()),
             SDL_VERSIONNUM_MICRO(SDL_GetVersion()),
-            kLogicalSize);
+            logicalW_, logicalH_);
     return SDL_APP_CONTINUE;
 }
 
@@ -256,7 +298,7 @@ void App::rebuildLayout() {
     const SDL_FRect safePx{safe.x * ppu, safe.y * ppu,
                            safe.w * ppu, safe.h * ppu};
 
-    const float pxPerLogical = present.w / static_cast<float>(kLogicalSize);
+    const float pxPerLogical = present.w / static_cast<float>(logicalW_);
     const float k = (pxPerLogical > 0.0F) ? (1.0F / pxPerLogical) : 1.0F;
 
     auto clamp0 = [](float v) -> int {
@@ -268,8 +310,21 @@ void App::rebuildLayout() {
     const int insetRight  = clamp0(((present.x + present.w) - (safePx.x + safePx.w)) * k);
     const int insetBottom = clamp0(((present.y + present.h) - (safePx.y + safePx.h)) * k);
 
-    layout_ = Layout::compute(kLogicalSize, insetTop, insetRight, insetBottom, insetLeft,
-                              kReserveTop);
+    // 量一下提示行文字需要多宽：宽屏模式据此保证右侧一列放得下，
+    // 否则长文案会被窗口裁掉（桌面 1600x900 实测过）。
+    int hudMinWidth = 0;
+    if (view_) {
+        int tw = 0, th = 0;
+        if (view_->textLogicalSize(hintText(), tw, th)) hudMinWidth = tw;
+        int sw = 0, sh = 0;
+        if (view_->textLogicalSize(statusText(), sw, sh)) {
+            hudMinWidth = std::max(hudMinWidth, sw);
+        }
+    }
+
+    layout_ = Layout::compute(logicalW_, logicalH_,
+                              insetTop, insetRight, insetBottom, insetLeft,
+                              kReserveTop, hudMinWidth);
 }
 
 void App::handlePointer(int renderX, int renderY) {
@@ -282,13 +337,13 @@ void App::handlePointer(int renderX, int renderY) {
     // 文字宽度随语言变化，按字做命中区既脆弱又没必要；
     // 这条带子位于棋盘上方，不会与落子区域重叠。
     {
-        const Recti& b = layout_.boardRect();
         const Layout::HudLines hud = layout_.hudLines();
-        if (b.w > 0) {
-            const int top    = hud.hintY - 8;
-            const int bottom = hud.hintY + 56;      // 44pt 行高 + 余量
-            const int left   = b.x;
-            const int right  = kLogicalSize;        // 文案可能比棋盘宽，右侧放开
+        const Recti& band = hud.hintBand;
+        if (band.w > 0) {
+            const int top    = band.y;
+            const int bottom = band.y + band.h;
+            const int left   = band.x;
+            const int right  = band.x + band.w;
 
             if (renderY >= top && renderY <= bottom && renderX >= left && renderX <= right) {
                 const Tap now{SDL_GetTicks(), renderX, renderY, true};
@@ -337,7 +392,11 @@ SDL_AppResult App::event(SDL_Event* e) {
         // P2-T5：窗口尺寸/DPI 变化时重算布局与缩放
         case SDL_EVENT_WINDOW_RESIZED:
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-        case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+            // 宽高比可能变了：重算逻辑画布，再重新套用逻辑呈现，
+            // 否则布局仍按旧画布计算，横竖切换时会错位。
+            updateLogicalSize();
+            SDL_SetRenderLogicalPresentation(renderer_, logicalW_, logicalH_,
+                                             SDL_LOGICAL_PRESENTATION_LETTERBOX);
             refreshScale();
             rebuildLayout();
             return SDL_APP_CONTINUE;
@@ -458,12 +517,29 @@ void App::drawHud() {
     // 两行的位置由 Layout 统一给出：自测截图用的是同一份计算，
     // 避免出现"CI 截图与真机画面间距不一致"这类只有肉眼能发现的偏差。
     const Layout::HudLines hud = layout_.hudLines();
-    view_->drawText(statusText(), b.x, hud.statusY, kHudR, kHudG, kHudB);
-    view_->drawText(hintText(), b.x, hud.hintY, kHintR, kHintG, kHintB);
+    // X 坐标来自 Layout：竖屏模式与棋盘左对齐；宽屏模式在棋盘右侧一列
+    view_->drawText(statusText(), hud.statusX, hud.statusY, kHudR, kHudG, kHudB);
+    view_->drawText(hintText(),   hud.hintX,   hud.hintY,   kHintR, kHintG, kHintB);
 }
 
 SDL_AppResult App::iterate() {
     if (!view_) return SDL_APP_CONTINUE;
+
+    // ---- 自截图模式（用于验证不同窗口尺寸下的排布）----
+    // 设置 CJING_SHOT=/path/out.bmp 后，渲染若干帧再读回像素并退出。
+    // 比抓屏可靠：不受其他窗口遮挡，也能在 CI 里用。
+    if (const char* shot = SDL_getenv("CJING_SHOT")) {
+        static int frames = 0;
+        ++frames;
+        if (frames == 30) {
+            if (SDL_Surface* surf = SDL_RenderReadPixels(renderer_, nullptr)) {
+                SDL_SaveBMP(surf, shot);
+                SDL_DestroySurface(surf);
+                SDL_Log("[Cjing] 已保存自截图: %s", shot);
+            }
+            return SDL_APP_SUCCESS;
+        }
+    }
 
     // 【每帧全量重绘 + 每帧 present】
     //
