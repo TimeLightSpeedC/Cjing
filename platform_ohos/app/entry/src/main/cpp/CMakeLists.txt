@@ -10,6 +10,11 @@
 #  而不是预检时的单个 main.c。
 # =============================================================================
 cmake_minimum_required(VERSION 3.5.0)
+
+# 允许给其它目录创建的目标（SDL3-shared）追加链接库
+if(POLICY CMP0079)
+    cmake_policy(SET CMP0079 NEW)
+endif()
 project(cjing C CXX)
 
 set(NATIVEAPP_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -28,6 +33,15 @@ set(SDLTTF_SAMPLES  OFF CACHE BOOL "" FORCE)
 set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
 
 add_subdirectory("SDL")
+
+# SDL 的鸿蒙音频后端默认采纳系统的回调帧数（4096 帧 ≈ 93ms）。
+# scripts/patch-sdl-ohos-audio.py 打了补丁，让它读取这个宏来设置更小的帧数。
+# 该宏只在鸿蒙构建定义，其它平台不受影响。
+set(CJING_OHOS_AUDIO_FRAMES 512 CACHE STRING "鸿蒙音频回调帧数（越小延迟越低）")
+if(TARGET SDL3-shared)
+    target_compile_definitions(SDL3-shared PRIVATE CJING_OHOS_AUDIO_FRAMES=${CJING_OHOS_AUDIO_FRAMES})
+    target_link_libraries(SDL3-shared PRIVATE ohaudio)
+endif()
 add_subdirectory("SDL_ttf")
 
 # 仓库根：cpp 位于 <repo>/platform_ohos/app/entry/src/main/cpp，向上五级

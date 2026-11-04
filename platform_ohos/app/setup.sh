@@ -22,6 +22,9 @@ echo "[2/3] 复制资源到 rawfile/"
 mkdir -p "$RAWFILE"
 cp -R "$ROOT/assets/." "$RAWFILE/"
 
+echo "[2.5/3] 给 SDL 的鸿蒙音频后端打补丁（降低音效延迟）"
+python3 "$ROOT/scripts/patch-sdl-ohos-audio.py"
+
 echo "[3/3] 校验"
 for p in "$CPP/SDL/CMakeLists.txt" "$CPP/SDL_ttf/CMakeLists.txt" \
          "$RAWFILE/fonts/NotoSansSC-Regular.ttf" "$RAWFILE/sounds/place.wav"; do

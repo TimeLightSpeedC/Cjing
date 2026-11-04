@@ -156,3 +156,76 @@ $HDC file recv /data/local/tmp/shot.jpeg ./shot.jpeg
 - 按键注入：`hdc shell uitest uiInput keyEvent Home`
 - 截图：`hdc shell snapshot_display -f /data/local/tmp/s.jpeg` + `hdc file recv`
 - 存档路径：`/data/app/el2/100/base/com.timelightspeed.cjing/files/Cjing/save.txt`
+
+---
+
+## 设备矩阵实测（2026-11-05）
+
+| 设备 | API | 类型 | 结果 |
+|---|---|---|---|
+| 真机 SLY-AL00 | 26 | phone | ✅ 完整可用（需签名） |
+| 模拟器 | 26 | phone | ✅ 完整可用 |
+| 模拟器 | 24 | 2in1（电脑） | ⚠️ 可用，见下 |
+| 模拟器 | 24 | phone / tablet | ❌ **黑屏**（仅有背景色，点击有声） |
+| 模拟器 | 16 | phone | ❌ 启动崩溃（历史问题） |
+
+### 黑屏（API24 手机/平板）
+
+日志显示应用完全正常：布局算出 684×684、音频设备打开、点击有音效，
+渲染器后端与能正常显示的 API26 设备**完全相同**（`opengles2`）。
+
+同样的构建在 2in1（API24）和 phone（API26）上正常 → 是这两个**模拟器镜像的
+图形栈**（DGLES 翻译层）问题，应用侧无法修复。
+
+尝试过改用 SDL 的 `gpu`（Vulkan）后端绕开：
+
+```
+[Cjing] gpu 后端不可用（No supported SDL_GPU backend found!），回退默认后端
+```
+
+API24 模拟器没有可用的 GPU 后端，回退后仍黑屏，该实验已回退。
+
+### 2in1（电脑）适配
+
+修了一个**代码级缺陷**：安全区换算把「逻辑呈现宽度 / 窗口宽度」当作 DPI 缩放，
+而横屏窗口的 letterbox 是由**高度**决定的 → ppu 算成 0.63（实际 1.0），
+内缩被放大，棋盘从 684 缩到 396。改用 `SDL_GetWindowSizeInPixels / SDL_GetWindowSize` 后正常。
+
+另外，2in1 模拟器**不向 SDL 暴露键盘和鼠标**（`键盘 0，鼠标 0`），
+因此仍显示触屏文案「双击这行字重开」。真实 PC 有键鼠时会自动切换为键盘文案。
+
+## 音效延迟（0.5~1 秒）：已优化到 20ms 缓冲
+
+### 根因
+
+SDL 的鸿蒙音频后端（`src/audio/ohaudio/SDL_ohaudio.c`）在建流后执行：
+
+```c
+device->sample_frames = OH_AudioRenderer_GetFrameSizeInCallback(...);   // 实测 4096 帧
+```
+
+即**直接采纳系统给的帧数**（4096 帧 ≈ 93ms），并且从不调用
+`OH_AudioStreamBuilder_SetFrameSizeInCallback`。因此
+`SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES` 在这条路径上无效（该文件里按 hint
+设置缓冲的代码还是 AAudio 时代的，已被 `#if 0` 停用）。
+
+SDL 内部还会缓冲 3 个这样的块 ≈ 280ms，再叠加系统管线 → 用户听到 0.5~1 秒。
+
+### 处理
+
+`scripts/patch-sdl-ohos-audio.py` 给该文件打一个**幂等补丁**，
+在设置延迟模式之后显式指定回调帧数：
+
+```c
+#ifdef CJING_OHOS_AUDIO_FRAMES
+    OH_AudioStreamBuilder_SetFrameSizeInCallback(builder, (int32_t)CJING_OHOS_AUDIO_FRAMES);
+#endif
+```
+
+- 帧数由 CMake 宏 `CJING_OHOS_AUDIO_FRAMES` 传入（默认 512）
+- 只在鸿蒙构建定义，其它平台编译结果不变
+- `setup.sh` 会自动执行补丁脚本
+
+**实测**：缓冲 4096 帧（93ms）→ **882 帧（20ms）**，SDL 三层缓冲从约 280ms 降到约 60ms。
+
+> 未验证：真机需解锁屏幕才能安装/启动，实际听感请人工确认。

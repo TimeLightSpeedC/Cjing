@@ -91,6 +91,10 @@ SDL_AppResult App::init() {
         return SDL_APP_FAILURE;
     }
 
+    // 说明：曾尝试在鸿蒙上优先用 SDL 的 GPU 后端（Vulkan），以绕开
+    // API24 手机/平板模拟器的 GLES 黑屏问题。实测这些模拟器返回
+    // "No supported SDL_GPU backend found!"，回退到 opengles2 仍然黑屏，
+    // 因此该实验已回退，保持默认后端（真机与 API26 模拟器均正常）。
     renderer_ = SDL_CreateRenderer(window_, nullptr);
     if (renderer_ != nullptr) {
         // 记录实际选中的后端：鸿蒙上不同模拟器 API 版本差异极大
