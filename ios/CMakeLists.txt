@@ -69,7 +69,8 @@ add_executable(cjing MACOSX_BUNDLE
     ${CJING_ROOT}/platform_sdl/main_callbacks.cpp
     ${CJING_ROOT}/platform_sdl/sdl_view.cpp
     ${CJING_ROOT}/platform_sdl/sdl_io.cpp
-    ${CJING_ROOT}/platform_sdl/sdl_audio.cpp)
+    ${CJING_ROOT}/platform_sdl/sdl_audio.cpp
+    ${CJING_ROOT}/platform_sdl/ohos_log.cpp)
 
 target_include_directories(cjing PRIVATE
     ${CJING_ROOT}/core/include

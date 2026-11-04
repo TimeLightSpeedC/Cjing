@@ -49,10 +49,28 @@
     <key>UILaunchScreen</key>
     <dict/>
 
-    <!-- 只允许竖屏 -->
+    <!-- 设备族：1=iPhone, 2=iPad。
+         不声明 2 的话，iPad 上会以「iPhone 兼容模式」运行（窗口只有 320x480），
+         既浪费屏幕，也让自适应布局无从发挥。 -->
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+        <integer>2</integer>
+    </array>
+
+    <!-- iPhone：只允许竖屏（棋盘正方形，横屏无收益） -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
+    </array>
+
+    <!-- iPad：允许横屏——这正是宽屏排布（棋盘靠左、HUD 靠右）的用武之地 -->
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
     <!-- 允许外接鼠标/触控板（iPadOS 指针支持） -->
