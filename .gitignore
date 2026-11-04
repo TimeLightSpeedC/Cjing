@@ -131,3 +131,16 @@ android/app/libs/
 # 保留忽略规则，避免再次误提交
 /Cjing/
 /Cjing.xcodeproj/
+
+# ------------------------------------------------ 十三、鸿蒙正式工程（P3）
+# 由 setup.sh 生成：源码链接与 resources/rawfile 资源副本
+platform_ohos/app/entry/src/main/cpp/SDL
+platform_ohos/app/entry/src/main/cpp/SDL_ttf
+platform_ohos/app/entry/src/main/resources/rawfile/
+# 构建产物与本机配置
+platform_ohos/app/**/build/
+platform_ohos/app/.hvigor/
+platform_ohos/app/.hvigor-home/
+platform_ohos/app/oh_modules/
+platform_ohos/app/local.properties
+platform_ohos/app/.idea/

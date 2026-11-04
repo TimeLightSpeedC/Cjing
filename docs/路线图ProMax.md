@@ -542,7 +542,15 @@ Cjing/                          # 仓库根目录
 - [ ] P3-T19 iOS：生成 Archive 前**必须用脚本移除嵌入的 SDL3 framework**（否则无法成功分发）；导出 IPA 验证可安装
 - [ ] P3-T20 里程碑 `v0.3.0`：Android/iOS 可玩（含 TTF 文字、存档恢复、安全区）＋ **渲染/布局相对 P2 零改动**（若有改动，回到 P2 修抽象）
 
-### P4 HarmonyOS 适配（约 2–3 周）
+#
+> **额外：HarmonyOS 正式工程（2026-11-03）**
+> `platform_ohos/app/` 已从预检工程进化而来：产品源码（core + platform_sdl）编译为
+> `libmain.so`，SDL3/SDL3_ttf 源码一并编译，资源进 `resources/rawfile/`。
+> 命令行构建通过（未签名 HAP 27MB，含两个 ABI 的 `libmain.so` 与字体音效）。
+> 签名暂缓：`build-profile.json5` 已移除 signingConfig，调试用未签名 HAP 安装。
+> 待真机验证：中文渲染、音效、触摸、存档、安全区。
+
+## P4 HarmonyOS 适配（约 2–3 周）
 
 > **里程碑 M4**：HarmonyOS NEXT 真机可玩，产出 `.hap`
 > **入场条件**：P2-T23 的预检为 Go；若为 No-Go，本阶段降级为"可行性跟踪 + 路线 B 试点"，**不阻塞 P5 的 5 平台发布**
