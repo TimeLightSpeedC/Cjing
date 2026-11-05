@@ -2,7 +2,7 @@
 <!-- ==========================================================================
      iOS 应用清单（路线图 P3-T15）
      说明：
-       * MACOSX_BUNDLE_ 前缀的变量由 CMake 在生成阶段替换
+       * CJING_ 前缀的变量由 CMake 的 configure_file 在配置阶段替换
          （来自 CMakeLists 的 set_target_properties）；
        * UILaunchScreen 是现代 iOS 的启动屏声明——**缺失会导致审核被拒**
          （Apple 要求应用必须提供启动屏）；<dict/> 即"使用纯色默认启动屏"。
@@ -15,16 +15,16 @@
     <string>zh_CN</string>
 
     <key>CFBundleExecutable</key>
-    <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+    <string>@CJING_EXECUTABLE_NAME@</string>
 
     <key>CFBundleIdentifier</key>
-    <string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+    <string>@CJING_BUNDLE_ID@</string>
 
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
 
     <key>CFBundleName</key>
-    <string>${MACOSX_BUNDLE_BUNDLE_NAME}</string>
+    <string>@CJING_DISPLAY_NAME@</string>
 
     <!-- 桌面图标下显示的名字 -->
     <key>CFBundleDisplayName</key>
@@ -34,16 +34,16 @@
     <string>APPL</string>
 
     <key>CFBundleShortVersionString</key>
-    <string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+    <string>@CJING_VERSION@</string>
 
     <key>CFBundleVersion</key>
-    <string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+    <string>@CJING_BUILD@</string>
 
     <key>LSRequiresIPhoneOS</key>
     <true/>
 
     <key>MinimumOSVersion</key>
-    <string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
+    <string>@CJING_DEPLOYMENT_TARGET@</string>
 
     <!-- 启动屏（缺失会被拒审） -->
     <key>UILaunchScreen</key>

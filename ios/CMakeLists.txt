@@ -79,12 +79,44 @@ target_include_directories(cjing PRIVATE
 target_link_libraries(cjing PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 target_compile_definitions(cjing PRIVATE CJING_HAVE_TTF=1)
 
+# ---- Info.plist：自己生成，两个生成器共用 ----
+#
+# 为什么不直接依赖 MACOSX_BUNDLE_INFO_PLIST 的默认处理：
+#   Xcode 生成器可能改用自己生成的 plist，导致 UILaunchScreen / UIDeviceFamily
+#   丢失 —— 应用会退回 iOS 的「兼容模式」：分辨率受限、文字被放大、
+#   iPad 上出现大片留白。这类问题在 Xcode 构建里出现过一次。
+#
+# 这里显式 configure_file 出 Info.plist，并同时设置：
+#   · MACOSX_BUNDLE_INFO_PLIST（Ninja 等生成器用）
+#   · XCODE_ATTRIBUTE_INFOPLIST_FILE（Xcode 生成器用）
+# 两边拿到的就是同一个文件。
+set(CJING_EXECUTABLE_NAME      "cjing")
+set(CJING_BUNDLE_ID            "com.timelightspeed.cjing")
+set(CJING_DISPLAY_NAME         "井字棋")
+set(CJING_VERSION              "0.2.0")
+set(CJING_BUILD                "0.2.0")
+if(NOT CJING_DEPLOYMENT_TARGET)
+    set(CJING_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+endif()
+if(NOT CJING_DEPLOYMENT_TARGET)
+    set(CJING_DEPLOYMENT_TARGET "16.0")
+endif()
+
+set(CJING_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info.plist")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
+               "${CJING_INFO_PLIST}" @ONLY)
+
 set_target_properties(cjing PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME            "井字棋"
-    MACOSX_BUNDLE_GUI_IDENTIFIER         "com.timelightspeed.cjing"
-    MACOSX_BUNDLE_BUNDLE_VERSION         "0.2.0"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING   "0.2.0"
-    MACOSX_BUNDLE_INFO_PLIST             "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in")
+    MACOSX_BUNDLE_BUNDLE_NAME            "${CJING_DISPLAY_NAME}"
+    MACOSX_BUNDLE_GUI_IDENTIFIER         "${CJING_BUNDLE_ID}"
+    MACOSX_BUNDLE_BUNDLE_VERSION         "${CJING_BUILD}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING   "${CJING_VERSION}"
+    MACOSX_BUNDLE_INFO_PLIST             "${CJING_INFO_PLIST}"
+    # Xcode 专用：禁用自动生成 plist，改用上面这份
+    XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE "NO"
+    XCODE_ATTRIBUTE_INFOPLIST_FILE          "${CJING_INFO_PLIST}"
+    # 同时声明 iPhone + iPad，避免 iPad 上以兼容模式运行
+    XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY  "1,2")
 
 # ---- 资源：复制到 .app/assets/ ----
 # SDL_GetBasePath() 在 iOS 返回 .app 目录，AssetIO 期望 <base>/assets/<name>

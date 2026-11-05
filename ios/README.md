@@ -108,3 +108,39 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 
 关键开关就是配置里的 `-DBUILD_SHARED_LIBS=OFF`：
 不加它，SDL3 在 iOS 上默认生成 dylib（见 SDL3 `CMakeLists.txt:233` 的分支）。
+
+## 排障：Xcode 构建后文字变大、iPad 两侧大片留白
+
+**症状**：用 Xcode 工程构建运行时，文字比预期大、行间距很宽；iPad 上画面只占中间一条，两侧大片留白。
+
+**原因**：应用跑在 iOS 的「兼容模式」。当 Info.plist 缺少
+`UILaunchScreen` 或 `UIDeviceFamily` 时，系统会按老版本兼容模式运行：
+分辨率被限制（典型窗口 320×480），界面被整体放大，iPad 上就表现为居中 + 大留白。
+
+**为什么 Ninja 构建正常、Xcode 构建异常**：
+CMake 的 Xcode 生成器可能改用自己生成的 Info.plist，导致上述键丢失。
+
+**已做的修复**（`ios/CMakeLists.txt`）：
+
+```cmake
+configure_file(Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist @ONLY)
+set_target_properties(cjing PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST "${CJING_INFO_PLIST}"          # Ninja 等
+    XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE "NO"            # Xcode：禁用自动生成
+    XCODE_ATTRIBUTE_INFOPLIST_FILE "${CJING_INFO_PLIST}"    # Xcode：用同一份
+    XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")           # iPhone + iPad
+```
+
+**验证方法**：运行后看控制台第一行布局日志。
+
+```
+正常（iPad）：window=806x1210  output=1612x2420  逻辑=900x1351(竖屏)
+兼容模式    ：window=320x480   output=640x960
+```
+
+看到 320×480 就说明 plist 仍未被采用，需要重新生成工程：
+
+```bash
+rm -rf build-ios-xcode
+./scripts/ios-xcode.sh
+```
