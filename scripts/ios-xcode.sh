@@ -21,8 +21,12 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 MODE="${1:-simulator}"
 OPEN_PROJECT=1
+DEV_TEAM="${CJING_DEV_TEAM:-}"
+_prev=""
 for arg in "$@"; do
     [ "$arg" = "--no-open" ] && OPEN_PROJECT=0
+    [ "$_prev" = "--team" ] && DEV_TEAM="$arg"
+    _prev="$arg"
 done
 
 case "$MODE" in
@@ -101,7 +105,9 @@ if ! "$CMAKE_BIN" -S "$ROOT/ios" -B "$BUILD" -G Xcode \
     -DCMAKE_OSX_ARCHITECTURES=arm64 \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
     -DBUILD_SHARED_LIBS=OFF \
-    -DCMAKE_XCODE_GENERATE_SCHEME=ON > "$LOG" 2>&1; then
+    -DCMAKE_XCODE_GENERATE_SCHEME=ON \
+    ${DEV_TEAM:+-DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM="$DEV_TEAM"} \
+    ${DEV_TEAM:+-DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_STYLE=Automatic} > "$LOG" 2>&1; then
     echo
     echo "✗ CMake 生成 Xcode 工程失败，最后 20 行："
     tail -20 "$LOG" | sed 's/^/    /'
@@ -123,6 +129,11 @@ fi
 echo
 echo "✓ 工程已生成：${PROJ}"
 echo "  产物位置：${BUILD}/Debug-${SYSROOT}/cjing.app"
+if [ "$SYSROOT" = "iphoneos" ] && [ -z "$DEV_TEAM" ]; then
+    echo
+    echo "⚠ 真机安装需要签名 Team。推荐带上 Team ID 重新生成："
+    echo "    ./scripts/ios-xcode.sh device --team <你的TeamID>"
+fi
 echo "  在 Xcode 中：选 scheme「cjing」→ 选设备 → Cmd+R"
 
 if [ "$OPEN_PROJECT" = "1" ]; then
