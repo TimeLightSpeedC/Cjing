@@ -271,3 +271,37 @@ CJING_WINDOW=1600x900 CJING_SHOT=/tmp/w.bmp ./CjingApp   # 渲染 30 帧后自�
 - `SDLView::drawTextWrapped()` / `measureTextWrapped()`：按 ` · ` 分段、贪心装箱
 - `Layout` 的 HUD 列不再按单行文字宽度扩张（32% 封顶，下限 240）
 - 宽屏命中带高度 110（两行），竖屏 64（一行）
+
+## 状态栏 / 导航栏（沉浸式外观）
+
+鸿蒙上 SDL 的后端**完全没有处理系统栏**（源码里连安全区设置都是
+`#if 0 // !!! FIXME`），因此状态栏用系统默认底色（白或黑），
+与深色画布割裂 —— Android/iOS 上不会这样。
+
+### 当前做法：系统栏跟随应用背景色
+
+在 `EntryAbility.ets` 里从 `onCreate` 异步取主窗口，设置：
+
+```ts
+win.setWindowSystemBarProperties({
+  statusBarColor: '#18181C',            // 与画布背景一致
+  statusBarContentColor: '#FFFFFF',     // 图标/文字白色
+  navigationBarColor: '#18181C',
+  navigationBarContentColor: '#FFFFFF'
+});
+```
+
+为什么不在 `onWindowStageCreate` 里做：SDL 会把自己的原生实现挂到 ability
+的原型上，接管 `onForeground` / `onWindowStageCreate` 等回调，覆盖不了。
+
+### 为什么没做"真沉浸式"（内容铺到状态栏下）
+
+那需要**安全区内缩**数据，而 SDL 的鸿蒙窗口层把 `SDL_SetWindowSafeAreaInsets`
+调用注释掉了（`SDL_openharmonywindow.c:111`）。没有内缩，内容会压到状态栏下面。
+
+要真正实现，需要：
+1. 在 ArkTS 侧用 `window.getWindowAvoidArea()` 取内缩；
+2. 通过 NAPI 传给原生（需要给 libmain.so 加 NAPI 导出）；
+3. 或修 SDL：让鸿蒙窗口层把 avoidArea 填进 `SDL_SetWindowSafeAreaInsets`。
+
+在拿到内缩之前，让状态栏颜色与画布一致是风险最低的做法。
