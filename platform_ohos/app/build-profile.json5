@@ -53,6 +53,19 @@
       //  ⚠️ 生成后请务必确认 products 里出现这一行（否则报「未检测到签名配置」）：
       //      "signingConfig": "default",
       // =====================================================================
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B9BFA193DBB15EC9971EC12117AC2D35CEDCBA2B39A70A4223CE0C66D448EEB0A6B75DBC9BB419F",
+          "profile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p12",
+          "storePassword": "0000001B543E46F57C00D70AF4715DDAF0BE8CF99217E673EB7BA544BAA999239DB578E81B907696FB0454"
+        }
+      }
     ]
   },
   "modules": [
