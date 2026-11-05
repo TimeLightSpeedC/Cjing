@@ -305,6 +305,107 @@ void SDLView::drawTextAt(std::string_view utf8, int x, int y, Uint8 r, Uint8 g, 
 #endif
 }
 
+namespace {
+
+// 把 UTF-8 文案按 " · " 切成若干段（分隔符保留在段之间）
+std::vector<std::string> splitBySeparator(std::string_view text) {
+    // 分隔符：空格 + U+00B7（中点）+ 空格
+    static constexpr std::string_view kSep = " \u00B7 ";
+    std::vector<std::string> out;
+    std::size_t pos = 0;
+    while (pos <= text.size()) {
+        const std::size_t hit = text.find(kSep, pos);
+        if (hit == std::string_view::npos) {
+            out.emplace_back(text.substr(pos));
+            break;
+        }
+        out.emplace_back(text.substr(pos, hit - pos));
+        pos = hit + kSep.size();
+    }
+    return out;
+}
+
+// 折行结果：逐行文本 + 度量
+struct WrappedText {
+    std::vector<std::string> lines;
+    int width = 0;          // 最宽一行（逻辑单位）
+    int lineHeight = 0;     // 单行高度
+    int totalHeight = 0;    // 含行间距的总高度
+};
+
+// 按 " · " 分段，逐段贪心装箱。
+// 为什么按分隔符而不是按字符：中文没有空格，任意字符断行会切出半个词；
+// 文案本身就用 " · " 分隔语义单元，按它断行既自然又稳定。
+WrappedText wrapText(TTF_Font* font, float scale, std::string_view text,
+                     int maxWidth, int lineGap) {
+    WrappedText out;
+#ifdef CJING_HAVE_TTF
+    if (font == nullptr || text.empty()) return out;
+
+    out.lineHeight = static_cast<int>(textLogicalExtent(TTF_GetFontHeight(font), scale));
+    if (out.lineHeight <= 0) out.lineHeight = 44;
+
+    auto measure = [&](std::string_view sv) -> int {
+        int tw = 0, th = 0;
+        if (!TTF_GetStringSize(font, sv.data(), sv.size(), &tw, &th)) return 0;
+        return static_cast<int>(textLogicalExtent(tw, scale));
+    };
+
+    const std::vector<std::string> segs = splitBySeparator(text);
+    const int sepW = measure(" \u00B7 ");      // " · "
+    const int limit = (maxWidth > 0) ? maxWidth : (1 << 20);
+
+    std::string current;
+    auto flush = [&]() {
+        if (!current.empty()) out.lines.push_back(current);
+        current.clear();
+    };
+
+    for (const std::string& seg : segs) {
+        const int segW = measure(seg);
+        if (current.empty()) {
+            current = seg;
+            continue;
+        }
+        const int candidate = measure(current) + sepW + segW;
+        if (candidate <= limit) {
+            current += " \u00B7 ";
+            current += seg;
+        } else {
+            flush();
+            current = seg;
+        }
+    }
+    flush();
+
+    for (const std::string& line : out.lines) {
+        out.width = std::max(out.width, measure(line));
+    }
+    const int n = static_cast<int>(out.lines.size());
+    out.totalHeight = (n > 0) ? (n * out.lineHeight + (n - 1) * lineGap) : 0;
+#endif
+    return out;
+}
+
+}  // namespace
+
+int SDLView::measureTextWrapped(TextId id, int maxWidth, int lineGap, int& outWidth) {
+    const WrappedText w = wrapText(font_, scale_, textOf(id), maxWidth, lineGap);
+    outWidth = w.width;
+    return w.totalHeight;
+}
+
+int SDLView::drawTextWrapped(TextId id, int x, int y, int maxWidth, int lineGap,
+                             std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+    const WrappedText w = wrapText(font_, scale_, textOf(id), maxWidth, lineGap);
+    int yy = y;
+    for (const std::string& line : w.lines) {
+        drawTextAt(line, x, yy, r, g, b);
+        yy += w.lineHeight + lineGap;
+    }
+    return w.totalHeight;
+}
+
 bool SDLView::textLogicalSize(TextId id, int& outW, int& outH) {
 #ifdef CJING_HAVE_TTF
     if (font_ == nullptr) return false;

@@ -59,6 +59,17 @@ public:
     // 返回 false 表示字体不可用或 TTF 未启用。
     [[nodiscard]] bool textLogicalSize(TextId id, int& outW, int& outH);
 
+    // 按 " · " 分隔符折行绘制（宽屏 HUD 用）。
+    // 文案本身是一整句，这里只做"按分隔点断行"，不做任意字符折行 ——
+    // 中文没有空格，按分隔符断行既自然又可预测。
+    // 返回实际占用的高度（逻辑单位，未包含最后一行下方的 lineGap）。
+    int drawTextWrapped(TextId id, int x, int y, int maxWidth, int lineGap,
+                        std::uint8_t r, std::uint8_t g, std::uint8_t b);
+
+    // 测量折行后的高度；outWidth 返回最宽一行（用于布局预留）。
+    [[nodiscard]] int measureTextWrapped(TextId id, int maxWidth, int lineGap,
+                                         int& outWidth);
+
     void drawText(TextId id, int x, int y,
                   std::uint8_t r, std::uint8_t g, std::uint8_t b) override;
 

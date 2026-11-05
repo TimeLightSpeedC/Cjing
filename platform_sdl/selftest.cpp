@@ -300,6 +300,16 @@ int main() {
         ttt::sdl::SDLView tv(ren, 1.0F, assets);
         const bool ok = tv.loadFont("fonts/NotoSansSC-Regular.ttf", 44);
         check(ok, "字体加载成功（字形覆盖检查前置）");
+
+        // ---- 提示折行（宽屏 HUD 的绘制方式）----
+        // 宽屏下提示按 " · " 断成两行，避免侧栏吃掉整个宽度、把棋盘挤小。
+        if (ok) {
+            int w = 0;
+            const int narrow = tv.measureTextWrapped(ttt::TextId::HintPlaying, 300, 6, w);
+            const int wide   = tv.measureTextWrapped(ttt::TextId::HintPlaying, 900, 6, w);
+            check(narrow >= 88, "提示折行：窄宽度下至少占两行高度");
+            check(wide  <  88, "提示折行：宽宽度下只有一行");
+        }
 #ifdef CJING_HAVE_TTF
         if (ok) {
             TTF_Font* f = tv.rawFontForTest();

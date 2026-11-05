@@ -114,8 +114,11 @@ Layout Layout::compute(int width, int height,
 
     // ---------------- 宽屏：棋盘靠左，HUD 占右侧一列 ----------------
     const int gap   = std::max(16, std::min(availW, availH) / 40);
-    // HUD 列宽：至少 240，且必须容得下实测文字宽度（hudMinWidth）。
-    // 上限取可用宽度的 55%，否则极长文案会把棋盘挤没。
+    // HUD 列宽：取可用宽度的 32%，下限 240。
+    //
+    // 提示文字会【折行】（按 " · " 断开），所以这里不该按单行宽度扩张列宽 ——
+    // 否则一句长提示会吃掉 700 单位，把棋盘挤到 420（iPad 横屏实测过的坏结果）。
+    // hudMinWidth 仍保留：调用方若明确要求不折行，可传更大值。
     int hudW = std::max(240, availW * 32 / 100);
     if (hudMinWidth > 0) {
         hudW = std::max(hudW, hudMinWidth + gap + kHudSafety);
@@ -171,8 +174,9 @@ Layout Layout::compute(int width, int height,
     out.hud_.statusY = out.board_.y + out.board_.h * 28 / 100;
     out.hud_.hintX   = hudX;
     out.hud_.hintY   = out.board_.y + out.board_.h * 46 / 100;
+    // 宽屏下提示折成两行，命中带相应加高（只用于双击判定，不影响落子）
     out.hud_.hintBand = Recti{hudX, out.hud_.hintY - 8,
-                              out.width_ - hudX, 64};
+                              out.width_ - hudX, 110};
     return out;
 }
 

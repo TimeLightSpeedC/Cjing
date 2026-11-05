@@ -9,6 +9,9 @@ namespace {
 // HUD 配色（与 sdl_view.cpp 的 kText* 保持一致的视觉基调）
 constexpr Uint8 kHudR = 236, kHudG = 238, kHudB = 244;
 constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
+
+// 提示折行后的行间距（逻辑单位）
+constexpr int kHintLineGap = 6;
 }  // namespace
 
 void App::updateLogicalSize() {
@@ -310,21 +313,11 @@ void App::rebuildLayout() {
     const int insetRight  = clamp0(((present.x + present.w) - (safePx.x + safePx.w)) * k);
     const int insetBottom = clamp0(((present.y + present.h) - (safePx.y + safePx.h)) * k);
 
-    // 量一下提示行文字需要多宽：宽屏模式据此保证右侧一列放得下，
-    // 否则长文案会被窗口裁掉（桌面 1600x900 实测过）。
-    int hudMinWidth = 0;
-    if (view_) {
-        int tw = 0, th = 0;
-        if (view_->textLogicalSize(hintText(), tw, th)) hudMinWidth = tw;
-        int sw = 0, sh = 0;
-        if (view_->textLogicalSize(statusText(), sw, sh)) {
-            hudMinWidth = std::max(hudMinWidth, sw);
-        }
-    }
-
+    // 提示文字在宽屏下会【折行】，因此不再按单行宽度索要列宽。
+    // （传 hudMinWidth 会让 HUD 列吃满宽度，把棋盘挤小 —— iPad 横屏踩过。）
     layout_ = Layout::compute(logicalW_, logicalH_,
                               insetTop, insetRight, insetBottom, insetLeft,
-                              kReserveTop, hudMinWidth);
+                              kReserveTop);
 }
 
 void App::handlePointer(int renderX, int renderY) {
@@ -517,9 +510,15 @@ void App::drawHud() {
     // 两行的位置由 Layout 统一给出：自测截图用的是同一份计算，
     // 避免出现"CI 截图与真机画面间距不一致"这类只有肉眼能发现的偏差。
     const Layout::HudLines hud = layout_.hudLines();
-    // X 坐标来自 Layout：竖屏模式与棋盘左对齐；宽屏模式在棋盘右侧一列
+    // X 来自 Layout：竖屏与棋盘左对齐；宽屏在棋盘右侧一列
     view_->drawText(statusText(), hud.statusX, hud.statusY, kHudR, kHudG, kHudB);
-    view_->drawText(hintText(),   hud.hintX,   hud.hintY,   kHintR, kHintG, kHintB);
+
+    // 提示行按 HUD 可用宽度折行绘制：
+    //   竖屏  → 宽度足够，仍是一行
+    //   宽屏  → 按 " · " 断成两行，避免占掉整个侧栏
+    view_->drawTextWrapped(hintText(), hud.hintX, hud.hintY,
+                           hud.hintBand.w, kHintLineGap,
+                           kHintR, kHintG, kHintB);
 }
 
 SDL_AppResult App::iterate() {
