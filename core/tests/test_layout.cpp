@@ -96,15 +96,36 @@ TEST_CASE("退化输入不崩溃", "[layout][robust]") {
 // 导致 CI 截图与真机画面间距不一致 —— 人眼才能发现，自动测试抓不到。
 // 现在两边都调用 Layout::hudLines()，这里是它的契约。
 // -----------------------------------------------------------------------------
-TEST_CASE("HUD 定位：状态行 12%，提示行 50%，且提示行更靠下", "[layout]") {
+TEST_CASE("HUD 定位：两行都在棋盘上方的预留带内且彼此紧邻", "[layout]") {
     const ttt::Layout l = ttt::Layout::compute(900, 900, 0, 0, 0, 0, 120);
     REQUIRE(l.boardRect().y > 0);
 
     const ttt::Layout::HudLines h = l.hudLines();
-    CHECK(h.statusY == l.boardRect().y * 12 / 100);
-    CHECK(h.hintY   == l.boardRect().y * 50 / 100);
     CHECK(h.hintY > h.statusY);
-    CHECK(h.hintY < l.boardRect().y);          // 必须还在棋盘上方，否则会压住棋格
+    CHECK(h.hintY < l.boardRect().y);          // 必须在棋盘上方，否则会压住棋格
+    CHECK(h.statusY >= 0);
+
+    // 关键约束：两行之间的间距应在一行文字的量级，
+    // 而不是随画布高度被拉开（旧实现按 board.y 的百分比定位，手机上会拉开 200+）
+    CHECK(h.hintY - h.statusY <= 80);
+    // HUD 要贴着棋盘，不能飘到屏幕顶端
+    CHECK(l.boardRect().y - h.hintY <= 140);
+
+    // 命中带覆盖提示行
+    CHECK(h.hintBand.y <= h.hintY);
+    CHECK(h.hintBand.y + h.hintBand.h >= h.hintY);
+}
+
+TEST_CASE("超长画布（手机 900x1950）HUD 不被拉散", "[layout]") {
+    // 复现真机问题：逻辑画布 900x1951，棋盘 792，旧实现 board.y=621，
+    // HUD 按百分比定位后两行相距 236 单位，肉眼可见"间距过大"。
+    const ttt::Layout l = ttt::Layout::compute(900, 1951, 0, 0, 0, 0, 120);
+    REQUIRE(l.cellSize() > 0);
+
+    const ttt::Layout::HudLines h = l.hudLines();
+    CHECK(h.hintY - h.statusY <= 80);                 // 两行紧邻
+    CHECK(l.boardRect().y - h.hintY <= 140);          // HUD 贴着棋盘
+    CHECK(l.boardRect().y + l.boardRect().h < 1951);  // 棋盘不出界
 }
 
 TEST_CASE("HUD 定位：无效布局返回 0，不产生负坐标", "[layout]") {

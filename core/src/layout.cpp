@@ -90,13 +90,22 @@ Layout Layout::compute(int width, int height,
         out.board_.w = out.cell_ * kSize;
         out.board_.h = out.board_.w;
         out.board_.x = availX + (availW - out.board_.w) / 2;
-        out.board_.y = availY + reserve + (usableH - out.board_.h) / 2;
 
-        // HUD 沿用既有公式（相对棋盘顶 12% / 50%），保持与历史截图一致
+        // ⚠️ 不能把棋盘单独在整屏高度里居中。
+        //    手机逻辑画布可能高达 1950（短边 900），棋盘受宽度限制只有 792，
+        //    单独居中的话上方会空出 600+，而 HUD 若再按 board.y 的百分比定位，
+        //    两行文字就会被拉到屏幕两端（实测：提示行距状态行 236 单位）。
+        //
+        //    正确做法：把「HUD 预留区 + 棋盘」当成一个整体垂直居中，
+        //    HUD 固定在棋盘正上方的预留带内。
+        const int contentH = reserve + out.board_.h;
+        const int top = availY + std::max(0, (availH - contentH) / 2);
+        out.board_.y = top + reserve;
+
         out.hud_.statusX = out.board_.x;
-        out.hud_.statusY = out.board_.y * 12 / 100;
         out.hud_.hintX   = out.board_.x;
-        out.hud_.hintY   = out.board_.y * 50 / 100;
+        out.hud_.statusY = top + reserve * 18 / 100;
+        out.hud_.hintY   = top + reserve * 58 / 100;
         out.hud_.hintBand = Recti{
             out.board_.x, out.hud_.hintY - 8,
             std::max(out.board_.w, out.width_ - out.board_.x), 64};
