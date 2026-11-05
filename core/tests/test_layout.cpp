@@ -187,3 +187,63 @@ TEST_CASE("宽屏模式：安全区仍被尊重", "[layout]") {
     CHECK(b.x + b.w <= 1600 - 30);
     CHECK(b.y + b.h <= 900 - 40);
 }
+
+// -----------------------------------------------------------------------------
+// 布局规范（跨平台一致性）
+//
+// 所有平台（Android / iOS / HarmonyOS / 桌面）共用 core/layout，
+// 因此"同一宽高比 → 同一套坐标"是硬保证。下面这些断言把它钉住：
+//   · 竖屏 HUD 行距、提示到棋盘的间距是常量，不随屏幕高度变化
+//   · 宽屏棋盘要真正利用横向空间（≥55% 宽度）
+//   · 各形态下棋盘都是正方形、不出界、HUD 在正确一侧
+// -----------------------------------------------------------------------------
+TEST_CASE("布局规范：竖屏 HUD 行距与提示-棋盘间距为常量", "[layout][spec]") {
+    for (int h : {1200, 1560, 1956}) {
+        const ttt::Layout L = ttt::Layout::compute(900, h, 0, 0, 0, 0, 120);
+        REQUIRE(L.cellSize() > 0);
+        const ttt::Layout::HudLines H = L.hudLines();
+        CHECK(H.hintY - H.statusY == 48);                 // 两行行距
+        CHECK(L.boardRect().y - H.hintY == 51);            // 提示到棋盘
+    }
+}
+
+TEST_CASE("布局规范：宽屏棋盘至少占画布 55% 宽度", "[layout][spec]") {
+    const ttt::Layout L = ttt::Layout::compute(1200, 900, 0, 0, 0, 0, 120);
+    REQUIRE(L.mode() == ttt::Layout::Mode::Wide);
+    CHECK(L.boardRect().w * 100 >= 1200 * 55);
+}
+
+TEST_CASE("布局规范：各形态下棋盘正方形、不出界、HUD 在正确一侧", "[layout][spec]") {
+    struct Form { int w; int h; const char* name; };
+    const Form forms[] = {
+        { 900, 1956, "手机竖屏" },
+        { 1956, 900, "手机横屏" },
+        { 1032, 1376, "平板竖屏" },
+        { 1376, 1032, "平板横屏" },
+        { 1600, 900, "桌面宽屏" },
+        { 800, 1200, "桌面竖窗" },
+    };
+
+    for (const Form& f : forms) {
+        INFO("形态: " << f.name);
+        const ttt::Layout L = ttt::Layout::compute(f.w, f.h, 0, 0, 0, 0, 120);
+        REQUIRE(L.cellSize() > 0);
+
+        const ttt::Recti& b = L.boardRect();
+        CHECK(b.w == b.h);                       // 正方形
+        CHECK(b.x >= 0);
+        CHECK(b.y >= 0);
+        CHECK(b.x + b.w <= f.w);                 // 不出界
+        CHECK(b.y + b.h <= f.h);
+
+        const ttt::Layout::HudLines H = L.hudLines();
+        CHECK(H.hintBand.w > 0);                 // 命中带有效（双击重开）
+        CHECK(H.hintY > H.statusY);
+        if (L.mode() == ttt::Layout::Mode::Vertical) {
+            CHECK(H.statusX == b.x);             // 与棋盘左对齐
+            CHECK(H.hintY < b.y);                // 在棋盘上方
+        } else {
+            CHECK(H.statusX > b.x + b.w);        // 在棋盘右侧
+        }
+    }
+}

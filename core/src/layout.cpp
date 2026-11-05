@@ -33,6 +33,13 @@ namespace {
   // 避免提示行最后几个字被窗口边缘裁掉（桌面 1600x900 实测过）。
   constexpr int kHudSafety = 16;
 
+  // HUD 两行在"顶部预留带"中的位置（百分比）。
+  // 相对于预留带而不是棋盘 → 行距是常量，不会随屏幕高度漂移。
+  //   行距 = 58% - 18% = 40% × 120 ≈ 48 逻辑单位
+  //   提示到棋盘 = 120 - 58% × 120 ≈ 51
+  constexpr int kHudStatusPercent = 18;
+  constexpr int kHudHintPercent   = 58;
+
 constexpr int kBoardRatioNum = 88;
 constexpr int kBoardRatioDen = 100;
 
@@ -104,8 +111,8 @@ Layout Layout::compute(int width, int height,
 
         out.hud_.statusX = out.board_.x;
         out.hud_.hintX   = out.board_.x;
-        out.hud_.statusY = top + reserve * 18 / 100;
-        out.hud_.hintY   = top + reserve * 58 / 100;
+        out.hud_.statusY = top + reserve * kHudStatusPercent / 100;
+        out.hud_.hintY   = top + reserve * kHudHintPercent / 100;
         out.hud_.hintBand = Recti{
             out.board_.x, out.hud_.hintY - 8,
             std::max(out.board_.w, out.width_ - out.board_.x), 64};
