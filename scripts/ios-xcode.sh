@@ -80,7 +80,8 @@ if ! "$CMAKE_BIN" -S "$ROOT/ios" -B "$BUILD" -G Xcode \
     -DCMAKE_OSX_SYSROOT="$SYSROOT" \
     -DCMAKE_OSX_ARCHITECTURES=arm64 \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
-    -DBUILD_SHARED_LIBS=OFF > "$LOG" 2>&1; then
+    -DBUILD_SHARED_LIBS=OFF \
+    -DCMAKE_XCODE_GENERATE_SCHEME=ON > "$LOG" 2>&1; then
     echo
     echo "✗ CMake 生成 Xcode 工程失败，最后 20 行："
     tail -20 "$LOG" | sed 's/^/    /'

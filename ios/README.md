@@ -76,6 +76,14 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 - `PrivacyInfo.xcprivacy` 隐私清单（T16）
 - Archive / IPA 导出验证（T19）
 
+## 为什么 Xcode 直接打开 `ios/` 不能编译
+
+`ios/` 里**没有 `.xcodeproj`**，只有 `CMakeLists.txt`、`Info.plist.in`、
+`PrivacyInfo.xcprivacy`、`README.md`。Xcode 打开一个目录时不会"猜"出 CMake 工程，
+所以既没有 target 也没有 scheme，Run 按钮是灰的。
+
+正确顺序是：**先用 CMake 生成 Xcode 工程，再打开生成物**。
+
 ## 用 Xcode 构建与调试（交互式）
 
 命令行 Ninja 适合 CI；交互式调试用 Xcode 更方便（断点、调试器、Instruments）：
