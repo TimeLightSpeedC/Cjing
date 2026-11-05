@@ -259,6 +259,29 @@ SDL_AppResult App::init() {
     return SDL_APP_CONTINUE;
 }
 
+void App::ensureAudio() {
+    if (audio_) return;
+
+    // 只在启动时尝试一次的话，模拟器偶发的 HAL 初始化失败会让整局静音。
+    // 这里每约 2 秒（60fps 下 120 帧）重试一次，最多 10 次（约 20 秒）。
+    if (audioRetryFrames_ > 0) {
+        --audioRetryFrames_;
+        return;
+    }
+    if (audioRetriesLeft_ <= 0) return;
+
+    --audioRetriesLeft_;
+    audioRetryFrames_ = 120;
+
+    audio_ = SDLAudio::create(*assetIO_);
+    if (!audio_) return;
+
+    audio_->load(SoundId::Place, "sounds/place.wav");
+    audio_->load(SoundId::Win,   "sounds/win.wav");
+    audio_->load(SoundId::Draw,  "sounds/draw.wav");
+    SDL_Log("[Cjing] 音频设备已打开（启动时失败，重试成功）");
+}
+
 void App::rebuildLayout() {
     // F6/P2-T11：安全区注入 Layout（Android 15+ / 刘海屏必做）
     //
@@ -536,6 +559,9 @@ void App::drawHud() {
 
 SDL_AppResult App::iterate() {
     if (!view_) return SDL_APP_CONTINUE;
+
+    // 音频设备可能在启动之后才就绪（模拟器/蓝牙切换），持续尝试
+    ensureAudio();
 
     // ---- 自截图模式（用于验证不同窗口尺寸下的排布）----
     // 设置 CJING_SHOT=/path/out.bmp 后，渲染若干帧再读回像素并退出。

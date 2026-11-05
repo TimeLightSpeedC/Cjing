@@ -39,6 +39,8 @@ public:
 
 private:
     void rebuildLayout();
+    // 音频不可用时按节奏重试（见 .cpp 注释）
+    void ensureAudio();
     // 按窗口宽高比重算逻辑画布尺寸（短边固定 900）
     void updateLogicalSize();
     void refreshScale();
@@ -69,6 +71,11 @@ private:
     std::unique_ptr<SDLAssetIO> assetIO_;
     std::unique_ptr<SDLSaveIO>  saveIO_;
     std::unique_ptr<SDLAudio>   audio_;     // 可能为 nullptr：无音频设备时静音运行
+
+    // 音频打开失败后的重试计数（帧）。模拟器的 CoreAudio 偶尔在启动瞬间
+    // 不可用（HALC ... no system object），只在 init 试一次会导致整局静音。
+    int audioRetryFrames_ = 0;
+    int audioRetriesLeft_ = 10;
     int           lastCell_ = -1;     // 触摸/鼠标去重（P2-T9）
 
     // ---- 触屏适配（P3）----
