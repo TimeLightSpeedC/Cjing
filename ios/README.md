@@ -109,6 +109,24 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 关键开关就是配置里的 `-DBUILD_SHARED_LIBS=OFF`：
 不加它，SDL3 在 iOS 上默认生成 dylib（见 SDL3 `CMakeLists.txt:233` 的分支）。
 
+## iPadOS 26 的窗口模式（左右留白）
+
+iPadOS 26 起，应用默认以**可缩放窗口**运行。实测默认窗口只有 635×1376，
+两侧露出桌面壁纸 —— 那不是布局留白，而是系统窗口没铺满。
+
+本项目在 Info.plist 声明：
+
+```xml
+<key>UIRequiresFullScreen</key>
+<true/>
+```
+
+声明后窗口变为 1032×1376（全屏）。该键在较新系统上已被标记废弃，
+若未来被忽略，可选方案：
+- 让用户用窗口控件（右上角）手动最大化；
+- 或在 UIKit 侧用 `UIWindowScene.requestGeometryUpdate` 请求全屏
+  （需要自有的 ObjC/Swift 代码，目前全部由 SDL 托管）。
+
 ## 排障：Xcode 构建后文字变大、iPad 两侧大片留白
 
 **症状**：用 Xcode 工程构建运行时，文字比预期大、行间距很宽；iPad 上画面只占中间一条，两侧大片留白。

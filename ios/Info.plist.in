@@ -45,6 +45,12 @@
     <key>MinimumOSVersion</key>
     <string>@CJING_DEPLOYMENT_TARGET@</string>
 
+    <!-- iPad 上要求全屏：iPadOS 26 默认以可缩放窗口运行，
+         游戏类应用应铺满屏幕（用户仍可用系统手势退出）。
+         注意：苹果在较新系统上已把它标记为废弃，若被忽略则退回窗口模式。 -->
+    <key>UIRequiresFullScreen</key>
+    <true/>
+
     <!-- 启动屏（缺失会被拒审） -->
     <key>UILaunchScreen</key>
     <dict/>
