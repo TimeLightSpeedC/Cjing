@@ -309,6 +309,15 @@ int main() {
             const int wide   = tv.measureTextWrapped(ttt::TextId::HintPlaying, 900, 6, w);
             check(narrow >= 88, "提示折行：窄宽度下至少占两行高度");
             check(wide  <  88, "提示折行：宽宽度下只有一行");
+
+            // 单个超长分句（无 " · " 可断）必须退化为逐字折行，否则会冲出屏幕。
+            // 例：iPad 横屏结束语「双击这行字再来一局」在 360 宽列里放不下。
+            {
+                int lw = 0;
+                const int lh = tv.measureTextWrapped(ttt::TextId::HintOverTouch, 360, 6, lw);
+                check(lw <= 360, "超长分句：折行后最宽一行不超过给定宽度");
+                check(lh >= 88, "超长分句：确实分成了两行");
+            }
         }
 #ifdef CJING_HAVE_TTF
         if (ok) {

@@ -203,7 +203,7 @@ TEST_CASE("布局规范：竖屏 HUD 行距与提示-棋盘间距为常量", "[l
         REQUIRE(L.cellSize() > 0);
         const ttt::Layout::HudLines H = L.hudLines();
         CHECK(H.hintY - H.statusY == 48);                 // 两行行距
-        CHECK(L.boardRect().y - H.hintY == 51);            // 提示到棋盘
+        CHECK(L.boardRect().y - H.hintY == 87);            // 提示到棋盘（含 36 间距）
     }
 }
 

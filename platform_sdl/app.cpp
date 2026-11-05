@@ -313,11 +313,24 @@ void App::rebuildLayout() {
     const int insetRight  = clamp0(((present.x + present.w) - (safePx.x + safePx.w)) * k);
     const int insetBottom = clamp0(((present.y + present.h) - (safePx.y + safePx.h)) * k);
 
-    // 提示文字在宽屏下会【折行】，因此不再按单行宽度索要列宽。
-    // （传 hudMinWidth 会让 HUD 列吃满宽度，把棋盘挤小 —— iPad 横屏踩过。）
+    // 量出"折行后"的文字宽度，交给 Layout 决定 HUD 列宽：
+    //   · 太窄 → 文字挤成多行、列宽不够会溢出
+    //   · 太宽 → 棋盘被挤小（曾出现 420/1200）
+    // 上限取逻辑宽度的 40%，避免超长文案独占屏幕。
+    int hudMinWidth = 0;
+    if (view_) {
+        const int cap = std::max(240, logicalW_ * 2 / 5);
+        int w = 0;
+        (void)view_->measureTextWrapped(hintText(), cap, kHintLineGap, w);
+        hudMinWidth = w;
+        int sw = 0;
+        (void)view_->measureTextWrapped(statusText(), cap, kHintLineGap, sw);
+        hudMinWidth = std::max(hudMinWidth, sw);
+    }
+
     layout_ = Layout::compute(logicalW_, logicalH_,
                               insetTop, insetRight, insetBottom, insetLeft,
-                              kReserveTop);
+                              kReserveTop, hudMinWidth);
 }
 
 void App::handlePointer(int renderX, int renderY) {

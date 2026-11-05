@@ -58,10 +58,13 @@
         <integer>2</integer>
     </array>
 
-    <!-- iPhone：只允许竖屏（棋盘正方形，横屏无收益） -->
+    <!-- iPhone：允许竖屏与横屏（横屏走宽屏排布：棋盘靠左、HUD 靠右）。
+         此前只声明竖屏，导致设备旋转时界面不跟着转。 -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
     <!-- iPad：允许横屏——这正是宽屏排布（棋盘靠左、HUD 靠右）的用武之地 -->

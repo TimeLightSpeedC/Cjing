@@ -336,6 +336,23 @@ struct WrappedText {
 // 按 " · " 分段，逐段贪心装箱。
 // 为什么按分隔符而不是按字符：中文没有空格，任意字符断行会切出半个词；
 // 文案本身就用 " · " 分隔语义单元，按它断行既自然又稳定。
+// 按 UTF-8 码位切成单个字符（用于超长分句的逐字折行）
+std::vector<std::string> splitChars(std::string_view s) {
+    std::vector<std::string> out;
+    for (std::size_t i = 0; i < s.size();) {
+        const auto c = static_cast<unsigned char>(s[i]);
+        std::size_t len = 1;
+        if ((c & 0x80) == 0x00)      len = 1;
+        else if ((c & 0xE0) == 0xC0) len = 2;
+        else if ((c & 0xF0) == 0xE0) len = 3;
+        else if ((c & 0xF8) == 0xF0) len = 4;
+        if (i + len > s.size()) len = 1;
+        out.emplace_back(s.substr(i, len));
+        i += len;
+    }
+    return out;
+}
+
 WrappedText wrapText(TTF_Font* font, float scale, std::string_view text,
                      int maxWidth, int lineGap) {
     WrappedText out;
@@ -352,8 +369,25 @@ WrappedText wrapText(TTF_Font* font, float scale, std::string_view text,
     };
 
     const std::vector<std::string> segs = splitBySeparator(text);
-    const int sepW = measure(" \u00B7 ");      // " · "
     const int limit = (maxWidth > 0) ? maxWidth : (1 << 20);
+
+    // 先把文案切成"词"：正常分句整段作为一个词；
+    // 若单个分句本身就超过可用宽度（如结束语「双击这行字再来一局」），
+    // 则退化为逐字切分，否则整段无法折行、会直接冲出屏幕（iPad 实测）。
+    struct Token { std::string text; bool sepBefore; };
+    std::vector<Token> tokens;
+    for (std::size_t si = 0; si < segs.size(); ++si) {
+        const std::string& seg = segs[si];
+        if (measure(seg) <= limit) {
+            tokens.push_back({seg, si > 0});
+        } else {
+            bool first = true;
+            for (const std::string& ch : splitChars(seg)) {
+                tokens.push_back({ch, first && si > 0});
+                first = false;
+            }
+        }
+    }
 
     std::string current;
     auto flush = [&]() {
@@ -361,19 +395,16 @@ WrappedText wrapText(TTF_Font* font, float scale, std::string_view text,
         current.clear();
     };
 
-    for (const std::string& seg : segs) {
-        const int segW = measure(seg);
-        if (current.empty()) {
-            current = seg;
-            continue;
-        }
-        const int candidate = measure(current) + sepW + segW;
-        if (candidate <= limit) {
-            current += " \u00B7 ";
-            current += seg;
+    for (const Token& t : tokens) {
+        std::string candidate = current;
+        if (!candidate.empty() && t.sepBefore) candidate += " \u00B7 ";
+        candidate += t.text;
+
+        if (current.empty() || measure(candidate) <= limit) {
+            current = candidate;      // 首词无论多宽都接受，避免死循环
         } else {
             flush();
-            current = seg;
+            current = t.text;
         }
     }
     flush();

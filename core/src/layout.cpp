@@ -40,6 +40,11 @@ namespace {
   constexpr int kHudStatusPercent = 18;
   constexpr int kHudHintPercent   = 58;
 
+  // HUD 文字块与棋盘之间的额外间距。
+  // 0 时提示行紧贴棋盘（51 单位），实测观感偏挤；加到 36 后约 87，
+  // 与改造前鸿蒙真机截图的观感接近。
+  constexpr int kHudBoardGap = 36;
+
 constexpr int kBoardRatioNum = 88;
 constexpr int kBoardRatioDen = 100;
 
@@ -105,9 +110,12 @@ Layout Layout::compute(int width, int height,
         //
         //    正确做法：把「HUD 预留区 + 棋盘」当成一个整体垂直居中，
         //    HUD 固定在棋盘正上方的预留带内。
-        const int contentH = reserve + out.board_.h;
+        // 只有存在 HUD 预留带时才加"文字与棋盘"的间距；
+        // 没有 HUD（reserveTop=0，例如纯棋盘自测）时保持垂直居中对称。
+        const int hudGap = (reserve > 0) ? kHudBoardGap : 0;
+        const int contentH = reserve + hudGap + out.board_.h;
         const int top = availY + std::max(0, (availH - contentH) / 2);
-        out.board_.y = top + reserve;
+        out.board_.y = top + reserve + hudGap;
 
         out.hud_.statusX = out.board_.x;
         out.hud_.hintX   = out.board_.x;
@@ -126,12 +134,14 @@ Layout Layout::compute(int width, int height,
     // 提示文字会【折行】（按 " · " 断开），所以这里不该按单行宽度扩张列宽 ——
     // 否则一句长提示会吃掉 700 单位，把棋盘挤到 420（iPad 横屏实测过的坏结果）。
     // hudMinWidth 仍保留：调用方若明确要求不折行，可传更大值。
+    // 列宽优先按 App 实测的折行文字宽度来定（hudMinWidth），
+    // 避免固定 32% 在宽屏手机上留下大片空白（鸿蒙手机横屏实测过）。
     int hudW = std::max(240, availW * 32 / 100);
     if (hudMinWidth > 0) {
-        hudW = std::max(hudW, hudMinWidth + gap + kHudSafety);
+        hudW = hudMinWidth + gap * 2 + kHudSafety;
     }
-    hudW = std::min(hudW, availW * 55 / 100);
-    const int maxBoardW = availW - hudW - gap * 2;
+    hudW = std::max(240, std::min(hudW, availW * 45 / 100));
+    const int maxBoardW = availW - hudW - gap * 4;   // 两侧各留一个 gap 的外边距
     if (maxBoardW <= 0) return out;
 
     // 宽屏用 94%（竖屏是 88%）：宽屏时高度是瓶颈，留白可以更小，
@@ -142,7 +152,12 @@ Layout Layout::compute(int width, int height,
 
     out.board_.w = out.cell_ * kSize;
     out.board_.h = out.board_.w;
-    out.board_.x = availX + gap;
+
+    // 整组（棋盘 + 间距 + HUD 列）在可用宽度内居中，
+    // 否则棋盘贴左、右侧留下大片黑（鸿蒙手机横屏的问题）。
+    const int totalW = out.board_.w + gap * 2 + hudW;
+    const int startX = availX + std::max(0, (availW - totalW) / 2);
+    out.board_.x = startX;
     out.board_.y = availY + (availH - out.board_.h) / 2;
 
     int hudX = out.board_.x + out.board_.w + gap * 2;
@@ -183,7 +198,7 @@ Layout Layout::compute(int width, int height,
     out.hud_.hintY   = out.board_.y + out.board_.h * 46 / 100;
     // 宽屏下提示折成两行，命中带相应加高（只用于双击判定，不影响落子）
     out.hud_.hintBand = Recti{hudX, out.hud_.hintY - 8,
-                              out.width_ - hudX, 110};
+                              std::min(hudW, out.width_ - hudX), 110};
     return out;
 }
 
