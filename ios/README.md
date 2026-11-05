@@ -109,23 +109,41 @@ list(FILTER _srcs EXCLUDE REGEX "SDL_gl_textengine\\.c$")
 关键开关就是配置里的 `-DBUILD_SHARED_LIBS=OFF`：
 不加它，SDL3 在 iOS 上默认生成 dylib（见 SDL3 `CMakeLists.txt:233` 的分支）。
 
-## iPadOS 26 的窗口模式（左右留白）
+## iPad 的窗口模式与「左右留白」
 
-iPadOS 26 起，应用默认以**可缩放窗口**运行。实测默认窗口只有 635×1376，
-两侧露出桌面壁纸 —— 那不是布局留白，而是系统窗口没铺满。
+### 现象与结论
 
-本项目在 Info.plist 声明：
+iPadOS 26 起，iPad 应用默认以**可缩放窗口**运行。实测 iPad Pro 13" 上：
+
+```
+默认（窗口模式）：window=635x1376   两侧露出桌面壁纸
+声明全屏键后    ：window=1032x1376   铺满
+```
+
+**这不是布局留白，而是系统窗口本身没占满。**
+
+### 当前状态：已回退，待真机验证
+
+`UIRequiresFullScreen` 虽能强制全屏，但：
+
+- 它在较新的 iOS/iPadOS 上**已被标记废弃**，未来可能失效；
+- 在 iPadOS 18 及更早系统上，应用本来默认就是全屏，
+  该键的实际作用只是**禁用分屏/侧拉**。
+
+因此已从 Info.plist 移除，恢复系统默认行为，等待在 **iPadOS 18 真机**上确认：
+若 18 上默认即全屏，则无需该键；届时再决定是否为 iPadOS 26 单独处理。
+
+### 若要重新启用
 
 ```xml
 <key>UIRequiresFullScreen</key>
 <true/>
 ```
 
-声明后窗口变为 1032×1376（全屏）。该键在较新系统上已被标记废弃，
-若未来被忽略，可选方案：
-- 让用户用窗口控件（右上角）手动最大化；
-- 或在 UIKit 侧用 `UIWindowScene.requestGeometryUpdate` 请求全屏
-  （需要自有的 ObjC/Swift 代码，目前全部由 SDL 托管）。
+### 低于 iPadOS 26 的系统
+
+- iPadOS 18 及更早：应用默认全屏；Stage Manager / 分屏属于用户主动操作
+- iPadOS 26：默认窗口化，窗口可缩放、可多窗口
 
 ## 排障：Xcode 构建后文字变大、iPad 两侧大片留白
 
