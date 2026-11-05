@@ -6,7 +6,6 @@
         // 签名：材料不入库（说明见文件末尾 signingConfigs）。
         // 在 DevEco 生成后，把这一行加回来："signingConfig": "default",
         // 未配置时产出未签名 HAP（模拟器可装，真机拒装）。
-        "signingConfig": "default",
         "targetSdkVersion": "5.0.4(16)",
         "compatibleSdkVersion": "5.0.4(16)",
         "runtimeOS": "HarmonyOS",
@@ -54,19 +53,6 @@
       //  ⚠️ 生成后请务必确认 products 里出现这一行（否则报「未检测到签名配置」）：
       //      "signingConfig": "default",
       // =====================================================================
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BB9B1EC9836D660FD32511D6CE65619AD0AEA236C73F71FB3CDBBB93A1F8FD3BE534BB2F4EB3592",
-          "profile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/c/.ohos/config/default_app_QHNiDBEXCmH0EMJYCKOXTZdtbF8FoDQMGqAjO5Oj2xE=.p12",
-          "storePassword": "0000001BB45A85B7648B8FEE3A4662A0427EFC41490D36F879F93B507C13C52811697097D0897CE9A9603D"
-        }
-      }
     ]
   },
   "modules": [

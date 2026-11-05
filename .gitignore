@@ -144,3 +144,6 @@ platform_ohos/app/.hvigor-home/
 platform_ohos/app/oh_modules/
 platform_ohos/app/local.properties
 platform_ohos/app/.idea/
+
+# Android NDK 的中间产物（CMake 生成，不该入库）
+android/app/.cxx/
