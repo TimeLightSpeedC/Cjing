@@ -42,6 +42,26 @@ case "$MODE" in
         ;;
 esac
 
+# ---- 源码完整性预检 ----
+# CMake 在"生成阶段"才会报源文件缺失，错误信息（Cannot find source file）
+# 不提示是仓库被改动过，容易误判成工程配置问题。这里提前拦住。
+_missing=0
+for rel in core/src/game.cpp core/src/layout.cpp core/src/tap.cpp \
+           platform_sdl/app.cpp platform_sdl/sdl_view.cpp; do
+    if [ ! -f "$ROOT/$rel" ]; then
+        echo "✗ 缺少源码: $rel"
+        _missing=1
+    fi
+done
+if [ "$_missing" != "0" ]; then
+    echo
+    echo "  仓库可能不完整（文件被删除或移动）。先检查："
+    echo "    git -C \"$ROOT\" status --short"
+    echo "  若显示被删除，恢复："
+    echo "    git -C \"$ROOT\" restore -- core platform_sdl"
+    exit 1
+fi
+
 # ---- 找一个可用的 cmake ----
 CMAKE_BIN="${CMAKE_BIN:-}"
 if [ -z "$CMAKE_BIN" ]; then
