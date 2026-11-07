@@ -38,10 +38,12 @@ export DEVECO_SDK_HOME=/Applications/DevEco-Studio.app/Contents/sdk
 
 产物：`entry/build/default/outputs/default/entry-default-unsigned.hap`
 
-> **签名暂未配置**：`build-profile.json5` 里已移除 `"signingConfig": "default"`，
-> 调试阶段用未签名 HAP 直接 `hdc install` 即可（预检阶段已验证可行）。
-> 正式签名在 DevEco Studio 的 *Project Structure → Signing Configs* 生成，
-> 与 Android/iOS 统一在 P3 收尾时处理。
+> **签名与否决定产物**：
+> - 未配置签名 → `entry-default-unsigned.hap`：**只能装模拟器**，真机报 `no signature file`
+> - 配置签名 → `entry-default-signed.hap`：可装真机
+>
+> 签名材料不入库，启用步骤见下方「⚠️ 签名配置的坑」。
+> 仓库默认是未签名状态。
 
 ## 安装与运行
 
