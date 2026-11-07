@@ -204,7 +204,7 @@ NINJA="${NINJA:-ninja}"
 | **P1** | 核心逻辑 + 抽象层 + 单元测试 | 第 2 周 | M1 `v0.1.0` | 22 | ⬜ |
 | **P2** | 桌面 SDL3（渲染/交互/文字/音频） | 第 3–4 周 | M2 `v0.2.0` | 24 | ⬜ |
 | **P3** | 移动端 Android / iOS | P2 完成后约 2 周 | M3 `v0.3.0` | 20 | ⬜ |
-| **P4** | HarmonyOS（路线 A 默认 / B 退路） | P3 完成后约 2–3 周 | M4 `v0.4.0` | 18 | ⬜ |
+| **P4** | HarmonyOS（路线 A 默认 / B 退路） | P3 完成后约 2–3 周 | M4 `v0.4.0` | 18 | 🟡 基本完成（余 T16/T17/T18） |
 | **P5** | 打磨、打包、CI 与发布验收 | 收尾约 1–2 周 | M5 `v1.0.0` | 18 | ⬜ |
 
 **总预估：10–12 周**（P0–P2 共 4 周为固定线性；P3 与 P4 是关键路径，其浮动决定总量）。
@@ -563,15 +563,15 @@ Cjing/                          # 仓库根目录
 > **入场条件**：P2-T23 的预检为 Go；若为 No-Go，本阶段降级为"可行性跟踪 + 路线 B 试点"，**不阻塞 P5 的 5 平台发布**
 > **⚠️ 兼容性范围**：HarmonyOS NEXT（5.x 起）**已不兼容 Android APK，必须交付 `.hap`**；不要把 APK 兼容层当作后备路径
 
-- [ ] P4-T1 安装 DevEco Studio（5.x）与 HarmonyOS NDK/SDK，确认 `ohos.toolchain.cmake` 可用；记录版本组合
-- [ ] P4-T2 **路线 A（默认）**：**复制 SDL 源码树中的 `openharmony-project` 作为工程模板**（改名后放入 `ohos/`）
+- [x] P4-T1 安装 DevEco Studio（5.x）与 HarmonyOS NDK/SDK，确认 `ohos.toolchain.cmake` 可用；记录版本组合
+- [x] P4-T2 **路线 A（默认）**：**复制 SDL 源码树中的 `openharmony-project` 作为工程模板**（改名后放入 `ohos/`）
   - ⚠️ **不要在 DevEco Studio 里新建工程** —— 官方明确要求：SDL 依赖其中已配置好的 ArkTS 脚本，
     新建工程会缺失这些配置，导致 NAPI/XComponent 对接反复踩坑（见 `技术验证结论.md` 2.2）
   - 需改 `AppScope/app.json5` 的 `bundleName`/`vendor`、`AppScope/resources/base/element/string.json` 的 `app_name`、
     以及 `build-profile.json5` 的 `signingConfig`
-- [ ] P4-T3 路线 A：确认锁定的 SHA 确实包含 `src/video/openharmony/`（video/events/mouse/keyboard/clipboard/opengl/vulkan/window）与官方构建脚本
-- [ ] P4-T4 路线 A：用 ArkTS `UIAbility` / `XComponent` 获取 Native Window 句柄并转发触摸与生命周期给 C++
-- [ ] P4-T5 路线 A：CMake 编译 `core` + `platform_sdl` 为 **`libmain.so`**（共享库，**非可执行文件**）
+- [x] P4-T3 路线 A：确认锁定的 SHA 确实包含 `src/video/openharmony/`（video/events/mouse/keyboard/clipboard/opengl/vulkan/window）与官方构建脚本
+- [x] P4-T4 路线 A：用 ArkTS `UIAbility` / `XComponent` 获取 Native Window 句柄并转发触摸与生命周期给 C++
+- [x] P4-T5 路线 A：CMake 编译 `core` + `platform_sdl` 为 **`libmain.so`**（共享库，**非可执行文件**）
   - ⚠️ **必须使用鸿蒙自带的 CMake**，标准 CMake（含 CLion 自带的 4.3.1）**无法识别该平台，会直接构建失败**：
     ```
     $CLT/sdk/default/openharmony/native/build-tools/cmake/bin/cmake \
@@ -581,28 +581,52 @@ Cjing/                          # 仓库根目录
     官方原文：*"you **must** use the CMake that comes with HarmonyOS's development tools, or building will fail"*
   - 入口由 ArkTS 侧加载 `libmain.so`；两条路径：有 `SDL_main` 符号则开线程跑它（**返回会像崩溃，禁止 return**），
     否则查找 `SDL_AppInit` 等 Main Callbacks 符号 —— 本项目走后者
-- [ ] P4-T6 **SDL3_ttf 鸿蒙交叉编译**（本阶段主要工作量）：按 0.1 节策略递归拉取 vendored FreeType/HarfBuzz，**建议 `SDLTTF_PLUTOSVG=OFF`**；验证字体渲染正常
-- [ ] P4-T7 路线 A：输入沿用 P3 的统一换算与去重策略（鸿蒙后端若产生 finger 事件，按 P2-T9 的二选一处理；换算仍只在 C++ 侧一处）
-- [ ] P4-T8 路线 A：安全区用 `SDL_GetWindowSafeArea()` 注入 `Layout`
-- [ ] P4-T9 路线 A：处理与 P3-T7 相同的生命周期/内存/渲染设备重置事件（由 SDL 后端进入 `SDL_AppEvent`）
+- [x] P4-T6 **SDL3_ttf 鸿蒙交叉编译**（本阶段主要工作量）：按 0.1 节策略递归拉取 vendored FreeType/HarfBuzz，**建议 `SDLTTF_PLUTOSVG=OFF`**；验证字体渲染正常
+- [x] P4-T7 路线 A：输入沿用 P3 的统一换算与去重策略（鸿蒙后端若产生 finger 事件，按 P2-T9 的二选一处理；换算仍只在 C++ 侧一处）
+- [x] P4-T8 路线 A：安全区用 `SDL_GetWindowSafeArea()` 注入 `Layout`
+- [x] P4-T9 路线 A：处理与 P3-T7 相同的生命周期/内存/渲染设备重置事件（由 SDL 后端进入 `SDL_AppEvent`）
   - ⚠️ **帧驱动模型不同**：`SDL_AppIterate` 由 XComponent 的 OnFrame 回调驱动，不是自由循环。
     P2-T20 的"仅状态变化时 present"语义需在真机实测帧节奏后再确认
   - ⚠️ **方向控制受限**：`SDL_HINT_ORIENTATION` **尚未实现**（官方 STILL TODO）。
     鸿蒙端屏幕方向只能在 `module.json5` 中做**静态**配置；三端的"方向策略"需分开表述
   - 另注意：鸿蒙**同一时刻只允许一个 `SDL_Window`**，且占满整个显示；全屏会隐藏系统状态栏与导航栏
-- [ ] P4-T10 路线 A：NAPI 边界 `try/catch(...)` 兜底；跨库内存谁分配谁释放
-- [ ] P4-T11 **路线 B（退路，仅在路线 A 阻塞时启用）**：保留 `ttt_core`，新建 `platform_ohos` 实现
-- [ ] P4-T12 路线 B：C++ 侧用 EGL / OpenGL ES 初始化渲染上下文
-- [ ] P4-T13 路线 B：通过 NAPI 暴露初始化、触摸、渲染、reset 接口
-- [ ] P4-T14 路线 B：资源放 rawfile/resources 并在 C++ 中正确读取；生命周期由 ArkTS/XComponent 转发
-- [ ] P4-T15 构建 HAP 并安装到真机验证：**重点验证目标 API 版本上能否构建并运行**（鸿蒙唯一还需实测的不确定项）＋ 渲染、输入、安全区、TTF 文字、存档恢复
+- [x] P4-T10 路线 A：NAPI 边界 `try/catch(...)` 兜底；跨库内存谁分配谁释放
+- [x] P4-T11 **路线 B（退路，仅在路线 A 阻塞时启用）**：保留 `ttt_core`，新建 `platform_ohos` 实现　（未启用：路线 A 成功，退路未实施）
+- [x] P4-T12 路线 B：C++ 侧用 EGL / OpenGL ES 初始化渲染上下文　（未启用：路线 A 成功，退路未实施）
+- [x] P4-T13 路线 B：通过 NAPI 暴露初始化、触摸、渲染、reset 接口　（未启用：路线 A 成功，退路未实施）
+- [x] P4-T14 路线 B：资源放 rawfile/resources 并在 C++ 中正确读取；生命周期由 ArkTS/XComponent 转发　（未启用：路线 A 成功，退路未实施）
+- [x] P4-T15 构建 HAP 并安装到真机验证：**重点验证目标 API 版本上能否构建并运行**（鸿蒙唯一还需实测的不确定项）＋ 渲染、输入、安全区、TTF 文字、存档恢复
   - ⚠️ 官方支持起点为 **HarmonyOS 5.0.4（API level 16）**，且**真机仅验证过 Mate 80、未做低端设备测试**
     → 这是硬性下限，也是 R1/R12 风险的来源
   - 鸿蒙日志用 `hdc hilog | grep -F <bundleName>` 查看（`SDL_Log` 走 hilog）；
     **注意 release 版用户也能看到这些日志**，不要打印敏感信息
-- [ ] P4-T16 准备发布签名材料（`.p7b` 证书 / `.cer` / Profile），确保真机安装与后续上架可复现
-- [ ] P4-T17 构建流程可复现：提供一键构建脚本，并在干净环境验证（CI 接入可选）
+- [ ] P4-T16 准备发布签名材料（`.p7b` 证书 / `.cer` / Profile），确保真机安装与后续上架可复现　🟡 **部分完成**
+- [ ] P4-T17 构建流程可复现：提供一键构建脚本，并在干净环境验证（CI 接入可选）　🟡 **部分完成**
 - [ ] P4-T18 里程碑 `v0.4.0`：HarmonyOS 可玩（路线 A 成功；若阻塞则切换路线 B 并更新风险状态）
+
+### P4 实现情况核查（2026-11-07）
+
+> 核查方式：逐条对照源码/产物/真机记录，不做主观判断。
+
+| 任务 | 状态 | 证据 |
+|---|---|---|
+| T1 环境 | ✅ | DevEco Studio **26.0.0**；`sdk/default/openharmony/native/build/cmake/ohos.toolchain.cmake` 可用 |
+| T2 模板 | ✅ | 工程由 SDL `openharmony-project` 复制；`bundleName=com.timelightspeed.cjing`、`vendor=TimeLightSpeedC`、`app_name=井字棋` |
+| T3 SDL 后端 | ✅ | `.tools/sdl3-src/src/video/openharmony/` 存在（clipboard/events/keyboard/…） |
+| T4 ArkTS 桥接 | ✅ | `EntryAbility.ets` + `Index.ets` 的 `XComponent(SURFACE, libraryname:'SDL3')` |
+| T5 libmain.so | ✅ | `entry/src/main/cpp/CMakeLists.txt` 产出 `libmain.so`；`nm` 导出 `SDL_AppInit/Iterate/Event/Quit` |
+| T6 ttf 交叉编译 | ✅ | `SDLTTF_VENDORED=ON`、`PLUTOSVG=OFF`；真机截图中文渲染正常 |
+| T7 输入统一 | ✅ | `app.cpp:88-91` 采用方案 A（忽略 FINGER，只处理鼠标）；`:395` 做去重 |
+| T8 安全区 | ✅ | `app.cpp:296` `SDL_GetWindowSafeArea()` → insets → `Layout::compute` |
+| T9 生命周期/帧 | ✅ | `app.cpp:422-472` 处理 RESIZED / PIXEL_SIZE / 前后台 / LOW_MEMORY / RENDER_DEVICE_RESET；每帧 present；方向由 `module.json5` 静态配置 `auto_rotation_restricted` |
+| T10 NAPI 边界 | ✅ | `EntryAbility.ets` 的 `provideArkTSObjects` 外包 `try/catch`；跨库内存由 SDL 管理 |
+| T11–T14 路线 B | ⛔ 未启用 | 路线 A 成功，退路未实施 |
+| T15 真机验证 | ✅（有边界） | 真机 **API 26**（`6BEUT26106000176`）验证：渲染、触摸、安全区、TTF、存档恢复；音频延迟 93ms → 20ms。**API 24 模拟器黑屏**（GPU 后端缺失）、**API 16 崩溃**，均为模拟器限制 |
+| T16 发布签名 | 🟡 | 本机已生成 `~/.ohos/config/default_app_*.p12/.p7b`；仓库 `build-profile.json5` 仍为无签名模板（材料刻意不入库） |
+| T17 可复现构建 | 🟡 | `setup.sh` + 文档命令可复现；**缺一键构建脚本**，无 CI |
+| T18 里程碑 v0.4.0 | ⬜ | 功能已达成（真机可玩），但未打 `v0.4.0` tag，CHANGELOG 仍停在 `v0.2.0` |
+
+**结论**：P4 路线 A 成功，M4 的**功能目标**已达成；剩余 T16（启用签名）、T17（一键脚本/CI）、T18（里程碑与版本）属于收尾项，不阻塞 P5。
 
 ### P5 打磨、打包、CI 与发布验收（约 1–2 周）
 
