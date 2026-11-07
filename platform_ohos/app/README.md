@@ -28,6 +28,22 @@
 
 ## 构建
 
+### 推荐：一键脚本（P4-T17）
+
+```bash
+# 仓库根目录执行
+./scripts/ohos-build.sh                 # debug 构建
+./scripts/ohos-build.sh --install       # 构建 + 安装到已连接设备
+./scripts/ohos-build.sh --install --run # 安装并启动
+./scripts/ohos-build.sh --signing <本地签名配置>   # 临时用本地签名，构建后自动还原
+./scripts/ohos-build.sh --release       # release 构建
+```
+
+脚本会：`setup.sh` → 设置 `JAVA_HOME`/`DEVECO_SDK_HOME` → `hvigorw assembleHap`
+→ 按签名状态定位产物 → 可选安装/启动/看日志。
+
+### 手工命令（脚本内部做的事）
+
 ```bash
 cd platform_ohos/app
 export JAVA_HOME=/Applications/DevEco-Studio.app/Contents/jbr/Contents/Home
@@ -43,7 +59,8 @@ export DEVECO_SDK_HOME=/Applications/DevEco-Studio.app/Contents/sdk
 > - 配置签名 → `entry-default-signed.hap`：可装真机
 >
 > 签名材料不入库，启用步骤见下方「⚠️ 签名配置的坑」。
-> 仓库默认是未签名状态。
+> 仓库默认是未签名状态；本机签名配置可放在 `.tools/ohos-signing/`（已 gitignore），
+> 构建时用 `--signing` 临时引用。
 
 ## 安装与运行
 
