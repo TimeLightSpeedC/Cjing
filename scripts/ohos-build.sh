@@ -16,6 +16,7 @@
 #    ./scripts/ohos-build.sh --clean            # 先清构建目录（含 .cxx）
 #    ./scripts/ohos-build.sh --no-setup         # 跳过 setup.sh
 #    ./scripts/ohos-build.sh --signing <file>   # 临时使用本地签名配置（构建后自动还原）
+#    ./scripts/ohos-build.sh --project precheck --release   # 构建预检工程的 release 包
 #
 #  环境变量：
 #    DEVECO_HOME           DevEco Studio 路径（默认 /Applications/DevEco-Studio.app）
@@ -30,7 +31,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP_DIR="$ROOT/platform_ohos/app"
 DEVECO_HOME="${DEVECO_HOME:-/Applications/DevEco-Studio.app}"
 
 MODE="debug"
@@ -41,6 +41,7 @@ DO_RUN=0
 DO_LOG=0
 TARGET=""
 SIGNING_FILE=""
+PROJECT="app"
 
 info()  { printf '  %s\n' "$*"; }
 warn()  { printf '  ⚠ %s\n' "$*" >&2; }
@@ -82,12 +83,16 @@ while [ $# -gt 0 ]; do
         --no-setup)  DO_SETUP=0 ;;
         --device)    shift; TARGET="${1:-}"; [ -n "$TARGET" ] || die "--device 需要一个目标 id" ;;
         --signing)   shift; SIGNING_FILE="${1:-}"; [ -n "$SIGNING_FILE" ] || die "--signing 需要一个文件路径" ;;
+        --project)   shift; PROJECT="${1:-}"; [ -n "$PROJECT" ] || die "--project 需要 app 或 precheck" ;;
         -h|--help)   usage ;;
         *)           die "未知参数: $1（--help 查看用法）" ;;
     esac
     shift
 done
 
+APP_DIR="$ROOT/platform_ohos/${PROJECT}"
+
+case "$PROJECT" in app|precheck) ;; *) die "--project 只支持 app 或 precheck" ;; esac
 [ -d "$APP_DIR" ] || die "找不到鸿蒙工程目录: $APP_DIR"
 
 # ---- 工具链 ----

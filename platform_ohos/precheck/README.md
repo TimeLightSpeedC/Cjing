@@ -309,3 +309,60 @@ SDL3 官方文档写明：**支持 HarmonyOS 5.0.4 / API 16+，且仅在 Mate 80
 > **本机现状**：只装了 API 24（6.1.1）的 SDK。
 > 要跑 API 16 的模拟器，需要先在 DevEco 的 SDK Manager 里安装 **HarmonyOS 5.0.4（API 16）**。
 > 这也是 SDL3 官方唯一声明支持并实测过的版本。
+
+---
+
+## 发布包：云测试 / 云调试
+
+### 一键构建
+
+```bash
+# release 包（未签名；模拟器可装）
+./scripts/ohos-build.sh --project precheck --release
+
+# release 包 + 本地签名配置（构建后自动还原配置）
+./scripts/ohos-build.sh --project precheck --release \
+  --signing .tools/ohos-signing/precheck-build-profile.signed.local.json5
+```
+
+产物：
+
+```
+platform_ohos/precheck/entry/build/default/outputs/default/
+├── entry-default-signed.hap      # 配置了签名时
+└── entry-default-unsigned.hap    # 未配置签名时（约 20 MB）
+```
+
+### 关键：两种云服务要的签名不一样
+
+| 用途 | 证书 / Profile | 设备绑定 |
+|---|---|---|
+| **云测试**（上架测试） | **发布证书 + 发布 Profile** | 不绑定设备，云上任意机型可装 |
+| **云调试** | **调试证书 + 调试 Profile** | **绑定 UDID**，需先把云设备 UDID 加入调试设备列表 |
+| 本地真机调试 | 调试证书 + 调试 Profile | 绑定你本机设备的 UDID |
+
+> 云调试要"调试签名"而不是 release 签名：调试 Profile 会把允许安装的设备 UDID 写死，
+> 云设备不在列表里就装不上。首次云调试通常要：
+> 启动云调试会话 → 记录设备 UDID → 在 AGC 注册调试设备 → 重新生成/更新 Profile → 重新签名上传。
+
+### 推荐流程
+
+1. **在 AGC 创建应用**，包名必须与工程一致：
+   `com.timelightspeed.cjing.precheck`（见 `AppScope/app.json5`）
+2. **云测试**：
+   - AGC 申请**发布证书**与**发布 Profile**
+   - 在 DevEco 的 *Project Structure → Signing Configs* 填入（或写成本地文件后用 `--signing`）
+   - `./scripts/ohos-build.sh --project precheck --release`
+   - 上传 `entry-default-signed.hap` 到云测试
+3. **云调试**：
+   - 启动云调试会话，获取云设备 UDID
+   - AGC 注册该调试设备，更新调试 Profile（包含该 UDID）
+   - 用调试签名构建（默认 `--project precheck`，debug 模式）
+   - 上传 HAP 开始调试
+
+### 注意
+
+- 本工程旧的调试签名材料已失效（构建时报 `keystore password was incorrect`），
+  需要按上面的流程重新生成证书/Profile。
+- 云测试对上传格式的要求以 AGC 控制台当期提示为准（通常为 HAP；若要求 App 包，
+  用 DevEco 的 *Build → Build App(s)* 生成）。
