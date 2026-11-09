@@ -220,7 +220,7 @@ NINJA="${NINJA:-ninja}"
 | `v0.2.0` | P2 完成：桌面三平台可玩，文字、音效、resize、安全区、坐标换算全部跑通 |
 | `v0.3.0` | P3 完成：Android / iOS 真机可玩，切后台状态不丢失 |
 | `v0.4.0` | P4 完成：HarmonyOS 真机可玩（路线 A 成功，或路线 B 退路成功） |
-| `v1.0.0` | P5 完成：全平台发布包就绪并通过逐平台验收清单 |
+| `v1.0.0` | P5 完成：全平台**本地交付包**就绪并通过验收清单（不含商店上架） |
 
 ### 1.4 目录结构
 
@@ -600,7 +600,7 @@ Cjing/                          # 仓库根目录
     → 这是硬性下限，也是 R1/R12 风险的来源
   - 鸿蒙日志用 `hdc hilog | grep -F <bundleName>` 查看（`SDL_Log` 走 hilog）；
     **注意 release 版用户也能看到这些日志**，不要打印敏感信息
-- [ ] P4-T16 准备发布签名材料（`.p7b` 证书 / `.cer` / Profile），确保真机安装与后续上架可复现　🟡 **部分完成**
+- [x] P4-T16 发布签名材料 　⛔ **不执行**（移动端不上架；本地调试签名已满足真机安装）
 - [x] P4-T17 构建流程可复现：提供一键构建脚本，并在干净环境验证（CI 接入可选）　→ `scripts/ohos-build.sh`（CI 未接入）
 - [ ] P4-T18 里程碑 `v0.4.0`：HarmonyOS 可玩（路线 A 成功；若阻塞则切换路线 B 并更新风险状态）
 
@@ -630,7 +630,15 @@ Cjing/                          # 仓库根目录
 
 ### P5 打磨、打包、CI 与发布验收（约 1–2 周）
 
-> **里程碑 M5**：所有取得 Go 结论的平台发布包就绪，并通过逐平台验收清单
+> **里程碑 M5**：所有取得 Go 结论的平台**本地交付包**就绪，并通过逐平台验收清单
+>
+> **发布范围（2026-11-09 决定）**：移动三端（Android / iOS / HarmonyOS）**不上架应用市场**，
+> 只交付本地安装包（APK / HAP；iOS 视真机条件而定）。
+> 因此 P5 中所有「商店上架 / AAB / Archive / TestFlight / 发布证书」任务标记为**不适用**，
+> 验收以**本地安装运行**为准。
+>
+> **真机覆盖现状**：Android 真机（Redmi K30i）、iPad（iPadOS 18.7.8）、鸿蒙真机（API 26）均已验证；
+> **iPhone 无真机**，iOS 旋转/横屏由 iPad 与模拟器覆盖。
 
 - [ ] P5-T1 视觉打磨：获胜连线闪烁动画（数据源 `winLine`）、平局灰度、按钮、深色/浅色适配；动画只在表现层，不得进入 `core/`
 - [ ] P5-T2 设置菜单：音量控制、AI 难度选择、重开
@@ -638,13 +646,13 @@ Cjing/                          # 仓库根目录
 - [ ] P5-T4 多语言：补齐英文文案表与语言切换（间接层已在 P0-T9 建立）；验证字体字符集覆盖
 - [ ] P5-T5 内存与稳定性工具化：Linux 用 ASan/UBSan 跑完整测试与一局对局；macOS 用 Instruments/`leaks`；移动端与鸿蒙前后台切换 50 次观察内存曲线是否单调上升
 - [ ] P5-T6 桌面 CI 增强：在既有 CI 中加入 ASan 构建与更完整的测试矩阵
-- [ ] P5-T7 移动端打包 CI：Android AAB / iOS（评估可行性，受签名与 runner 成本限制可保留为脚本化手动流程）
-- [ ] P5-T8 鸿蒙打包：生成签名后的 `.hap` / `.app`（CI 接入可选，标记为非阻塞）
+- [x] P5-T7 移动端打包 CI 　⛔ **不适用**（不上架，本地构建即可；Android 已有脚本化 release 构建命令）
+- [x] P5-T8 鸿蒙打包 　⛔ **不适用**（不上架；本地 HAP 构建已具备：`scripts/ohos-build.sh`）
 - [ ] P5-T9 Windows 打包：便携版 ZIP（含全部依赖 DLL，验证干净环境可直接运行）；MSI 可选
 - [ ] P5-T10 macOS 打包：Universal Binary（arm64 + x86_64）`.app` / `.dmg`，Developer ID 签名 + Hardened Runtime + **公证（`notarytool`）**，验证 Gatekeeper 不拦截
 - [ ] P5-T11 Linux 打包：AppImage（自带 SDL3 等 so）；Flatpak 可选；**验证 X11 与 Wayland 两种会话**
-- [ ] P5-T12 Android 打包：签名 `.aab`（发布仅 `arm64-v8a`，与 P3-T3 一致）；确认 `targetSdk` 满足商店当期门槛
-- [ ] P5-T13 iOS 打包：Archive 并上传 App Store Connect；补齐 App Privacy 问卷；走一遍 TestFlight 内测后再提交审核
+- [x] P5-T12 Android 交付包（本地）：release APK + debug 证书签名，含 `arm64-v8a`/`x86_64`；不上架，无需 AAB（2026-11-09 完成，9.83 MiB）
+- [x] P5-T13 iOS 打包 　⛔ **不适用**（不上架；模拟器与 iPad 真机已覆盖旋转/横屏验证）
 - [ ] P5-T14 所有 CI 任务必须能在**干净环境**复现，构建脚本入库（不接受"只在我机器上能编"）
 - [ ] P5-T15 **逐平台验收清单（必须逐条执行，且必须针对发布产物而非开发机构建）**：
 
@@ -683,8 +691,8 @@ Cjing/                          # 仓库根目录
 | R7 | Android base path / `assets://` 版本差异 | 字体/音效加载失败 | P0-T8 记录锁定版本行为；P3-T8 真机验证 | P0-T8, P3-T8 | ⬜ |
 | R8 | `SDL3_ttf` 鸿蒙交叉编译受阻（FreeType/HarfBuzz） | 鸿蒙无文字 | P2-T12 提前在桌面跑通并锁 SHA；P0-T16 定策略；P4-T6 交叉编译验证 | P2-T12, P0-T16, P4-T6 | ⬜ |
 | R9 | C++ 异常跨越 JNI/NAPI/ObjC 边界 | 移动端闪退 | 语言边界 `try/catch(...)` 兜底；主线程渲染；谁分配谁释放 | P3-T11, P3-T18, P4-T10 | ⬜ |
-| R10 | iOS 隐私清单 / 嵌入 framework 未处理 | 上架拒审或分发失败 | 添加 `PrivacyInfo.xcprivacy`；Archive 前移除 framework | P3-T16, P3-T19 | ⬜ |
-| R11 | iOS 签名与发布流程复杂 | 首次签名超出预期 | 提前注册 Apple Developer 账号；先模拟器后真机 | P3-T15, P5-T13 | ⬜ |
+| R10 | iOS 隐私清单 / 嵌入 framework 未处理 | 上架拒审或分发失败 | 添加 `PrivacyInfo.xcprivacy`；Archive 前移除 framework | P3-T16, P3-T19 | ✅ 已消除（不上架） |
+| R11 | iOS 签名与发布流程复杂 | 首次签名超出预期 | 提前注册 Apple Developer 账号；先模拟器后真机 | P3-T15, P5-T13 | ✅ 已消除（不上架） |
 | R12 | **鸿蒙超出预估工期仍无法跑通** | 无法按时交付 6 平台 | **降级预案**：若进入 P4 后**超过 3 周**仍无法真机跑通，则先交付 5 平台（Win/macOS/Linux/Android/iOS），鸿蒙转为 v2 目标；或切换路线 B | P4-T11~T18, P5-T15 | ⬜ |
 | R13 | 构建环境未就绪（本机缺 CMake、Homebrew 权限受限） | P0 无法启动 | P0-T14 先解决环境；必要时改用独立 CMake 安装包或 vcpkg 二进制 | P0-T14 | ⬜ |
 | R14 | 移动端前后台反复切换内存增长 | 长时间使用后崩溃 | P5-T5 前后台 50 次内存曲线检查；生命周期中释放可重建资源 | P5-T5, P3-T7 | ⬜ |

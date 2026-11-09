@@ -1,0 +1,107 @@
+11-08 15:42:10.606 10362 10362 I A00000/com.oltomb.oltomb/SDL/STARTUP: Handing control from ArkTS to native SDL.
+11-08 15:42:10.682 27946 27946 I A00F00/com.huawei.hmos.aidataservice/170005357: AppUsageAbility: publishAppUsage appUsage {"timestamp":1794123730682,"dataName":"AppUsage","bundleName":"com.oltomb.oltomb","appUid":20020296,"state":"IN","installationFree":false,"hasIcon":true,"isSplitScreenMode":false,"isFloatingWindowMode":false,"isSplit":false}
+11-08 15:42:10.684 27946  9077 I A00F00/com.huawei.hmos.aidataservice/CA170005357: [ForegroundAppAbility:413]: triggerBundleName:com.oltomb.oltomb, whiteList:["com.huawei.hmos.maps.app","com.amap.hmapp","com.baidu.hmmap","com.tencent.mapohos"]
+11-08 15:42:10.684 27946  9077 I A00F00/com.huawei.hmos.aidataservice/CA170005357: [ForegroundAppAbility:413]: triggerBundleName:com.oltomb.oltomb, whiteList:["com.huawei.hmos.browser","com.amap.hmapp","com.kanyun.hos.solar","com.sdu.didi.hmos.psnger","com.ximalaya.ting.xmharmony","com.sz.air.hmOS","com.huawei.hmsapp.totemweather","com.htsc.zlcft","com.eastmoney.hmn.berlin","com.huawei.hmsapp.music","com.huawei.hmos.hiskytone","com.huawei.hmos.camera","com.huawei.hmos.settings","com.ohos.contacts","com.huawei.hmos.calendar","com.huawei.hmos.clock"]
+11-08 15:42:10.684 27946  9077 I A00F00/com.huawei.hmos.aidataservice/CA170005357: [ForegroundAppAbility:413]: triggerBundleName:com.oltomb.oltomb, whiteList:["com.luna.hm.music","com.huawei.hmsapp.music","com.hiby.music.hm"]
+11-08 15:42:10.684  1421 60822 I A03101/tp_host/TS_HAL: ts_set_feature_config:feature =14,config = com.oltomb.oltomb#-1#0
+11-08 15:42:10.684  1421 60822 I A03101/tp_host/TS_HAL: multi_panel_write_cmd: thp write /sys/touchscreen/thp_app_info com.oltomb.oltomb#-1#0
+11-08 15:42:10.697 15516 15516 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: ability[com.oltomb.oltomb|undefined|EntryAbility] state change to 2
+11-08 15:42:10.698 15516 15516 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: checkAbilityForegroundChange change: 2, com.oltomb.oltomb
+11-08 15:42:10.698 15516 15516 I A01A01/com.ohos.sceneboard/NC: BannerNotificationEntryVm --> onForegroundAppEvent. com.oltomb.oltomb
+11-08 15:42:10.704 15516 15516 I A01A00/com.ohos.sceneboard/SYS_UI: AppLifeCycleManager: Ability state changed, uid: 20020296, key: com.oltomb.oltomb_entry_EntryAbility_10362, isForeground: true, state 2
+11-08 15:42:10.704 15516 15516 I A01A00/com.ohos.sceneboard/SYS_UI: AppLifeCycleManager: Ability state change: new foregroundAbilities: 20020296: com.oltomb.oltomb_entry_EntryAbility_10362
+11-08 15:42:10.704 15516 15516 W A01A00/com.ohos.sceneboard/SYS_UI: LiveCapsuleListVm: onAppForegroundStateChange foreground: true, uid: 20020296, bundleName: com.oltomb.oltomb, orientation: 0
+11-08 15:42:10.748 15516 15516 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: ability[com.oltomb.oltomb|undefined|EntryAbility] state change to 2
+11-08 15:42:10.835  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: [a92ab127d22ee8f 2b0f78e 60f38e]PhoneAppManager: ability[com.oltomb.oltomb|undefined|EntryAbility] state change to 0
+11-08 15:42:10.844  4561  4561 I A01B0A/com.ohos.sceneboard/GESTURE: GestureDockPreferenceUtil --> onSceneStateChange,isForegroud:true,bundleName:com.oltomb.oltomb,appIndex:0 sceneInfo.abilityName:EntryAbility
+11-08 15:42:10.844  4561  4561 I A01B0A/com.ohos.sceneboard/GESTURE: GestureDockPreferenceUtil --> addGestureDockRecentPreference, bundleName:com.oltomb.oltomb appIndex:0 abilityName:EntryAbility.
+11-08 15:42:10.844  4561  4561 I A01B09/com.ohos.sceneboard/RECENT: RecentGestureEventManager: onSceneStateChange,isForegroud:true,bundleName:com.oltomb.oltomb abilityName:EntryAbility
+11-08 15:42:10.844  4561  4561 I A01B09/com.ohos.sceneboard/RECENT: RecentGestureEventManager: isActiveContainerFollowing EntryAbility/com.oltomb.oltomb/entry/0(persistentId: 3766)(containerId: 693)
+11-08 15:42:10.844  4561  4561 I A01B0A/com.ohos.sceneboard/GESTURE: CeliaCollectGuideManager --> onForeGroundAppChange is not whiteList app bundleName: com.oltomb.oltomb
+11-08 15:42:10.844  4561  4561 I A01B0A/com.ohos.sceneboard/GESTURE: AIBarViewModel --> bundleName:com.oltomb.oltomb isEnterDeliver:false
+11-08 15:42:10.846  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: ability[com.oltomb.oltomb|undefined|EntryAbility] state change to 2
+11-08 15:42:10.846  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: checkAbilityForegroundChange change: 2, com.oltomb.oltomb
+11-08 15:42:10.846  4561  4561 I A01A01/com.ohos.sceneboard/NC: BannerNotificationEntryVm --> onForegroundAppEvent. com.oltomb.oltomb
+11-08 15:42:10.846  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: PhoneAppManager: ability[com.oltomb.oltomb|undefined|EntryAbility] state change to 2
+11-08 15:42:10.851  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: AppLifeCycleManager: Ability state changed, uid: 20020296, key: com.oltomb.oltomb_entry_EntryAbility_10362, isForeground: true, state 2
+11-08 15:42:10.851  4561  4561 I A01A00/com.ohos.sceneboard/SYS_UI: AppLifeCycleManager: Ability state change: new foregroundAbilities: 20020296: com.oltomb.oltomb_entry_EntryAbility_10362
+11-08 15:42:10.851  4561  4561 W A01A00/com.ohos.sceneboard/SYS_UI: LiveCapsuleListVm: onAppForegroundStateChange foreground: true, uid: 20020296, bundleName: com.oltomb.oltomb, orientation: 3
+11-08 15:42:10.853 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(pVerStruct:<private>)...
+11-08 15:42:10.853 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(pVerStruct:<private>) ifaceVer:<private>, libHandle:<private> --> vkresult:<private>
+11-08 15:42:10.859 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetPlatformProduct(121): ohVersion: [OpenHarmony-7.0.0.105]
+11-08 15:42:10.859 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetPlatformProduct(122): chipPlatform: [Kirin9010S] - [Kirin9010]
+11-08 15:42:10.859 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: DisableReasonLog(148): com.oltomb.oltomb is GT Disable by local game config
+11-08 15:42:10.859 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: CheckGameVersion(355): not config gameversion
+11-08 15:42:10.859 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetGameName(100): No iGraphicsCore opt is enabled. Disable hook.
+11-08 15:42:10.867  4561  4561 I A01C06/com.ohos.sceneboard/ICON: AppNameLiteModel --> observerCallback appName: OLTomb, bundleName: com.oltomb.oltomb labelId: 16777221
+11-08 15:42:10.869 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>:<private>() --> instance:<private>, instanceKey:<private>, vkresult:<private>
+11-08 15:42:10.870 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: CreateInstance(29): pApplicationName is nullptr
+11-08 15:42:10.870 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(instance:<private>) instanceKey:<private>, destroyInstance:<private>
+11-08 15:42:10.886 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(pVerStruct:<private>)...
+11-08 15:42:10.886 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(pVerStruct:<private>) ifaceVer:<private>, libHandle:<private> --> vkresult:<private>
+11-08 15:42:10.891 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetPlatformProduct(121): ohVersion: [OpenHarmony-7.0.0.105]
+11-08 15:42:10.891 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetPlatformProduct(122): chipPlatform: [Kirin9010S] - [Kirin9010]
+11-08 15:42:10.891 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: DisableReasonLog(148): com.oltomb.oltomb is GT Disable by local game config
+11-08 15:42:10.891 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: CheckGameVersion(355): not config gameversion
+11-08 15:42:10.891 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: GetGameName(100): No iGraphicsCore opt is enabled. Disable hook.
+11-08 15:42:10.895 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>:<private>() --> instance:<private>, instanceKey:<private>, vkresult:<private>
+11-08 15:42:10.895 10362 10362 I A0140A/com.oltomb.oltomb/iGraphicsCore: CreateInstance(29): pApplicationName is nullptr
+11-08 15:42:10.903 10362 10362 I A01405/com.oltomb.oltomb/TRACE3D_LOADER: <private>(physDev:<private>) physKey:<private>, instance:<private> --> device:<private>, deviceKey:<private>, vkresult:<private>
+11-08 15:42:11.001 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: 字体: assets://Font/Normal.ttf (1522240 字节，经 SDL_IOFromFile 读入)
+11-08 15:42:11.001 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: 窗口尺寸: 2856x1054 点, 2856x1054 像素
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: 文档已加载: memory://ui.rml, 文档数=1
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: 上下文尺寸: 2856 x 1054
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: SDL 3.5.0 on OpenHarmony
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: SDL_mixer 3.2.4
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: SDL_image 3.4.8
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: Jolt physics 5.6.1 (ObjectLayer 64 bit)
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: RmlUi 6.3
+11-08 15:42:11.003 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: gamend SDK 1.1.1387
+11-08 15:42:11.004 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: gamend curl transport: ready
+11-08 15:42:11.004 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: UI 就绪: 2856x1054
+11-08 15:42:11.004 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: SDL_AppInit said continue! We are live!
+11-08 15:42:11.012  4561  4561 I A04200/com.ohos.sceneboard/WMS: SCBSceneSession --> onBufferAvailableChange, isBufferAvailable: true, id: 3766,      bundleName: com.oltomb.oltomb
+11-08 15:42:11.028 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1: 24 条渲染命令, swapchain 2856x1054
+11-08 15:42:11.040 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2: 27 条渲染命令, swapchain 2856x1054
+11-08 15:42:11.081  4561  4561 W A04200/com.ohos.sceneboard/WMS: SCBSCS --> [SCBScenePanelViewModel] border radius from topLeft: 56, topRight: 56, bottomLeft: 56, bottomRight: 56 to 0. reason: sceneContainerZoomIn, extra: EntryAbility/com.oltomb.oltomb/entry/0(persistentId: 3766)(containerId: 693)
+11-08 15:42:11.090 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 3: 24 条渲染命令, swapchain 2856x1222
+11-08 15:42:13.053 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 120: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:15.050 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 240: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:17.046 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 360: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:19.041 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 480: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:21.037 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 600: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:23.034 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 720: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:25.029 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 840: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:26.244  4561  4561 I A01B09/com.ohos.sceneboard/RECENT: RecentDockRefreshAlarm --> start alarm recent dock: EntryAbility/com.oltomb.oltomb/entry/0(persistentId: 3766)(containerId: 693)
+11-08 15:42:26.294 10362 10749 I C04208/com.oltomb.oltomb/WMSLayout: UpdateRect: [WindowRectUpdate:ClientRecv] UpdateRect id:3766 name:oltomb0, preRect=[0 0 2856 1320], newRect=[0 0 2856 1320], reason:23 displayId:0
+11-08 15:42:26.295 10362 10362 I C03959/com.oltomb.oltomb/AceLayout: [(-2:100000:singleton)] UVC Viewport config: size: (2856, 1320) orientation: 3 density: 3.500000 position: (0, 0) transformHint: 270 displayId: 0 forceSplitDisplayConfig: disable forceSplit, mode: 0, WSCR 23, IRN 1, updateAvoidAreas size: 5[(0,empty)(1,left [45 518 103 285] )(2,empty)(3,empty)(4,empty)], keyboardInfo is null
+11-08 15:42:26.295 10362 10362 I C03922/com.oltomb.oltomb/AceNavigation: [(100000:100000:scope)] disable forceSplit, mode:0
+11-08 15:42:26.295 10362 10362 I C04208/com.oltomb.oltomb/WMSLayout: UpdateViewportConfig: Id: 3766, reason: 23, viewportRect: [0 0 2856 1320], displayOrientation: 3, config[270, 0, 270, 3.500000]
+11-08 15:42:26.330 10362 10362 I C02805/com.oltomb.oltomb/InputKeyFlow: [P:U:5497700|249]ac: move, first: 5497688-(2026-11-08 15:42:26.244ms), 5497699, count: 12, last: ac: up: 5497700
+11-08 15:42:26.330 10362 10362 I C02805/com.oltomb.oltomb/InputKeyFlow: [P:U:5497700|707]recv
+11-08 15:42:26.330 10362 10362 I C04213/com.oltomb.oltomb/InputKeyFlow: HandleInputEvent: eid:1,InputId:5497700,wid:3766,ac:4
+11-08 15:42:26.330 10362 10362 I C03951/com.oltomb.oltomb/InputKeyFlow: [(100000:100000:scope)] ITK Id:5497700, fId:0, T:1, I=0, M=0
+11-08 15:42:26.331 10362 10362 I C03919/com.oltomb.oltomb/AceInputTracking: [(100000:100000:scope)] Consumed id:5497700, last id:5497699
+11-08 15:42:26.345  4561  4561 I A01B09/com.ohos.sceneboard/RECENT: RecentDockRefreshAlarm --> refresh recent dock: EntryAbility/com.oltomb.oltomb/entry/0(persistentId: 3766)(containerId: 693)
+11-08 15:42:27.025 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 960: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:29.020 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1080: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:30.546 10362 10749 I C04208/com.oltomb.oltomb/WMSLayout: UpdateRect: [WindowRectUpdate:ClientRecv] UpdateRect id:3766 name:oltomb0, preRect=[0 0 2856 1320], newRect=[0 0 2856 1320], reason:23 displayId:0
+11-08 15:42:30.548 10362 10362 I C03959/com.oltomb.oltomb/AceLayout: [(-2:100000:singleton)] UVC Viewport config: size: (2856, 1320) orientation: 3 density: 3.500000 position: (0, 0) transformHint: 270 displayId: 0 forceSplitDisplayConfig: disable forceSplit, mode: 0, WSCR 23, IRN 1, updateAvoidAreas size: 5[(0,empty)(1,left [45 518 103 285] )(2,empty)(3,empty)(4,empty)], keyboardInfo is null
+11-08 15:42:30.548 10362 10362 I C03922/com.oltomb.oltomb/AceNavigation: [(100000:100000:scope)] disable forceSplit, mode:0
+11-08 15:42:30.548 10362 10362 I C04208/com.oltomb.oltomb/WMSLayout: UpdateViewportConfig: Id: 3766, reason: 23, viewportRect: [0 0 2856 1320], displayOrientation: 3, config[270, 0, 270, 3.500000]
+11-08 15:42:30.998 10362 10362 W C01400/com.oltomb.oltomb/Vsync: PrintRequestTs: recv vsync timestamp, from:WM_10362, now:779666723568132, fromRsTs:779666722990604, timeInterval:577528ns
+11-08 15:42:31.017 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1200: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:33.012 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1320: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:35.008 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1440: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:36.395   967 10959 I C02948/resource_schedule_service/ThermalAware: [a92abf27b955e6d 377c83b 21be907][thermal_scenario_cluster.cpp] install change to 0 pkg: com.oltomb.oltomb
+11-08 15:42:37.005 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1560: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:39.000 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1680: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:40.375   967  8867 I C01746/resource_schedule_service/Taihang: [a92ab127d22ee8f c20f9f 36adcd7]insert data to db with timestamp: 1794123730375, bundleName: com.oltomb.oltomb, triggerName: NONE_TRIGGER
+11-08 15:42:40.997 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1800: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:42.992 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 1920: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:44.988 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2040: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:46.984 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2160: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:48.980 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2280: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:50.974 10362 10362 W C01400/com.oltomb.oltomb/Vsync: PrintRequestTs: recv vsync timestamp, from:WM_10362, now:779686698837664, fromRsTs:779686698379901, timeInterval:457763ns
+11-08 15:42:50.992 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2400: 23 条渲染命令, swapchain 2856x1320
+11-08 15:42:52.989 10362 10362 I A00000/com.oltomb.oltomb/SDL/APP: [diag] frame 2520: 23 条渲染命令, swapchain 2856x1320

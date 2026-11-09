@@ -6,6 +6,7 @@
         "targetSdkVersion": "5.0.4(16)",
         "compatibleSdkVersion": "5.0.4(16)",
         "runtimeOS": "HarmonyOS",
+        "signingConfig": "default",
         "buildOption": {
           "nativeCompiler": "BiSheng",
           "strictMode": {
@@ -23,7 +24,21 @@
         "name": "release"
       }
     ],
-    "signingConfigs": []
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B6125843223C65E08DAECA323EF30DB6DB8161A312D1CB77C5C0884D265FD2C04C14EC472580AA0",
+          "profile": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/c/.ohos/config/default_precheck_rEz8cZxDaA2WmKAm7yKyNixDlSI9x_SF7mcBdW04t9M=.p12",
+          "storePassword": "0000001BD66E386E6605944FD1C7E5E5048AD09576CFFE937F7E22E41AB5AEE5EB366DF9F9D0BEC68DA4ED"
+        }
+      }
+    ]
   },
   "modules": [
     {

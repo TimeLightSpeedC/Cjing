@@ -12,6 +12,10 @@ constexpr Uint8 kHintR = 140, kHintG = 144, kHintB = 156;
 
 // 提示折行后的行间距（逻辑单位）
 constexpr int kHintLineGap = 6;
+
+// 终局音效相对落子音的延迟。
+// 两者同时播放时，落子的短促敲击会把结果音的起音掩蔽掉（平局尤其明显）。
+constexpr int kResultSoundDelayMs = 120;
 }  // namespace
 
 void App::updateLogicalSize() {
@@ -378,6 +382,7 @@ void App::handlePointer(int renderX, int renderY) {
                 const Tap now{SDL_GetTicks(), renderX, renderY, true};
                 if (isDoubleTap(lastTap_, now)) {
                     game_.reset();
+                    pendingResult_ = -1;
                     lastCell_ = -1;
                     lastTap_  = Tap{};
                     SDL_Log("[Cjing] 双击提示行 → 重开");
@@ -405,10 +410,15 @@ void App::handlePointer(int renderX, int renderY) {
     // core 不参与：它只返回 MoveResult，不关心声音。
     if (audio_) {
         audio_->play(SoundId::Place);
+
+        // 终局：把结果音排到落子音之后，避免被敲击声掩蔽。
+        // 平局音本身不弱（峰值 -10.9 dBFS），问题纯粹是同时播放的掩蔽效应。
         if (r == MoveResult::XWon || r == MoveResult::OWon) {
-            audio_->play(SoundId::Win);
+            pendingResult_   = static_cast<int>(SoundId::Win);
+            pendingResultAt_ = SDL_GetTicks() + kResultSoundDelayMs;
         } else if (r == MoveResult::Drawn) {
-            audio_->play(SoundId::Draw);
+            pendingResult_   = static_cast<int>(SoundId::Draw);
+            pendingResultAt_ = SDL_GetTicks() + kResultSoundDelayMs;
         }
     }
 }
@@ -562,6 +572,14 @@ SDL_AppResult App::iterate() {
 
     // 音频设备可能在启动之后才就绪（模拟器/蓝牙切换），持续尝试
     ensureAudio();
+
+    // 到点播放终局音效（见 handlePointer 里的排期）
+    if (pendingResult_ >= 0 && SDL_GetTicks() >= pendingResultAt_) {
+        if (audio_) {
+            audio_->play(static_cast<SoundId>(pendingResult_));
+        }
+        pendingResult_ = -1;
+    }
 
     // ---- 自截图模式（用于验证不同窗口尺寸下的排布）----
     // 设置 CJING_SHOT=/path/out.bmp 后，渲染若干帧再读回像素并退出。

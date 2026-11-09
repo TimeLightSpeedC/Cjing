@@ -1,0 +1,166 @@
+--------- beginning of main
+11-09 13:54:14.118 14245 14245 I ightspeed.cjin: Late-enabling -Xcheck:jni
+11-09 13:54:14.145 14245 14245 D ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+11-09 13:54:14.179 14245 14262 D AppScoutStateMachine: 14245-ScoutStateMachinecreated
+11-09 13:54:14.181 14245 14245 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10576; state: ENABLED
+11-09 13:54:14.213 14245 14245 V GraphicsEnvironment: ANGLE Developer option for 'com.timelightspeed.cjing' set to: 'default'
+11-09 13:54:14.213 14245 14245 V GraphicsEnvironment: Updatable production driver is not supported on the device.
+--------- beginning of system
+11-09 13:54:14.217 14245 14245 I ForceDarkHelperStubImpl: initialize for com.timelightspeed.cjing , ForceDarkOrigin
+11-09 13:54:14.219 14245 14245 D OpenGLRenderer: JNI_OnLoad success
+11-09 13:54:14.219 14245 14245 I MiuiForceDarkConfig: setConfig density:2.750000, mainRule:0, secondaryRule:0, tertiaryRule:0
+11-09 13:54:14.220 14245 14245 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-09 13:54:14.221 14245 14245 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-09 13:54:14.258 14245 14245 V SDL     : Manufacturer: Xiaomi
+11-09 13:54:14.258 14245 14245 V SDL     : Device: picasso
+11-09 13:54:14.258 14245 14245 V SDL     : Model: Redmi K30i 5G
+11-09 13:54:14.258 14245 14245 V SDL     : onCreate()
+11-09 13:54:14.261 14245 14245 D VFUtils : scaleWght : 340
+11-09 13:54:14.275 14245 14245 V SDL     : nativeSetupJNI()
+11-09 13:54:14.275 14245 14245 V SDL     : AUDIO nativeSetupJNI()
+11-09 13:54:14.276 14245 14245 V SDL     : CONTROLLER nativeSetupJNI()
+11-09 13:54:14.282 14245 14245 V hidapi  : HIDDeviceRegisterCallback()
+11-09 13:54:14.285 14245 14245 D ViewScrollStubImpl: the value of ScrollFrictionRes is: 0.03
+11-09 13:54:14.303 14245 14245 D IS_CTS_MODE: false
+11-09 13:54:14.303 14245 14245 D MULTI_WINDOW_SWITCH_ENABLED: false
+11-09 13:54:14.304 14245 14245 D IS_CTS_MODE: false
+11-09 13:54:14.304 14245 14245 D MULTI_WINDOW_SWITCH_ENABLED: false
+11-09 13:54:14.309 14245 14245 D DecorView[]: getWindowModeFromSystem  windowmode is 1
+11-09 13:54:14.314 14245 14245 V SDL     : onStart()
+11-09 13:54:14.315 14245 14245 V SDL     : onResume()
+11-09 13:54:14.322 14245 14277 D ViewContentFactory: initViewContentFetcherClass
+11-09 13:54:14.322 14245 14277 D ViewContentFactory: getInterceptorPackageInfo
+11-09 13:54:14.323 14245 14277 D ViewContentFactory: getInitialApplication took 1ms
+11-09 13:54:14.323 14245 14277 D ViewContentFactory: packageInfo.packageName: com.miui.catcherpatch
+11-09 13:54:14.331 14245 14277 D ViewContentFactory: initViewContentFetcherClass took 9ms
+11-09 13:54:14.331 14245 14277 I ContentCatcher: ViewContentFetcher : ViewContentFetcher
+11-09 13:54:14.331 14245 14277 D ViewContentFactory: createInterceptor took 10ms
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: java.lang.NoSuchMethodException: android.view.ViewRootImpl#needSurface()#bestmatch
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at miui.util.ReflectionUtils.findMethodBestMatch(ReflectionUtils.java:338)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at miui.util.ReflectionUtils.tryFindMethodBestMatch(ReflectionUtils.java:358)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.ChoreographerInjectorStubImpl.<init>(ChoreographerInjectorStubImpl.java:37)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at java.lang.reflect.Constructor.newInstance0(Native Method)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at java.lang.reflect.Constructor.newInstance(Constructor.java:343)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry.newInstance(MiuiStubRegistry.java:201)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry.newInstanceNoThrow(MiuiStubRegistry.java:211)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry$ImplHolder.getInstance(MiuiStubRegistry.java:57)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry.doGetInstance(MiuiStubRegistry.java:266)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry.get(MiuiStubRegistry.java:242)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubRegistry.get(MiuiStubRegistry.java:234)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.miui.base.MiuiStubUtil.getInstance(MiuiStubUtil.java:42)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.animation.ChoreographerInjectorStub.getInstance(ChoreographerInjectorStub.java:16)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.Choreographer.postCallbackDelayedInternal(Choreographer.java:508)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.Choreographer.postCallbackDelayed(Choreographer.java:492)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.Choreographer.postCallback(Choreographer.java:464)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.ViewRootImpl.scheduleTraversals(ViewRootImpl.java:2239)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.ViewRootImpl.requestLayout(ViewRootImpl.java:1876)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.ViewRootImpl.setView(ViewRootImpl.java:1167)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:403)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:134)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.ActivityThread.handleResumeActivity(ActivityThread.java:5000)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.servertransaction.ResumeActivityItem.execute(ResumeActivityItem.java:54)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.servertransaction.ActivityTransactionItem.execute(ActivityTransactionItem.java:45)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.servertransaction.TransactionExecutor.executeLifecycleState(TransactionExecutor.java:176)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:97)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2286)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.os.Looper.loopOnce(Looper.java:210)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.os.Looper.loop(Looper.java:299)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at android.app.ActivityThread.main(ActivityThread.java:8292)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at java.lang.reflect.Method.invoke(Native Method)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:556)
+11-09 13:54:14.341 14245 14245 W ReflectionUtils: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+11-09 13:54:14.342 14245 14245 D DecorView[]: getWindowModeFromSystem  windowmode is 1
+11-09 13:54:14.342 14245 14245 D DecorView[]: updateDecorCaptionStatus displayWindowDecor is false
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: QUALCOMM build                   : 16c8186230, I159ae7f0bb
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Build Date                       : 04/05/21
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: OpenGL ES Shader Compiler Version: EV031.32.02.10
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Local Branch                     : 
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Remote Branch                    : 
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Remote Branch                    : 
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Reconstruct Branch               : 
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Build Config                     : S P 10.0.7 AArch64
+11-09 13:54:14.369 14245 14271 I AdrenoGLES-0: Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+11-09 13:54:14.370 14245 14245 D SurfaceView: UPDATE null, mIsCastMode = false
+11-09 13:54:14.372 14245 14245 V SDL     : surfaceCreated()
+11-09 13:54:14.373 14245 14245 V SDL     : surfaceChanged()
+11-09 13:54:14.373 14245 14245 V SDL     : Window size: 1080x2400
+11-09 13:54:14.373 14245 14245 V SDL     : Device size: 1080x2400
+11-09 13:54:14.377 14245 14271 I AdrenoGLES-0: PFP: 0x016dd093, ME: 0x00000000
+11-09 13:54:14.381 14245 14285 V SDL     : nativeInitSDLThread() 1 time
+11-09 13:54:14.382 14245 14285 V SDL     : Running main function SDL_main from library /data/app/~~PYqvfDdi_IBXU6gckiQteQ==/com.timelightspeed.cjing-tCA_vGlTKCcBhnqNtP8kyA==/lib/arm64/libmain.so
+11-09 13:54:14.387 14245 14285 V SDL     : setOrientation() requestedOrientation=13 width=800 height=900 resizable=true hint=
+11-09 13:54:14.391 14245 14271 D hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+11-09 13:54:14.407 14245 14245 D SurfaceView: UPDATE Surface(name=SurfaceView[com.timelightspeed.cjing/com.timelightspeed.cjing.MainActivity])/@0x83cfafe, mIsProjectionMode = false
+11-09 13:54:14.407 14245 14245 D SurfaceControl: nativeSetScreenProjection ===> setScreenProjection
+11-09 13:54:14.407 14245 14245 D SurfaceControl: nativeSetScreenProjection ===> setScreenProjection
+11-09 13:54:14.407 14245 14245 D SurfaceControl: nativeSetScreenProjection ===> setScreenProjection
+11-09 13:54:14.428 14245 14245 V SDL     : onWindowFocusChanged(): true
+11-09 13:54:14.890 14245 14245 V SDL     : nativeFocusChanged()
+11-09 13:54:14.890 14245 14245 D DecorView[]: onWindowFocusChanged hasWindowFocus true
+11-09 13:54:14.891 14245 14285 V SDL     : setOrientation() requestedOrientation=13 width=800 height=900 resizable=true hint=
+11-09 13:54:14.893 14245 14285 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBA8888 (1), got SDL_PIXELFORMAT_RGBA8888 (1)
+11-09 13:54:15.440 14245 14285 I SDL/APP : [Cjing] 渲染器后端: opengles2
+11-09 13:54:15.440 14245 14285 I SDL/APP : [Cjing] 存档目录: /data/data/com.timelightspeed.cjing/files/
+11-09 13:54:15.660 14245 14285 I SDL/APP : [Cjing] 资源已加载: assets://fonts/NotoSansSC-Regular.ttf（10560380 字节）
+11-09 13:54:15.660 14245 14285 I SDL/APP : [Cjing] 字体已加载: fonts/NotoSansSC-Regular.ttf（10560380 字节 @ 53pt）
+11-09 13:54:15.662 14245 14285 I SDL/APP : [Cjing] 布局: window=1080x2400 output=1080x2400 逻辑=900x2000(竖屏) 渲染缩放=1.000x1.000 棋盘=792x792@(54,681) 格子=264 HUD带=846 scale_=1.200
+11-09 13:54:15.662 14245 14285 I SDL/APP : [Cjing] 输入模式: 触屏（视频驱动 android，触摸设备 2，键盘 0，鼠标 0）
+11-09 13:54:15.662 14245 14285 I SDL/APP : Low latency audio enabled
+11-09 13:54:15.662 14245 14285 I AAudio  : AAudioStreamBuilder_openStream() called ----------------------------------------
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: rate   =  44100, channels  = 2, format   = 1, sharing = SH, dir = OUTPUT
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: device =      0, sessionId = -1, perfMode = 12, callback: ON with frames = 512
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: usage  =      0, contentType = 0, inputPreset = 0, allowedCapturePolicy = 0
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: privacy sensitive = false
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: opPackageName = (null)
+11-09 13:54:15.662 14245 14285 I AudioStreamBuilder: attributionTag = (null)
+11-09 13:54:15.662 14245 14285 D ightspeed.cjin: PlayerBase::PlayerBase()
+11-09 13:54:15.663 14245 14285 D AudioStreamTrack: open(), request notificationFrames = 0, frameCount = 1024
+11-09 13:54:15.663 14245 14285 D AudioTrack: set(sessionId=0)
+11-09 13:54:15.663 14245 14285 D AudioTrack: set(): streamType -1, sampleRate 44100, format 0x1, channelMask 0x3, frameCount 1024, flags #104, notificationFrames 0, sessionId 0, transferType 1, uid -1, pid -1
+11-09 13:54:15.663 14245 14245 W SDLThread: type=1400 audit(0.0:2089): avc: denied { read } for name="u:object_r:vendor_audio_prop:s0" dev="tmpfs" ino=28366 scontext=u:r:untrusted_app:s0:c64,c258,c512,c768 tcontext=u:object_r:vendor_audio_prop:s0 tclass=file permissive=0 app=com.timelightspeed.cjing
+11-09 13:54:15.666 14245 14285 W libc    : Access denied finding property "vendor.audio.lowpower"
+11-09 13:54:15.685 14245 14285 D AudioTrack: createTrack_l(0): AUDIO_OUTPUT_FLAG_FAST denied by server; frameCount 1024 -> 1772
+11-09 13:54:15.686 14245 14285 D AudioTrack: isWhiteListPackage() Uid 10576, package name com.timelightspeed.cjing
+11-09 13:54:15.687 14245 14285 I AudioTrack: AudioTrack::setVolume L:1.000000 R:1.000000 and the pakage is com.timelightspeed.cjing
+11-09 13:54:15.687 14245 14285 W libc    : Access denied finding property "ro.vendor.audio.shortvideo.index"
+11-09 13:54:15.687 14245 14285 D AAudioStream: setState(s#1) from 0 to 2
+11-09 13:54:15.687 14245 14285 D AudioStreamTrack: open() flags changed from 0x00000104 to 0x00000000
+11-09 13:54:15.687 14245 14285 D AudioStreamTrack: open() perfMode changed from 12 to 10
+11-09 13:54:15.683 14245 14245 W SDLThread: type=1400 audit(0.0:2090): avc: denied { read } for name="u:object_r:vendor_audio_prop:s0" dev="tmpfs" ino=28366 scontext=u:r:untrusted_app:s0:c64,c258,c512,c768 tcontext=u:object_r:vendor_audio_prop:s0 tclass=file permissive=0 app=com.timelightspeed.cjing
+11-09 13:54:15.688 14245 14263 D ightspeed.cjin: PlayerBase::setVolume() from IPlayer
+11-09 13:54:15.689 14245 14263 D AAudioStream: setDuckAndMuteVolume() to 1.000000
+11-09 13:54:15.689 14245 14285 I AAudio  : AAudioStreamBuilder_openStream() returns 0 = AAUDIO_OK for s#1 ----------------
+11-09 13:54:15.689 14245 14285 D AAudio  : AAudioStream_requestStart(s#1) called --------------
+11-09 13:54:15.689 14245 14263 I AudioTrack: AudioTrack::setVolume L:1.000000 R:1.000000 and the pakage is com.timelightspeed.cjing
+11-09 13:54:15.689 14245 14263 W libc    : Access denied finding property "ro.vendor.audio.shortvideo.index"
+11-09 13:54:15.689 14245 14285 D AAudioStream: setState(s#1) from 2 to 3
+11-09 13:54:15.683 14245 14245 W Binder:14245_2: type=1400 audit(0.0:2091): avc: denied { read } for name="u:object_r:vendor_audio_prop:s0" dev="tmpfs" ino=28366 scontext=u:r:untrusted_app:s0:c64,c258,c512,c768 tcontext=u:object_r:vendor_audio_prop:s0 tclass=file permissive=0 app=com.timelightspeed.cjing
+11-09 13:54:15.701 14245 14285 D AAudio  : AAudioStream_requestStart(s#1) returned 0 ---------
+11-09 13:54:15.702 14245 14285 I SDL/APP : [Cjing] 音频设备已打开（id=21，44100 Hz，2 声道，缓冲 512 帧 ≈ 12 ms）
+11-09 13:54:15.702 14245 14281 D ightspeed.cjin: PlayerBase::setVolume() from IPlayer
+11-09 13:54:15.702 14245 14281 D AAudioStream: setDuckAndMuteVolume() to 1.000000
+11-09 13:54:15.702 14245 14285 I SDL/APP : [Cjing] 资源已加载: assets://sounds/place.wav（6218 字节）
+11-09 13:54:15.702 14245 14285 I SDL/APP : [Cjing] 音效已加载: sounds/place.wav（6174 字节，44100Hz 1 声道）
+11-09 13:54:15.703 14245 14285 I SDL/APP : [Cjing] 资源已加载: assets://sounds/win.wav（38852 字节）
+11-09 13:54:15.703 14245 14281 I AudioTrack: AudioTrack::setVolume L:1.000000 R:1.000000 and the pakage is com.timelightspeed.cjing
+11-09 13:54:15.703 14245 14285 I SDL/APP : [Cjing] 音效已加载: sounds/win.wav（38808 字节，44100Hz 1 声道）
+11-09 13:54:15.703 14245 14281 W libc    : Access denied finding property "ro.vendor.audio.shortvideo.index"
+11-09 13:54:15.703 14245 14263 D AudioStreamLegacy: onAudioDeviceUpdate(deviceId = 3)
+11-09 13:54:15.704 14245 14285 I SDL/APP : [Cjing] 资源已加载: assets://sounds/draw.wav（30914 字节）
+11-09 13:54:15.704 14245 14285 I SDL/APP : [Cjing] 音效已加载: sounds/draw.wav（30870 字节，44100Hz 1 声道）
+11-09 13:54:15.704 14245 14285 I SDL/APP : [Cjing] 无存档文件: /data/data/com.timelightspeed.cjing/files/save.txt（Couldn't open asset 'data/data/com.timelightspeed.cjing/files/save.txt'）
+11-09 13:54:15.704 14245 14285 I SDL/APP : Cjing 0.2.0 | SDL 3.5.0 | 逻辑分辨率 900x2000
+11-09 13:54:15.699 14245 14245 W Binder:14245_4: type=1400 audit(0.0:2092): avc: denied { read } for name="u:object_r:vendor_audio_prop:s0" dev="tmpfs" ino=28366 scontext=u:r:untrusted_app:s0:c64,c258,c512,c768 tcontext=u:object_r:vendor_audio_prop:s0 tclass=file permissive=0 app=com.timelightspeed.cjing
+11-09 13:54:15.799 14245 14295 D AAudioStream: setState(s#1) from 3 to 4
+11-09 13:54:16.705 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 1 Seconds
+11-09 13:54:17.703 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 2 Seconds
+11-09 13:54:18.703 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 3 Seconds
+11-09 13:54:19.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 4 Seconds
+11-09 13:54:20.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 5 Seconds
+11-09 13:54:21.703 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 6 Seconds
+11-09 13:54:22.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 7 Seconds
+11-09 13:54:23.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 8 Seconds
+11-09 13:54:24.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 9 Seconds
+11-09 13:54:25.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 10 Seconds
+11-09 13:54:26.704 14245 14295 I AudioTrack: isLongTimeZeroData zero date time 11 Seconds
