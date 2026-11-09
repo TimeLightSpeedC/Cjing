@@ -1,0 +1,55 @@
+name: 分发包（桌面三平台）
+
+# 手动触发，或推送 v* 标签时自动构建。
+# 产物：Actions 运行页 → Artifacts → Cjing-linux / Cjing-windows / Cjing-macos
+#
+# 说明：移动端三平台不上架应用市场，但本工作流只负责桌面三平台；
+#       Android APK / iOS unsigned IPA / 鸿蒙 unsigned HAP 由本地脚本产出。
+
+on:
+  workflow_dispatch:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  package:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+          - os: windows-latest
+            name: windows
+          - os: macos-latest
+            name: macos
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 与 desktop.yml 相同的 Linux 依赖（SDL3 对 X11 扩展做 FATAL 检查）
+      - name: 安装 Linux 构建依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential ninja-build \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev \
+            libxfixes-dev libxss-dev libxtst-dev libwayland-dev libdecor-0-dev \
+            libfribidi-dev \
+            libasound2-dev libpulse-dev libdbus-1-dev libibus-1.0-dev \
+            libudev-dev libunwind-dev
+
+      - name: 构建并打包
+        shell: bash
+        run: ./scripts/package-desktop.sh
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cjing-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
