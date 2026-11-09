@@ -42,9 +42,24 @@ jobs:
             libasound2-dev libpulse-dev libdbus-1-dev libibus-1.0-dev \
             libudev-dev libunwind-dev
 
-      - name: 构建并打包
+      # 各平台产出「官方安装程序」：
+      #   Linux   → AppImage（静态链接）
+      #   Windows → Inno Setup 安装程序（runner 未预装则回退 zip）
+      #   macOS   → .pkg（安装到 /Applications）+ .dmg
+      - name: 构建并打包（Linux AppImage）
+        if: runner.os == 'Linux'
         shell: bash
-        run: ./scripts/package-desktop.sh
+        run: ./scripts/package-linux-appimage.sh
+
+      - name: 构建并打包（Windows 安装程序）
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/package-windows.ps1
+
+      - name: 构建并打包（macOS pkg/dmg）
+        if: runner.os == 'macOS'
+        shell: bash
+        run: ./scripts/package-macos-installer.sh
 
       - name: 上传产物
         uses: actions/upload-artifact@v4

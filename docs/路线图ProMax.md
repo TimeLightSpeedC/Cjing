@@ -657,9 +657,9 @@ Cjing/                          # 仓库根目录
 - [ ] P5-T6 桌面 CI 增强：在既有 CI 中加入 ASan 构建与更完整的测试矩阵
 - [x] P5-T7 移动端打包 CI 　⛔ **不适用**（不上架，本地构建即可；Android 已有脚本化 release 构建命令）
 - [x] P5-T8 鸿蒙打包 　⛔ **不适用**（不上架；本地 HAP 构建已具备：`scripts/ohos-build.sh`）
-- [x] P5-T9 Windows 打包：便携版 ZIP（SDL 静态链接，无 DLL）　🟡 **等 CI 产物**（本地 macOS 无法交叉编译）
-- [x] P5-T10 macOS 打包：Universal `.app` zip 已产出（ad-hoc 签名，未公证）；DMG 交给 CI　✅ **完成（本地）**
-- [x] P5-T11 Linux 打包：静态链接 tar.gz（无外部 .so）　🟡 **等 CI 产物**（本地 macOS 无法构建）
+- [x] P5-T9 Windows 打包：**Inno Setup 安装程序**（脚本 `scripts/package-windows.ps1` + `packaging/windows/Cjing.iss`）　🟡 **待 Win10 笔记本验证**
+- [x] P5-T10 macOS 打包：Universal `.pkg` 安装程序已产出（ad-hoc 签名，未公证）；DMG 交给 CI　✅ **完成（本地）**
+- [x] P5-T11 Linux 打包：**AppImage**（`scripts/package-linux-appimage.sh`，静态链接）　🟡 **待 WSL 验证**
 - [x] P5-T12 Android 交付包（本地）：release APK + debug 证书签名，含 `arm64-v8a`/`x86_64`；不上架，无需 AAB（2026-11-09 完成，9.83 MiB）
 - [x] P5-T13 iOS 打包 　⛔ **不适用**（不上架；模拟器与 iPad 真机已覆盖旋转/横屏验证）
 - [ ] P5-T14 所有 CI 任务必须能在**干净环境**复现，构建脚本入库（不接受"只在我机器上能编"）
